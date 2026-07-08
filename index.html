@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>NutriFlow - Client Health Sanctuary</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js for premium interactive charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary": "#006e2f",
+                      "primary-container": "#22c55e",
+                      "on-primary": "#ffffff",
+                      "on-primary-container": "#004b1e",
+                      "secondary": "#006a61",
+                      "secondary-container": "#86f2e4",
+                      "on-secondary": "#ffffff",
+                      "on-secondary-container": "#006f66",
+                      "tertiary": "#9d4300",
+                      "tertiary-container": "#ff8e4d",
+                      "on-tertiary-container": "#6d2d00",
+                      "background": "#f8f9ff",
+                      "on-background": "#0b1c30",
+                      "surface": "#f8f9ff",
+                      "on-surface": "#0b1c30",
+                      "surface-variant": "#d3e4fe",
+                      "on-surface-variant": "#3d4a3d",
+                      "surface-container": "#e5eeff",
+                      "surface-container-low": "#eff4ff",
+                      "surface-container-high": "#dce9ff",
+                      "surface-container-highest": "#d3e4fe",
+                      "surface-container-lowest": "#ffffff",
+                      "outline": "#6d7b6c",
+                      "outline-variant": "#bccbb9",
+                      "error": "#ba1a1a",
+                      "error-container": "#ffdad6",
+                      "on-error-container": "#93000a"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "8px",
+                      "sm": "16px",
+                      "margin-mobile": "16px",
+                      "base": "4px",
+                      "md": "24px",
+                      "margin-desktop": "40px",
+                      "gutter": "24px",
+                      "xl": "48px",
+                      "lg": "32px"
+              },
+              "fontFamily": {
+                      "body-md": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "label-md": ["Inter"],
+                      "headline-lg-mobile": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "stats-number": ["Inter"]
+              },
+              "fontSize": {
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "stats-number": ["20px", {"lineHeight": "24px", "fontWeight": "700"}]
+              }
+            }
+          }
+        }
+      </script>
+    <link href="/src/style.css" rel="stylesheet">
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col antialiased">
+
+    <!-- Client Navigation Bar -->
+    <nav class="bg-surface border-b border-outline-variant/30 flex justify-between items-center w-full px-6 md:px-margin-desktop h-20 z-50 sticky top-0 shadow-sm">
+        <!-- Logo -->
+        <div class="flex items-center gap-sm cursor-pointer" onclick="navigateTo('dashboard')">
+            <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">eco</span>
+            <div class="flex flex-col">
+                <span class="text-xl font-bold tracking-tight text-primary leading-none">NutriFlow</span>
+                <span class="text-[9px] uppercase tracking-widest text-[#006a61] font-bold mt-0.5">Client Portal</span>
+            </div>
+        </div>
+
+        <!-- Links -->
+        <div class="hidden md:flex gap-md h-full items-center absolute left-1/2 transform -translate-x-1/2">
+            <a onclick="navigateTo('dashboard')" id="link-dashboard" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Dashboard</a>
+            <a onclick="navigateTo('meal-plans')" id="link-meal-plans" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Meal Plans</a>
+            <a onclick="navigateTo('appointments')" id="link-appointments" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Appointments</a>
+            <a onclick="navigateTo('profile')" id="link-profile" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Profile</a>
+        </div>
+
+        <!-- Right Side Icons -->
+        <div class="flex items-center gap-xs md:gap-sm">
+            <button onclick="showClientNotifications()" class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-full transition-colors active:scale-95">
+                <span class="material-symbols-outlined">notifications</span>
+            </button>
+            <div class="w-9 h-9 rounded-full overflow-hidden border border-outline-variant/30 shrink-0">
+                <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACuxsdo8Z-Nl17WpH629BzA84HKeMAyR84ojL8M6_ChXIeE9bfCQBqPmwchAEQCT5lb5-2KDHD93QDQg2UUdEQJkacYZlIHcwjcLYGeVjP7qLy_IRIllE38Uzqf1QNJbaoVbJfU2d1xOmwzdumNrQrQWfgE1Jg6plIvgmlVhhKJnXCrpg0WjqXVw9AETngufeSZQaB8jSUc6wuYHyns96XH7QXmKMQDUc4xTIRPxACmKNRWwizJIHaSw" alt="Profile">
+            </div>
+            <button onclick="handleClientSignOut()" class="border border-[#ba1a1a]/30 hover:bg-red-55 text-[#ba1a1a] px-3 py-1.5 rounded-full font-bold text-xs transition-all flex items-center gap-1 cursor-pointer">
+                <span class="material-symbols-outlined text-[16px]">logout</span> Log Out
+            </button>
+        </div>
+    </nav>
+
+    <!-- Notification Toast Alert -->
+    <div id="toast-container" class="fixed top-24 left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full max-w-sm flex flex-col gap-2 px-4"></div>
+
+    <!-- Main Container -->
+    <main class="flex-grow w-full max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-lg relative">
+
+        <!-- ==================== VIEW 1: CLIENT DASHBOARD ==================== -->
+        <section id="view-dashboard" class="view-section hidden flex flex-col gap-gutter">
+            <div class="bg-surface-container-lowest rounded-2xl p-lg border border-outline-variant/30 shadow-sm relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="absolute -top-24 -right-24 w-64 h-64 bg-surface-container-high rounded-full opacity-40 blur-3xl pointer-events-none"></div>
+                <div class="flex-1 z-10 text-center md:text-left">
+                    <h1 class="text-3xl md:text-4xl font-bold text-on-background tracking-tight mb-2">Good morning, Sarah!</h1>
+                    <p class="text-body-lg text-on-surface-variant mb-4">You're on track for your goals today.</p>
+                    <div class="inline-flex items-center gap-2 bg-surface-container-low px-4 py-1.5 rounded-full border border-surface-variant/50 shadow-sm">
+                        <span class="material-symbols-outlined text-primary fill-1" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+                        <span class="font-semibold text-xs text-on-surface" id="client-streak-label">Current Streak: 12 Days</span>
+                    </div>
+                </div>
+                <div class="flex-shrink-0 z-10 flex flex-col items-center">
+                    <div class="relative w-40 h-40">
+                        <svg class="w-full h-full" viewBox="0 0 100 100">
+                            <circle class="text-surface-variant stroke-current" cx="50" cy="50" fill="transparent" r="40" stroke-width="8"></circle>
+                            <circle id="kcal-progress-circle" class="text-primary stroke-current progress-ring__circle" cx="50" cy="50" fill="transparent" r="40" stroke-dasharray="251.2" stroke-dashoffset="143" stroke-linecap="round" stroke-width="8"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span class="text-2xl font-bold text-on-background" id="kcal-left-value">1,200</span>
+                            <span class="text-[10px] uppercase font-bold text-on-surface-variant tracking-wider">kcal left</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+                <!-- Meals -->
+                <div class="lg:col-span-8 flex flex-col gap-sm">
+                    <h2 class="text-2xl font-bold text-on-background">Today's Meals</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-sm" id="dashboard-meals-grid"></div>
+                </div>
+
+                <!-- Stats & Hydration -->
+                <div class="lg:col-span-4 flex flex-col gap-gutter">
+                    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
+                        <h2 class="text-lg font-bold text-on-background">Today's Summary</h2>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center pb-2 border-b border-surface-variant/30 text-sm">
+                                <span class="text-on-surface-variant">Goal</span>
+                                <span class="font-semibold text-on-background">2,100 kcal</span>
+                            </div>
+                            <div class="flex justify-between items-center pb-2 border-b border-surface-variant/30 text-sm">
+                                <span class="text-on-surface-variant">Consumed</span>
+                                <span class="font-semibold text-on-background" id="summary-consumed-kcal">900 kcal</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-on-surface-variant">Burned (Active)</span>
+                                <span class="font-semibold text-primary">350 kcal</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-2 grid grid-cols-3 gap-2 text-center border-t border-surface-variant/30 pt-4">
+                            <div>
+                                <div class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Carbs</div>
+                                <div class="text-xs font-bold text-on-background mt-0.5" id="summary-carbs">55g</div>
+                                <div class="w-full bg-surface-variant h-1 mt-1 rounded-full overflow-hidden">
+                                    <div id="summary-carbs-bar" class="bg-primary h-full rounded-full" style="width: 30%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Protein</div>
+                                <div class="text-xs font-bold text-on-background mt-0.5" id="summary-protein">60g</div>
+                                <div class="w-full bg-surface-variant h-1 mt-1 rounded-full overflow-hidden">
+                                    <div id="summary-protein-bar" class="bg-secondary h-full rounded-full" style="width: 60%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Fat</div>
+                                <div class="text-xs font-bold text-on-background mt-0.5" id="summary-fat">33g</div>
+                                <div class="w-full bg-surface-variant h-1 mt-1 rounded-full overflow-hidden">
+                                    <div id="summary-fat-bar" class="bg-tertiary h-full rounded-full" style="width: 45%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-lg font-bold text-on-background">Hydration</h2>
+                            <span class="font-bold text-secondary text-sm" id="water-count-label">5 / 8</span>
+                        </div>
+                        <p class="text-xs text-on-surface-variant mb-2">Glasses (250ml) consumed today</p>
+                        <div class="grid grid-cols-4 gap-2 mt-1" id="water-glasses-grid"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW 2: CLIENT MEAL PLANS (FOOD DIARY) ==================== -->
+        <section id="view-meal-plans" class="view-section hidden flex flex-col gap-gutter">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight text-on-surface">My Food Diary</h1>
+                    <p class="text-body-md text-on-surface-variant mt-1">Log and scan meals using AI to reach your doctor's targets.</p>
+                </div>
+                <div class="flex items-center gap-3 flex-wrap">
+                    <div class="flex flex-wrap gap-1 bg-surface-container-low p-1 rounded-xl border border-outline-variant/20" id="meal-weekday-switcher"></div>
+                </div>
+            </div>
+
+            <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                <div class="md:col-span-3 flex flex-col items-center border-b md:border-b-0 md:border-r border-surface-variant/30 pb-4 md:pb-0">
+                    <div class="relative w-32 h-32">
+                        <svg class="w-full h-full" viewBox="0 0 100 100">
+                            <circle class="text-surface-variant stroke-current" cx="50" cy="50" fill="transparent" r="40" stroke-width="8"></circle>
+                            <circle id="meals-progress-circle" class="text-[#006e2f] stroke-current progress-ring__circle" cx="50" cy="50" fill="transparent" r="40" stroke-dasharray="251.2" stroke-dashoffset="120" stroke-linecap="round" stroke-width="8"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span class="text-xl font-bold text-on-background" id="meals-kcal-ratio">1,850</span>
+                            <span class="text-[9px] uppercase font-bold text-on-surface-variant tracking-wider" id="meals-kcal-target-label">/ 2400 kcal</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="md:col-span-9 flex flex-col gap-3">
+                    <h3 class="text-xs uppercase tracking-widest font-bold text-[#006a61]">Daily Macro Targets</h3>
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-on-surface-variant">Protein</span>
+                            <span class="text-on-background" id="meals-macro-protein-label">120g / 150g</span>
+                        </div>
+                        <div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden">
+                            <div id="meals-macro-protein-bar" class="bg-primary h-full rounded-full" style="width: 80%"></div>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-on-surface-variant">Carbs</span>
+                            <span class="text-on-background" id="meals-macro-carbs-label">200g / 250g</span>
+                        </div>
+                        <div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden">
+                            <div id="meals-macro-carbs-bar" class="bg-[#006a61] h-full rounded-full" style="width: 80%"></div>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-on-surface-variant">Fats</span>
+                            <span class="text-on-background" id="meals-macro-fats-label">45g / 65g</span>
+                        </div>
+                        <div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden">
+                            <div id="meals-macro-fats-bar" class="bg-tertiary h-full rounded-full" style="width: 69%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-gutter overflow-x-auto pb-4 w-full hide-scrollbar snap-x snap-mandatory" id="meals-plan-cards-container"></div>
+        </section>
+
+        <!-- ==================== VIEW 3: CLIENT APPOINTMENTS ==================== -->
+        <section id="view-appointments" class="view-section hidden flex flex-col gap-gutter">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight text-on-surface">My Appointments</h1>
+                    <p class="text-body-md text-on-surface-variant mt-1">Manage your upcoming sessions and review past consultations.</p>
+                </div>
+                <button onclick="navigateTo('book-wizard')" class="bg-primary hover:bg-[#005321] text-white font-bold text-xs px-5 py-3 rounded-full flex items-center gap-2 shadow-md transition-all active:scale-95">
+                    <span class="material-symbols-outlined text-[18px]">add</span>
+                    Book New Session
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+                <div class="lg:col-span-8 flex flex-col gap-sm">
+                    <h2 class="text-xl font-bold text-on-background">Upcoming</h2>
+                    <div class="flex flex-col gap-4" id="appointments-upcoming-list"></div>
+                </div>
+
+                <div class="lg:col-span-4 flex flex-col gap-gutter">
+                    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
+                        <h3 class="text-lg font-bold text-on-background">Session Overview</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-surface-container-low p-4 rounded-xl text-center border border-surface-variant/30">
+                                <div class="text-2xl font-bold text-primary" id="overview-completed-count">12</div>
+                                <div class="text-xs text-on-surface-variant font-medium mt-1">Completed</div>
+                            </div>
+                            <div class="bg-surface-container-low p-4 rounded-xl text-center border border-surface-variant/30">
+                                <div class="text-2xl font-bold text-secondary" id="overview-upcoming-count">2</div>
+                                <div class="text-xs text-on-surface-variant font-medium mt-1">Upcoming</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-lg font-bold text-on-background">Past History</h3>
+                            <button onclick="showPastHistoryModal()" class="text-xs text-primary font-bold hover:underline">View All</button>
+                        </div>
+                        <div class="space-y-3" id="appointments-history-list"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW 4: BOOKING WIZARD ==================== -->
+        <section id="view-book-wizard" class="view-section hidden flex flex-col gap-gutter">
+            <div class="mb-2 text-center md:text-left">
+                <h1 class="text-3xl font-bold tracking-tight text-on-surface">Book Appointment</h1>
+                <p class="text-body-md text-on-surface-variant mt-1" id="booking-subtitle">Select the service that best fits your nutritional goals.</p>
+            </div>
+
+            <!-- Progress Stepper -->
+            <div class="w-full max-w-3xl mx-auto mb-8 relative">
+                <div class="flex items-center justify-between relative">
+                    <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-surface-variant z-0 rounded-full"></div>
+                    <div id="booking-stepper-progress-line" class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1/3 h-1 bg-primary z-0 rounded-full transition-all duration-500"></div>
+                    
+                    <div class="relative z-10 flex flex-col items-center bg-surface px-2" id="step-node-1">
+                        <div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-label-md shadow-md">1</div>
+                        <span class="mt-2 font-label-md text-xs font-semibold text-primary">Service</span>
+                    </div>
+                    <div class="relative z-10 flex flex-col items-center bg-surface px-2" id="step-node-2">
+                        <div class="w-10 h-10 rounded-full bg-surface text-on-surface-variant border-2 border-surface-variant flex items-center justify-center font-bold text-label-md">2</div>
+                        <span class="mt-2 font-label-md text-xs font-semibold text-on-surface-variant">Date & Time</span>
+                    </div>
+                    <div class="relative z-10 flex flex-col items-center bg-surface px-2" id="step-node-3">
+                        <div class="w-10 h-10 rounded-full bg-surface text-on-surface-variant border-2 border-surface-variant flex items-center justify-center font-bold text-label-md">3</div>
+                        <span class="mt-2 font-label-md text-xs font-semibold text-on-surface-variant">Details</span>
+                    </div>
+                    <div class="relative z-10 flex flex-col items-center bg-surface px-2" id="step-node-4">
+                        <div class="w-10 h-10 rounded-full bg-surface text-on-surface-variant border-2 border-surface-variant flex items-center justify-center font-bold text-label-md">4</div>
+                        <span class="mt-2 font-label-md text-xs font-semibold text-on-surface-variant">Confirm</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Steps -->
+            <div id="booking-step-1" class="booking-step-container flex flex-col gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-md" id="booking-services-grid"></div>
+                <div class="flex justify-end pt-md border-t border-outline-variant/30">
+                    <button id="booking-next-btn-1" class="bg-primary text-on-primary font-bold text-sm py-3 px-6 rounded-lg opacity-50 cursor-not-allowed transition-all shadow-sm flex items-center gap-2" disabled>
+                        Continue to Date & Time
+                        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="booking-step-2" class="booking-step-container hidden grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+                <div class="lg:col-span-4 flex flex-col gap-4">
+                    <div class="bg-surface-container-lowest rounded-2xl overflow-hidden border border-outline-variant/30 shadow-sm flex flex-col">
+                        <div class="h-44 w-full relative">
+                            <img id="booking-summary-service-img" class="w-full h-full object-cover" src="" alt="Service">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent"></div>
+                            <span class="absolute bottom-3 left-3 bg-[#006e2f] text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">Selected Session</span>
+                        </div>
+                        <div class="p-5 flex flex-col gap-3">
+                            <h3 class="text-lg font-bold text-on-background" id="booking-summary-service-title">Initial Consultation</h3>
+                            <div class="space-y-2 text-xs text-on-surface-variant font-medium">
+                                <div class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-[16px]">schedule</span><span id="booking-summary-service-duration">60 Minutes</span></div>
+                                <div class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-[16px]">person</span><span id="booking-summary-service-therapist">Dr. Eleanor Vance, RD</span></div>
+                                <div class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-[16px]">videocam</span><span>Telehealth / Online</span></div>
+                            </div>
+                            <div class="flex justify-between items-center border-t border-outline-variant/20 pt-4 mt-1">
+                                <span class="text-xs text-on-surface-variant font-semibold">TOTAL COST</span>
+                                <span class="text-lg font-extrabold text-[#006e2f]" id="booking-summary-service-cost">$150.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-8 flex flex-col gap-6">
+                    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-lg font-bold text-on-background" id="calendar-month-year">October 2024</h3>
+                            <div class="flex gap-1">
+                                <button onclick="changeBookingMonth(-1)" class="p-1.5 hover:bg-surface-container rounded-full text-on-surface-variant border border-outline-variant/20"><span class="material-symbols-outlined text-[18px]">chevron_left</span></button>
+                                <button onclick="changeBookingMonth(1)" class="p-1.5 hover:bg-surface-container rounded-full text-on-surface-variant border border-outline-variant/20"><span class="material-symbols-outlined text-[18px]">chevron_right</span></button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-on-surface-variant">
+                            <div class="py-1">SUN</div><div class="py-1">MON</div><div class="py-1">TUE</div><div class="py-1">WED</div><div class="py-1">THU</div><div class="py-1">FRI</div><div class="py-1">SAT</div>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1" id="booking-calendar-grid"></div>
+                    </div>
+
+                    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
+                        <h3 class="text-base font-bold text-on-background">Available Times</h3>
+                        <p class="text-xs text-[#006a61] font-semibold" id="selected-date-indicator">Please select a date above</p>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <span class="text-xs text-on-surface-variant font-bold uppercase tracking-wider flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-amber-500">light_mode</span> Morning</span>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2" id="booking-morning-slots"></div>
+                            </div>
+                            <div>
+                                <span class="text-xs text-on-surface-variant font-bold uppercase tracking-wider flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-[#006a61]">wb_twilight</span> Afternoon</span>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2" id="booking-afternoon-slots"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-4 border-t border-outline-variant/30">
+                        <button onclick="goBackToBookingStep(1)" class="text-xs text-on-surface-variant hover:text-primary font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">arrow_back</span> Back to Service</button>
+                        <button id="booking-next-btn-2" onclick="advanceBookingStep(3)" class="bg-[#006e2f] hover:bg-[#005321] text-white font-bold text-sm py-3 px-6 rounded-lg shadow-sm flex items-center gap-2 opacity-50 cursor-not-allowed" disabled>Continue <span class="material-symbols-outlined text-[18px]">arrow_forward</span></button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="booking-step-3" class="booking-step-container hidden flex flex-col gap-6 max-w-2xl mx-auto w-full">
+                <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-5">
+                    <h3 class="text-lg font-bold text-on-background">Consultation details</h3>
+                    <form id="booking-details-form" onsubmit="handleDetailsSubmit(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Full Name</label>
+                                <input type="text" id="details-name" required value="Sarah Jenkins" class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-3 py-2 bg-surface">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Email Address</label>
+                                <input type="email" id="details-email" required value="sarah.j@email.com" class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-3 py-2 bg-surface">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Primary Nutritional Goal</label>
+                            <select id="details-goal" class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-3 py-2 bg-surface">
+                                <option value="Weight Loss">Weight Loss & Lean Muscle</option>
+                                <option value="Sports Performance">Sports & Athletics Performance</option>
+                                <option value="Medical Nutrition">Medical Nutrition & Diet Therapy</option>
+                                <option value="General Wellness">General Wellness & Clean Eating</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Dietary Restrictions or Allergies (Optional)</label>
+                            <input type="text" id="details-dietary" placeholder="e.g. Gluten-free, Lactose intolerant, Vegan" class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-3 py-2 bg-surface">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Health Issues & Focus Concerns (Optional)</label>
+                            <textarea id="details-concerns" rows="3" placeholder="Briefly describe health history..." class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-3 py-2 bg-surface"></textarea>
+                        </div>
+                        
+                        <div class="flex justify-between items-center pt-4 border-t border-outline-variant/30 mt-6">
+                            <button type="button" onclick="goBackToBookingStep(2)" class="text-xs text-on-surface-variant hover:text-primary font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">arrow_back</span> Back</button>
+                            <button type="submit" class="bg-primary hover:bg-[#005321] text-white font-bold text-sm py-3 px-6 rounded-lg shadow-sm flex items-center gap-2">Review Summary <span class="material-symbols-outlined text-[18px]">arrow_forward</span></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="booking-step-4" class="booking-step-container hidden flex flex-col gap-6 max-w-md mx-auto w-full text-center">
+                <div class="bg-surface-container-lowest rounded-2xl p-8 border border-outline-variant/30 shadow-sm flex flex-col items-center gap-4">
+                    <div class="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-2 shadow-inner"><span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">check_circle</span></div>
+                    <h2 class="text-2xl font-bold text-on-background">Appointment Confirmed!</h2>
+                    <p class="text-sm text-on-surface-variant" id="success-message">Your consultation has been successfully scheduled.</p>
+                    
+                    <div class="w-full bg-surface-container-low p-4 rounded-xl border border-surface-variant/30 text-left space-y-2 mt-2 text-xs">
+                        <div class="flex justify-between"><span class="font-bold text-on-surface-variant">Service:</span><span class="font-bold text-on-background" id="success-service-title">-</span></div>
+                        <div class="flex justify-between"><span class="font-bold text-on-surface-variant">Date:</span><span class="font-bold text-on-background" id="success-date">-</span></div>
+                        <div class="flex justify-between"><span class="font-bold text-on-surface-variant">Time:</span><span class="font-bold text-on-background" id="success-time">-</span></div>
+                        <div class="flex justify-between"><span class="font-bold text-on-surface-variant">Practitioner:</span><span class="font-bold text-on-background" id="success-practitioner">-</span></div>
+                        <div class="flex justify-between border-t border-surface-variant/30 pt-2"><span class="font-bold text-[#006e2f]">Total Paid:</span><span class="font-bold text-[#006e2f]" id="success-price">-</span></div>
+                    </div>
+                    <button onclick="resetBookingWizardStateAndExit()" class="w-full bg-primary hover:bg-[#005321] text-white font-bold text-sm py-3 px-6 rounded-lg shadow-sm transition-all mt-4">Back to Appointments</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW 5: CLIENT PROFILE & PROGRESS ==================== -->
+        <section id="view-profile" class="view-section hidden flex flex-col gap-gutter">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight text-on-surface">Your Progress Journey</h1>
+                <p class="text-body-md text-on-surface-variant mt-1">Track your consistency and celebrate your milestones.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+                <div class="lg:col-span-8 flex flex-col gap-gutter">
+                    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-lg font-bold text-on-background">Weight Trend</h2>
+                            <select id="weight-trend-range" onchange="updateWeightTrendChart()" class="text-xs bg-surface border border-outline-variant/30 rounded-lg px-2 py-1 font-semibold text-on-surface-variant">
+                                <option value="3">Last 3 Months</option>
+                                <option value="6">Last 6 Months</option>
+                            </select>
+                        </div>
+                        <div class="w-full relative h-64"><canvas id="weightTrendChartCanvas"></canvas></div>
+                    </div>
+
+                    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
+                        <h2 class="text-lg font-bold text-on-background">Body Measurements (Inches)</h2>
+                        <div class="w-full relative h-64"><canvas id="bodyMeasurementsChartCanvas"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-4 flex flex-col gap-gutter">
+                    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
+                        <h3 class="text-lg font-bold text-on-background">Log Today's Stats</h3>
+                        <form id="stats-log-form" onsubmit="handleStatsLogSubmit(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Weight (lbs)</label>
+                                <input type="number" id="stats-weight" step="0.1" required value="162.0" class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-3 py-2 bg-surface">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Waist (in)</label>
+                                    <input type="number" id="stats-waist" step="0.1" required value="30.0" class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-3 py-2 bg-surface">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Hip (in)</label>
+                                    <input type="number" id="stats-hip" step="0.1" required value="36.0" class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-3 py-2 bg-surface">
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 text-xs text-on-surface-variant font-medium">
+                                <input type="checkbox" id="stats-fasted" class="rounded border-outline-variant/40 text-primary focus:ring-primary">
+                                <label for="stats-fasted">Fasted Weigh-in</label>
+                            </div>
+                            <button type="submit" id="stats-submit-btn" class="w-full bg-[#006e2f] hover:bg-[#005321] text-white font-bold text-sm py-2.5 rounded-lg transition-all shadow-sm cursor-pointer">Save Entry</button>
+                        </form>
+                    </div>
+
+                    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
+                        <h3 class="text-lg font-bold text-on-background">Achievements</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-surface-container-low border border-surface-variant/30">
+                                <div class="w-10 h-10 rounded-full bg-secondary-container text-secondary flex items-center justify-center"><span class="material-symbols-outlined">water_drop</span></div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-on-background">7-Day Hydration</h4>
+                                    <p class="text-[10px] text-on-surface-variant">Hit water goal a week straight.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-surface-container-low border border-surface-variant/30">
+                                <div class="w-10 h-10 rounded-full bg-[#ffdbca] text-[#9d4300] flex items-center justify-center"><span class="material-symbols-outlined">local_fire_department</span></div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-on-background">14-Day Streak</h4>
+                                    <p class="text-[10px] text-on-surface-variant">Logged meals for two weeks.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Mobile Bottom Navigation (Only visible on mobile screens) -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-surface border-t border-outline-variant/30 flex justify-around items-center h-16 z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] px-2">
+        <button onclick="navigateTo('dashboard')" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
+            <span class="material-symbols-outlined text-[22px]">dashboard</span>
+            <span class="text-[9px] font-bold mt-0.5">Dashboard</span>
+        </button>
+        <button onclick="navigateTo('meal-plans')" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
+            <span class="material-symbols-outlined text-[22px]">restaurant</span>
+            <span class="text-[9px] font-bold mt-0.5">Meal Plans</span>
+        </button>
+        <button onclick="navigateTo('appointments')" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
+            <span class="material-symbols-outlined text-[22px]">calendar_month</span>
+            <span class="text-[9px] font-bold mt-0.5">Appointments</span>
+        </button>
+        <button onclick="navigateTo('profile')" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
+            <span class="material-symbols-outlined text-[22px]">person</span>
+            <span class="text-[9px] font-bold mt-0.5">Profile</span>
+        </button>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-surface-container-low border-t border-outline-variant/30 w-full py-6 px-6 md:px-margin-desktop mt-auto pb-24 md:pb-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex flex-col items-center md:items-start text-center md:text-left">
+                <span class="font-bold text-primary text-base">NutriFlow</span>
+                <p class="text-[10px] text-on-surface-variant/80 mt-1">© 2024 NutriFlow Health Systems. All rights reserved.</p>
+            </div>
+            
+            <div class="flex gap-md text-xs font-semibold text-on-surface-variant">
+                <a onclick="showToast('Opening Help Center resources...', 'info')" class="hover:text-primary transition-colors cursor-pointer">Help Center</a>
+                <a onclick="showToast('Loading Privacy Policy guidelines...', 'info')" class="hover:text-primary transition-colors cursor-pointer">Privacy Policy</a>
+                <a onclick="showToast('Loading Terms of Service conditions...', 'info')" class="hover:text-primary transition-colors cursor-pointer">Terms of Service</a>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- Recipe Modal -->
+    <div id="recipe-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-surface-container-lowest max-w-xl w-full rounded-2xl overflow-hidden border border-outline-variant/30 shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="h-48 w-full relative">
+                <img id="modal-recipe-image" class="w-full h-full object-cover" src="" alt="Recipe">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <button onclick="closeRecipeModal()" class="absolute top-4 right-4 bg-black/40 hover:bg-black/60 text-white rounded-full p-1.5 transition-colors"><span class="material-symbols-outlined text-[20px]">close</span></button>
+                <div class="absolute bottom-4 left-4">
+                    <span id="modal-recipe-type" class="bg-[#006e2f] text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">Breakfast</span>
+                    <h2 id="modal-recipe-title" class="text-xl font-bold text-white mt-1">Berry Smoothie</h2>
+                </div>
+            </div>
+            <div class="p-6 flex-grow overflow-y-auto space-y-4">
+                <div class="grid grid-cols-4 gap-2 text-center bg-surface-container-low p-3 rounded-xl border border-surface-variant/20 text-xs">
+                    <div><span class="block font-bold text-on-background" id="modal-recipe-kcal">350</span><span class="text-[9px] text-on-surface-variant font-semibold">KCAL</span></div>
+                    <div><span class="block font-bold text-on-background" id="modal-recipe-protein">30g</span><span class="text-[9px] text-on-surface-variant font-semibold">PROTEIN</span></div>
+                    <div><span class="block font-bold text-on-background" id="modal-recipe-carbs">45g</span><span class="text-[9px] text-on-surface-variant font-semibold">CARBS</span></div>
+                    <div><span class="block font-bold text-on-background" id="modal-recipe-fat">8g</span><span class="text-[9px] text-on-surface-variant font-semibold">FAT</span></div>
+                </div>
+                <div class="space-y-1"><h4 class="text-xs font-bold uppercase tracking-wider text-primary">Ingredients</h4><ul id="modal-recipe-ingredients" class="list-disc pl-5 text-xs text-on-surface-variant space-y-1"></ul></div>
+                <div class="space-y-1"><h4 class="text-xs font-bold uppercase tracking-wider text-primary">Instructions</h4><p id="modal-recipe-instructions" class="text-xs text-on-surface-variant leading-relaxed"></p></div>
+            </div>
+        </div>
+    </div>
+    <!-- Reschedule Modal -->
+    <div id="reschedule-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-surface-container-lowest max-w-sm w-full rounded-2xl p-6 border border-outline-variant/30 shadow-2xl flex flex-col gap-4">
+            <div class="flex justify-between items-center border-b border-outline-variant/35 pb-3">
+                <h3 class="text-base font-bold text-on-background">Reschedule Session</h3>
+                <button onclick="closeRescheduleModal()" class="text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[20px]">close</span></button>
+            </div>
+            <form id="reschedule-form" onsubmit="handleRescheduleSubmit(event)" class="space-y-4">
+                <input type="hidden" id="reschedule-apt-id">
+                <div>
+                    <label class="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">New Consultation Date</label>
+                    <input type="date" id="reschedule-date" required class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-xs px-3 py-2 bg-surface">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">New Time Slot</label>
+                    <select id="reschedule-time" class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-xs px-3 py-2 bg-surface">
+                        <option value="09:00 AM">09:00 AM</option>
+                        <option value="10:30 AM">10:30 AM</option>
+                        <option value="01:00 PM">01:00 PM</option>
+                        <option value="02:30 PM">02:30 PM</option>
+                        <option value="04:00 PM">04:00 PM</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-[#006e2f] hover:bg-[#005321] text-white font-bold text-xs py-2.5 rounded-lg transition-all shadow-sm mt-2">Request New Date</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Past History Modal -->
+    <div id="past-history-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-surface-container-lowest max-w-md w-full rounded-2xl p-6 border border-outline-variant/30 shadow-2xl flex flex-col gap-4 max-h-[80vh]">
+            <div class="flex justify-between items-center border-b border-outline-variant/35 pb-3">
+                <h3 class="text-base font-bold text-on-background">Consultation History</h3>
+                <button onclick="closePastHistoryModal()" class="text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[20px]">close</span></button>
+            </div>
+            <div class="flex-grow overflow-y-auto space-y-3 pr-1 hide-scrollbar" id="past-history-modal-list">
+                <!-- Populated dynamically via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Consultation Notes Modal -->
+    <div id="consultation-notes-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-surface-container-lowest max-w-md w-full rounded-2xl border border-outline-variant/30 shadow-2xl flex flex-col overflow-hidden">
+            <div class="bg-[#006e2f] text-white p-5 flex justify-between items-center">
+                <div>
+                    <h3 id="notes-title" class="text-base font-bold">Initial Consultation</h3>
+                    <p id="notes-date" class="text-[9px] text-white/80 font-medium mt-0.5">Sep 15, 2023 • Dr. Sarah Jenkins</p>
+                </div>
+                <button onclick="closeConsultationNotesModal()" class="text-white hover:text-white/80"><span class="material-symbols-outlined text-[20px]">close</span></button>
+            </div>
+            <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto text-xs">
+                <div>
+                    <h4 class="font-bold text-[#006a61] mb-1 uppercase tracking-wider">Session Summary</h4>
+                    <p id="notes-summary" class="text-on-surface-variant leading-relaxed">Conducted assessment of baseline measurements and nutritional preferences. Cleared weight objectives and scheduled follow-up cycles.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-[#006a61] mb-1 uppercase tracking-wider">Clinical Metrics</h4>
+                    <div class="grid grid-cols-2 gap-2 bg-surface-container-low p-3 rounded-lg border border-surface-variant/35 font-semibold text-on-surface-variant">
+                        <div>Weight: <span class="text-on-background font-bold" id="notes-metric-weight">168.0 lbs</span></div>
+                        <div>Body Fat: <span class="text-on-background font-bold" id="notes-metric-fat">22.4%</span></div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-[#006a61] mb-1 uppercase tracking-wider">Dietary Prescription</h4>
+                    <ul id="notes-prescription" class="list-disc pl-5 text-on-surface-variant space-y-1">
+                        <li>Maintain caloric target of 2,100 kcal/day.</li>
+                        <li>Target 150g protein/day.</li>
+                        <li>Include complex carbs like sweet potato & quinoa.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Food Scanner Modal -->
+    <div id="ai-scanner-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="bg-surface-container-lowest max-w-xl w-full rounded-3xl border border-outline-variant/30 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-primary to-secondary text-white p-5 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-2xl animate-pulse">linked_camera</span>
+                    <div>
+                        <h3 class="text-base font-bold">AI Food Scanner</h3>
+                        <p class="text-[9px] text-white/80 font-medium mt-0.5">NutriFlow Real-time AI Analysis</p>
+                    </div>
+                </div>
+                <button onclick="closeAIScanner()" class="text-white hover:text-white/80"><span class="material-symbols-outlined text-[20px]">close</span></button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto space-y-6 flex-grow">
+                <!-- Camera view & Scanner animation wrapper -->
+                <div id="scanner-viewfinder" class="relative rounded-2xl overflow-hidden border border-outline-variant/40 bg-slate-900 aspect-video flex items-center justify-center">
+                    <!-- Scanner Laser Overlay -->
+                    <div id="scanner-laser" class="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#00ff66] to-transparent shadow-[0_0_15px_#00ff66] z-20 animate-[scan_2.5s_ease-in-out_infinite]" style="display: none; top: 0%;"></div>
+                    <style>
+                        @keyframes scan {
+                            0% { top: 0%; opacity: 0; }
+                            10% { opacity: 1; }
+                            90% { opacity: 1; }
+                            100% { top: 100%; opacity: 0; }
+                        }
+                    </style>
+                    
+                    <!-- Inside viewfinder screen -->
+                    <div id="scanner-camera-feed" class="w-full h-full object-cover flex items-center justify-center text-slate-400 relative">
+                        <input type="file" id="scanner-file-input" accept="image/*" class="hidden" onchange="handleCustomImageUpload(event)">
+                        <div class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center gap-2 bg-slate-950/70 z-10" id="scanner-select-prompt">
+                            <span class="text-xs font-bold text-white tracking-wide uppercase">AI Camera Simulator</span>
+                            <p class="text-[10px] text-slate-400 max-w-xs mb-1">Upload a food photo from your device or pick a healthy sample below to scan.</p>
+                            <button onclick="document.getElementById('scanner-file-input').click()" class="bg-[#006e2f] hover:bg-[#005321] text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer transition-all active:scale-95">
+                                <span class="material-symbols-outlined text-[16px]">add_a_photo</span> Upload & Scan Photo
+                            </button>
+                        </div>
+                        <!-- Scanned Food Picture Overlay -->
+                        <img id="scanner-food-image" class="w-full h-full object-cover hidden" src="" alt="Target scan">
+                    </div>
+                </div>
+                
+
+
+                <!-- AI Analysis Progress Logs -->
+                <div id="scanner-progress-log" class="hidden bg-surface-container-low border border-outline-variant/20 rounded-xl p-4 space-y-2.5 font-semibold text-[11px] text-on-surface-variant">
+                    <div id="log-step-1" class="flex items-center gap-2 opacity-40"><span class="material-symbols-outlined text-[14px]">checklist</span> Identifying ingredients...</div>
+                    <div id="log-step-2" class="flex items-center gap-2 opacity-40"><span class="material-symbols-outlined text-[14px]">scale</span> Estimating food volume & weight...</div>
+                    <div id="log-step-3" class="flex items-center gap-2 opacity-40"><span class="material-symbols-outlined text-[14px]">bar_chart_4_bars</span> Extracting calorie & macro values...</div>
+                </div>
+
+                <!-- AI Analysis Result Card -->
+                <div id="scanner-results" class="hidden bg-surface border border-outline-variant/30 rounded-2xl overflow-hidden shadow-md flex flex-col">
+                    <div class="bg-primary/5 px-5 py-4 border-b border-surface-variant/30 flex justify-between items-center">
+                        <div>
+                            <h4 class="text-sm font-bold text-on-background" id="res-food-title">Avocado Egg Toast</h4>
+                            <p class="text-[10px] text-on-surface-variant mt-0.5" id="res-food-type">Vegetarian Breakfast</p>
+                        </div>
+                        <span class="bg-primary/10 text-primary px-2.5 py-1 rounded-full text-[10px] font-bold" id="res-food-calories">320 kcal</span>
+                    </div>
+                    <div class="p-5 space-y-4">
+                        <!-- Macros Grid -->
+                        <div class="grid grid-cols-3 gap-4 text-center">
+                            <div class="bg-surface-container-low p-2.5 rounded-xl border border-outline-variant/10">
+                                <span class="block text-[9px] uppercase font-bold text-on-surface-variant tracking-wider">Protein</span>
+                                <span class="text-sm font-bold text-on-background" id="res-food-protein">14g</span>
+                            </div>
+                            <div class="bg-surface-container-low p-2.5 rounded-xl border border-outline-variant/10">
+                                <span class="block text-[9px] uppercase font-bold text-on-surface-variant tracking-wider">Carbs</span>
+                                <span class="text-sm font-bold text-on-background" id="res-food-carbs">22g</span>
+                            </div>
+                            <div class="bg-surface-container-low p-2.5 rounded-xl border border-outline-variant/10">
+                                <span class="block text-[9px] uppercase font-bold text-on-surface-variant tracking-wider">Fats</span>
+                                <span class="text-sm font-bold text-on-background" id="res-food-fat">18g</span>
+                            </div>
+                        </div>
+                        <!-- AI Health Advice -->
+                        <div class="bg-[#e5eeff]/40 border border-[#e5eeff]/80 rounded-xl p-3.5 text-xs text-on-surface-variant flex items-start gap-2.5">
+                            <span class="material-symbols-outlined text-[#006a61] mt-0.5 text-[18px]">smart_toy</span>
+                            <div class="leading-relaxed">
+                                <span class="block font-bold text-[#006a61] mb-0.5">AI Insights:</span>
+                                <p id="res-food-advice">Excellent choice! Rich in healthy unsaturated monounsaturated fats from avocado and clean protein from the egg.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="bg-surface-container-low px-6 py-4 border-t border-surface-variant/30 flex justify-end gap-3 shrink-0">
+                <button onclick="closeAIScanner()" class="border border-outline-variant/30 hover:bg-surface-container text-on-surface font-bold text-xs px-4 py-2 rounded-xl">Cancel</button>
+                <button id="btn-log-scanned" onclick="logScannedMeal()" class="bg-primary hover:bg-[#005321] text-white font-bold text-xs px-5 py-2 rounded-xl shadow-sm transition-all active:scale-95 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed" disabled>Log Scanned Meal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core App logic -->
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>
