@@ -609,6 +609,20 @@ window.handleAddNewClientSubmit = function(e) {
 
 // ==================== WEEKLY MEAL BUILDER ====================
 function renderAdminMealBuilder() {
+    // Populate client select dropdown dynamically
+    const select = document.getElementById('meal-builder-client-select');
+    if (select) {
+        const currentVal = select.value || state.selectedMealBuilderClient;
+        select.innerHTML = state.clients.map(c => `
+            <option value="${c.name}">${c.name}</option>
+        `).join('');
+        if (state.clients.some(c => c.name === currentVal)) {
+            select.value = currentVal;
+        } else if (state.clients.length > 0) {
+            select.value = state.clients[0].name;
+        }
+    }
+    
     loadMealBuilderClientPlan();
     renderLibraryList();
 }
@@ -640,13 +654,12 @@ window.setLibraryFilter = function(filter) {
     // Toggle active class on chips
     const chips = document.querySelectorAll('.library-chip');
     chips.forEach(chip => {
-        const text = chip.innerText.trim();
-        if (filter === 'all' && text === 'All') {
-            chip.className = 'library-chip active bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full hover:opacity-95 transition-all';
-        } else if (text.toLowerCase() === filter.toLowerCase()) {
-            chip.className = 'library-chip active bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full hover:opacity-95 transition-all';
+        const onclickAttr = chip.getAttribute('onclick') || '';
+        const isActive = onclickAttr.includes(`'${filter}'`);
+        if (isActive) {
+            chip.className = 'library-chip active bg-primary text-white text-[9px] font-bold py-1.5 rounded-lg hover:opacity-90 transition-all text-center';
         } else {
-            chip.className = 'library-chip bg-surface-container border text-[10px] font-bold text-on-surface-variant px-3 py-1 rounded-full hover:opacity-95 transition-all';
+            chip.className = 'library-chip bg-surface-container border border-outline-variant/30 text-[9px] font-bold text-on-surface-variant py-1.5 rounded-lg hover:bg-slate-100 transition-all text-center';
         }
     });
     

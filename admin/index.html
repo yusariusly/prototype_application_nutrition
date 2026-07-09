@@ -221,28 +221,28 @@
         <section id="view-admin-meal-builder" class="view-section hidden grid grid-cols-1 lg:grid-cols-12 gap-gutter">
             <!-- Left Column: Food Library -->
             <div class="lg:col-span-3 bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-sm p-4 flex flex-col gap-4">
-                <div class="flex justify-between items-center">
+                <div class="flex justify-between items-center pb-2 border-b border-surface-variant/20">
                     <div>
-                        <h3 class="text-base font-bold text-on-background">Library</h3>
-                        <p class="text-[10px] text-on-surface-variant mt-0.5">Add foods and recipes to weekly builder.</p>
+                        <h3 class="text-sm font-extrabold text-on-background uppercase tracking-wider">Library</h3>
+                        <p class="text-[9px] text-on-surface-variant leading-none">Weekly food database</p>
                     </div>
-                    <button onclick="openAddFoodModal()" class="bg-primary hover:bg-[#005321] text-white font-bold text-[9px] px-2.5 py-1.5 rounded-lg flex items-center gap-0.5 cursor-pointer shadow-sm">
-                        <span class="material-symbols-outlined text-[12px]">add</span> Add Food
+                    <button onclick="openAddFoodModal()" class="bg-primary hover:bg-[#005321] text-white font-bold text-[9px] px-3 py-2 rounded-lg flex items-center gap-1 cursor-pointer shadow-sm transition-all hover:scale-105 active:scale-95 shrink-0">
+                        <span class="material-symbols-outlined text-[13px]">add</span> Add Food
                     </button>
                 </div>
                 
                 <!-- Search Input -->
                 <div class="relative">
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant/60 text-lg">search</span>
-                    <input type="text" id="library-search" oninput="filterLibraryFoods()" placeholder="Search foods or recipes..." class="w-full rounded-xl border-outline-variant/40 focus:border-primary focus:ring-primary text-xs pl-9 pr-3 py-2 bg-surface-container-low/55">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant/60 text-base">search</span>
+                    <input type="text" id="library-search" oninput="filterLibraryFoods()" placeholder="Search foods or recipes..." class="w-full rounded-xl border-outline-variant/40 focus:border-primary focus:ring-primary text-xs pl-8 pr-3 py-2.5 bg-surface-container-low/55">
                 </div>
 
-                <!-- Chips/Filters -->
-                <div class="flex flex-wrap gap-1" id="library-filter-chips">
-                    <button onclick="setLibraryFilter('all')" class="library-chip active bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full hover:opacity-95 transition-all">All</button>
-                    <button onclick="setLibraryFilter('Recipes')" class="library-chip bg-surface-container border text-[10px] font-bold text-on-surface-variant px-3 py-1 rounded-full hover:opacity-95 transition-all">Recipes</button>
-                    <button onclick="setLibraryFilter('Raw Foods')" class="library-chip bg-surface-container border text-[10px] font-bold text-on-surface-variant px-3 py-1 rounded-full hover:opacity-95 transition-all">Raw Foods</button>
-                    <button onclick="setLibraryFilter('Favorites')" class="library-chip bg-surface-container border text-[10px] font-bold text-on-surface-variant px-3 py-1 rounded-full hover:opacity-95 transition-all">Favorites</button>
+                <!-- Chips/Filters Grid -->
+                <div class="grid grid-cols-4 gap-1" id="library-filter-chips">
+                    <button onclick="setLibraryFilter('all')" class="library-chip active bg-primary text-white text-[9px] font-bold py-1.5 rounded-lg hover:opacity-90 transition-all text-center">All</button>
+                    <button onclick="setLibraryFilter('Recipes')" class="library-chip bg-surface-container border border-outline-variant/30 text-[9px] font-bold text-on-surface-variant py-1.5 rounded-lg hover:bg-slate-100 transition-all text-center">Recipes</button>
+                    <button onclick="setLibraryFilter('Raw Foods')" class="library-chip bg-surface-container border border-outline-variant/30 text-[9px] font-bold text-on-surface-variant py-1.5 rounded-lg hover:bg-slate-100 transition-all text-center">Raw</button>
+                    <button onclick="setLibraryFilter('Favorites')" class="library-chip bg-surface-container border border-outline-variant/30 text-[9px] font-bold text-on-surface-variant py-1.5 rounded-lg hover:bg-slate-100 transition-all text-center">Favs</button>
                 </div>
 
                 <!-- Library List -->
