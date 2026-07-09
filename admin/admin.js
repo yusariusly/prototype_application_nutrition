@@ -532,18 +532,29 @@ function renderLibraryList() {
         return;
     }
     
-    container.innerHTML = filtered.map(f => `
-        <div class="bg-surface border border-outline-variant/20 rounded-xl p-2.5 flex gap-2.5 items-center hover:border-primary/45 transition-colors">
-            <div class="w-10 h-10 rounded-lg overflow-hidden bg-slate-100 shrink-0">
-                <img class="w-full h-full object-cover" src="${f.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100'}" alt="${f.title}">
+    container.innerHTML = filtered.map(f => {
+        let tagHtml = '';
+        if (f.id === 'f-1' || f.id === 'f-3') {
+            tagHtml = `<span class="inline-block bg-[#eff6ff] text-[#1e40af] text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider mt-1.5">Vegetarian</span>`;
+        } else if (f.id === 'f-2' || f.id === 'f-4') {
+            tagHtml = `<span class="inline-block bg-[#f0fdf4] text-[#166534] text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider mt-1.5">High Protein</span>`;
+        } else {
+            tagHtml = `<span class="inline-block bg-[#fef3c7] text-[#92400e] text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider mt-1.5">Raw Food</span>`;
+        }
+
+        return `
+            <div class="bg-white border border-outline-variant/30 rounded-2xl p-4 flex gap-3.5 items-center shadow-sm">
+                <div class="w-14 h-14 rounded-xl overflow-hidden bg-slate-100 shrink-0">
+                    <img class="w-full h-full object-cover" src="${f.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100'}" alt="${f.title}">
+                </div>
+                <div class="min-w-0 flex-grow text-left">
+                    <h4 class="font-bold text-xs text-slate-800 leading-snug">${f.title}</h4>
+                    <p class="text-[10px] text-slate-500 font-medium mt-0.5">${f.calories} kcal · ${f.p}g P · ${f.c}g C · ${f.f}g F</p>
+                    ${tagHtml}
+                </div>
             </div>
-            <div class="min-w-0 flex-grow text-left">
-                <h4 class="font-bold text-xs text-on-background truncate" title="${f.title}">${f.title}</h4>
-                <p class="text-[9px] text-on-surface-variant font-semibold mt-0.5">${f.calories} kcal</p>
-                <p class="text-[8px] text-on-surface-variant/80 font-medium">P:${f.p}g • C:${f.c}g • F:${f.f}g</p>
-            </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function renderWeeklyMealTable() {
@@ -558,35 +569,76 @@ function renderWeeklyMealTable() {
     let html = '';
     
     rowTypes.forEach(rowType => {
+        let rowHeaderHtml = '';
+        if (rowType === 'Breakfast') {
+            rowHeaderHtml = `
+                <div class="flex flex-col items-center justify-center gap-1 py-2">
+                    <span class="material-symbols-outlined text-[#006e2f] text-2xl" style="font-variation-settings: 'FILL' 1;">wb_twilight</span>
+                    <span class="font-bold text-xs text-slate-700">${rowType}</span>
+                </div>
+            `;
+        } else if (rowType === 'Lunch') {
+            rowHeaderHtml = `
+                <div class="flex flex-col items-center justify-center gap-1 py-2">
+                    <span class="material-symbols-outlined text-[#9d4300] text-2xl" style="font-variation-settings: 'FILL' 1;">sunny</span>
+                    <span class="font-bold text-xs text-slate-700">${rowType}</span>
+                </div>
+            `;
+        } else if (rowType === 'Dinner') {
+            rowHeaderHtml = `
+                <div class="flex flex-col items-center justify-center gap-1 py-2">
+                    <span class="material-symbols-outlined text-indigo-700 text-2xl" style="font-variation-settings: 'FILL' 1;">nights_stay</span>
+                    <span class="font-bold text-xs text-slate-700">${rowType}</span>
+                </div>
+            `;
+        } else {
+            rowHeaderHtml = `
+                <div class="flex flex-col items-center justify-center gap-1 py-2">
+                    <span class="material-symbols-outlined text-[#006a61] text-2xl" style="font-variation-settings: 'FILL' 1;">cookie</span>
+                    <span class="font-bold text-xs text-slate-700">${rowType}</span>
+                </div>
+            `;
+        }
+
         html += `<tr class="hover:bg-slate-50/50 transition-colors">`;
-        html += `<td class="p-3 font-bold text-center border-r border-outline-variant/20 bg-surface-container-low/20 align-middle text-on-surface">${rowType}</td>`;
+        html += `<td class="p-3 border-r border-outline-variant/20 bg-surface-container-low/20 align-middle text-center w-[12%]">${rowHeaderHtml}</td>`;
         
         days.forEach(day => {
             const meals = (clientPlan[day] || []).filter(m => m.type.toLowerCase() === rowType.toLowerCase());
             
-            html += `<td class="p-3 border-r border-outline-variant/20 align-top relative min-h-[100px]">`;
-            html += `<div class="flex flex-col gap-2">`;
+            html += `<td class="p-3 border-r border-outline-variant/20 align-middle relative min-h-[100px]">`;
             
-            meals.forEach(m => {
+            if (meals.length === 0) {
+                // Centered circular plus icon
                 html += `
-                    <div class="bg-surface border border-outline-variant/30 rounded-xl p-2 flex flex-col gap-1 relative shadow-sm text-[10px] text-left">
-                        <button onclick="removeFoodFromSlot('${day}', '${rowType}', '${m.title}')" class="absolute top-1.5 right-1.5 text-on-surface-variant hover:text-red-600 transition-colors flex items-center justify-center cursor-pointer shrink-0">
-                            <span class="material-symbols-outlined text-[12px] font-bold">close</span>
+                    <div class="flex items-center justify-center h-16">
+                        <button onclick="openAssignFoodModal('${day}', '${rowType}')" class="text-slate-300 hover:text-primary transition-colors flex items-center justify-center cursor-pointer">
+                            <span class="material-symbols-outlined" style="font-size:26px;">add_circle</span>
                         </button>
-                        <div class="font-bold text-on-background pr-4 truncate" title="${m.title}">${m.title}</div>
-                        <div class="text-[9px] text-[#006e2f] font-semibold">${m.calories} kcal</div>
-                        <div class="text-[8px] text-on-surface-variant/80 font-medium">P:${m.p}g · C:${m.c}g · F:${m.f}g</div>
                     </div>
                 `;
-            });
+            } else {
+                html += `<div class="flex flex-col gap-2">`;
+                meals.forEach(m => {
+                    html += `
+                        <div class="bg-white border border-outline-variant/30 rounded-xl p-3 flex flex-col gap-1 relative shadow-sm text-[11px] text-left">
+                            <button onclick="removeFoodFromSlot('${day}', '${rowType}', '${m.title}')" class="absolute top-2 right-2 text-slate-400 hover:text-red-600 transition-colors flex items-center justify-center cursor-pointer shrink-0">
+                                <span class="material-symbols-outlined text-[14px]">close</span>
+                            </button>
+                            <div class="font-bold text-slate-800 pr-4 leading-tight">${m.title}</div>
+                            <div class="text-[10px] text-slate-500 mt-0.5">${m.calories} kcal</div>
+                        </div>
+                    `;
+                });
+                // Dotted border card with plus symbol under the meals
+                html += `
+                    <button onclick="openAssignFoodModal('${day}', '${rowType}')" class="w-full border border-dashed border-outline-variant/40 hover:border-primary/60 hover:bg-primary/5 rounded-xl py-1.5 flex items-center justify-center text-slate-400 hover:text-primary transition-all cursor-pointer">
+                        <span class="material-symbols-outlined text-sm">add</span>
+                    </button>
+                `;
+                html += `</div>`;
+            }
             
-            html += `
-                <button onclick="openAssignFoodModal('${day}', '${rowType}')" class="w-full border border-dashed border-outline-variant/30 hover:border-primary/60 hover:bg-primary/5 rounded-xl py-2 flex items-center justify-center text-outline-variant/80 hover:text-primary transition-all cursor-pointer">
-                    <span class="material-symbols-outlined text-sm">add</span>
-                </button>
-            `;
-            
-            html += `</div>`;
             html += `</td>`;
         });
         
@@ -598,57 +650,91 @@ function renderWeeklyMealTable() {
     renderWeeklyTotalsSummary();
 }
 
+window.setSelectedTotalsDay = function(day) {
+    state.selectedTotalsDay = day;
+    renderWeeklyTotalsSummary();
+};
+
 function renderWeeklyTotalsSummary() {
     const container = document.getElementById('weekly-totals-summary-container');
     if (!container) return;
     
     const client = state.selectedMealBuilderClient;
     const clientPlan = state.clientMealPlans[client] || {};
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    
+    if (!state.selectedTotalsDay) {
+        state.selectedTotalsDay = 'Mon';
+    }
+    const day = state.selectedTotalsDay;
     const targetKcal = parseInt(document.getElementById('target-kcal').value) || 2000;
     
-    let html = '';
-    html += `<h4 class="text-xs font-bold uppercase tracking-wider text-on-surface mb-3 flex items-center gap-2">`;
-    html += `<span class="material-symbols-outlined text-primary text-base">analytics</span> Weekly Nutrition Summary`;
-    html += `</h4>`;
+    const meals = clientPlan[day] || [];
+    let kcal = 0;
+    let p = 0;
+    let c = 0;
+    let f = 0;
     
-    html += `<div class="grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-7 gap-3">`;
-    
-    days.forEach(day => {
-        const meals = clientPlan[day] || [];
-        let kcal = 0;
-        let p = 0;
-        let c = 0;
-        let f = 0;
-        
-        meals.forEach(m => {
-            kcal += m.calories;
-            p += m.p || 0;
-            c += m.c || 0;
-            f += m.f || 0;
-        });
-        
-        const pct = Math.min((kcal / targetKcal) * 100, 100);
-        
-        html += `
-            <div class="bg-surface rounded-xl p-3 border border-outline-variant/20 shadow-sm flex flex-col gap-1.5">
-                <div class="flex justify-between items-center">
-                    <span class="font-bold text-[11px] text-on-background">${day} Totals</span>
-                    <span class="font-bold text-[10px] text-primary">${kcal} kcal</span>
-                </div>
-                <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                    <div class="bg-[#006e2f] h-full rounded-full transition-all" style="width: ${pct}%"></div>
-                </div>
-                <div class="flex justify-between items-center text-[9px] text-on-surface-variant font-medium mt-1">
-                    <span>P: <b>${p}g</b></span>
-                    <span>C: <b>${c}g</b></span>
-                    <span>F: <b>${f}g</b></span>
-                </div>
-            </div>
-        `;
+    meals.forEach(m => {
+        kcal += m.calories;
+        p += m.p || 0;
+        c += m.c || 0;
+        f += m.f || 0;
     });
     
-    html += `</div>`;
+    const pct = Math.min((kcal / targetKcal) * 100, 100);
+    
+    let html = `
+        <div class="bg-white border border-outline-variant/30 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 w-full">
+            <!-- Left Side: Calorie Progress -->
+            <div class="w-full md:w-[35%] flex flex-col gap-2">
+                <div>
+                    <span class="text-xs text-slate-500 font-semibold uppercase tracking-wider block mb-1">${day} Totals</span>
+                    <span class="text-2xl font-extrabold text-slate-800">${kcal.toLocaleString()} <span class="text-sm font-normal text-slate-500">/ ${targetKcal.toLocaleString()} kcal</span></span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div class="bg-[#006e2f] h-full rounded-full transition-all" style="width: ${pct}%"></div>
+                </div>
+            </div>
+            
+            <!-- Middle: Divider -->
+            <div class="hidden md:block w-px h-12 bg-slate-200"></div>
+            
+            <!-- Right Side: Macros Row -->
+            <div class="w-full md:w-[60%] flex flex-row items-center justify-around gap-4">
+                <!-- Protein Column -->
+                <div class="flex gap-3 items-center">
+                    <div class="w-1.5 h-8 bg-[#006e2f] rounded-full"></div>
+                    <div>
+                        <div class="text-[9px] uppercase tracking-wider font-extrabold text-slate-500">Protein</div>
+                        <div class="text-base font-bold text-slate-800">${p}g</div>
+                    </div>
+                </div>
+                
+                <!-- Carbs Column -->
+                <div class="flex gap-3 items-center">
+                    <div class="w-1.5 h-8 bg-[#006e2f] rounded-full"></div>
+                    <div>
+                        <div class="text-[9px] uppercase tracking-wider font-extrabold text-slate-500">Carbs</div>
+                        <div class="text-base font-bold text-slate-800">${c}g</div>
+                    </div>
+                </div>
+                
+                <!-- Fats Column -->
+                <div class="flex gap-3 items-center">
+                    <div class="w-1.5 h-8 bg-[#9d4300] rounded-full"></div>
+                    <div>
+                        <div class="text-[9px] uppercase tracking-wider font-extrabold text-slate-500">Fats</div>
+                        <div class="text-base font-bold text-slate-800">${f}g</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Day selector hint -->
+        <div class="text-[10px] text-center text-slate-400 mt-3">
+            Click on a day column header (e.g. Mon, Tue) to view its daily macronutrient breakdown totals.
+        </div>
+    `;
     
     container.innerHTML = html;
 }
@@ -732,6 +818,10 @@ window.publishWeeklyPlanToClient = function() {
 
 window.saveWeeklyTemplate = function() {
     showToast(`Weekly meal template saved successfully!`, 'success');
+};
+
+window.previewWeeklyPlan = function() {
+    showToast(`Weekly meal plan preview simulated for ${state.selectedMealBuilderClient}.`, 'info');
 };
 
 // ==================== CALENDAR ====================

@@ -107,7 +107,7 @@
         <!-- Links -->
         <div class="hidden md:flex gap-md h-full items-center absolute left-1/2 transform -translate-x-1/2">
             <a onclick="navigateTo('admin-clients')" id="link-admin-clients" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Clients</a>
-            <a onclick="navigateTo('admin-meal-builder')" id="link-admin-meal-builder" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Targets & Diaries</a>
+            <a onclick="navigateTo('admin-meal-builder')" id="link-admin-meal-builder" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Meal Builder</a>
             <a onclick="navigateTo('admin-calendar')" id="link-admin-calendar" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Calendar</a>
             <a onclick="navigateTo('admin-reports')" id="link-admin-reports" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Reports</a>
         </div>
@@ -258,11 +258,14 @@
                             </div>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="saveWeeklyTemplate()" class="border border-outline-variant/30 hover:bg-surface-container-low text-on-surface font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-[16px]">save</span> Save as Template
+                            <button onclick="previewWeeklyPlan()" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer">
+                                <span class="material-symbols-outlined text-[18px]">preview</span> Preview
                             </button>
-                            <button onclick="publishWeeklyPlanToClient()" class="bg-primary hover:bg-[#005321] text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-[16px]">send</span> Publish to Client
+                            <button onclick="saveWeeklyTemplate()" class="bg-[#dbeafe] text-[#1e3a8a] hover:bg-[#bfdbfe] font-semibold text-xs px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer">
+                                <span class="material-symbols-outlined text-[18px] fill-1" style="font-variation-settings: 'FILL' 1;">save</span> Save as Template
+                            </button>
+                            <button onclick="publishWeeklyPlanToClient()" class="bg-[#006e2f] hover:bg-[#005321] text-white font-semibold text-xs px-5 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-1.5 cursor-pointer">
+                                <span class="material-symbols-outlined text-[18px] rotate-[-30deg] translate-y-[-1px]" style="font-size:18px;">send</span> Publish to Client
                             </button>
                         </div>
                     </div>
@@ -273,13 +276,13 @@
                             <thead>
                                 <tr class="bg-surface-container-low/50 border-b border-surface-variant/30 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
                                     <th class="p-3 w-[12%] text-center border-r border-outline-variant/20">Meals</th>
-                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20">Mon</th>
-                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20">Tue</th>
-                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20">Wed</th>
-                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20">Thu</th>
-                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20">Fri</th>
-                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20">Sat</th>
-                                    <th class="p-3 w-[12.5%] text-center">Sun</th>
+                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20 cursor-pointer hover:bg-slate-100/50 transition-colors" onclick="setSelectedTotalsDay('Mon')">Mon<span class="block text-[9px] font-normal text-on-surface-variant mt-0.5">May 12</span></th>
+                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20 cursor-pointer hover:bg-slate-100/50 transition-colors" onclick="setSelectedTotalsDay('Tue')">Tue<span class="block text-[9px] font-normal text-on-surface-variant mt-0.5">May 13</span></th>
+                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20 cursor-pointer hover:bg-slate-100/50 transition-colors" onclick="setSelectedTotalsDay('Wed')">Wed<span class="block text-[9px] font-normal text-on-surface-variant mt-0.5">May 14</span></th>
+                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20 cursor-pointer hover:bg-slate-100/50 transition-colors" onclick="setSelectedTotalsDay('Thu')">Thu<span class="block text-[9px] font-normal text-on-surface-variant mt-0.5">May 15</span></th>
+                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20 cursor-pointer hover:bg-slate-100/50 transition-colors" onclick="setSelectedTotalsDay('Fri')">Fri<span class="block text-[9px] font-normal text-on-surface-variant mt-0.5">May 16</span></th>
+                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20 cursor-pointer hover:bg-slate-100/50 transition-colors" onclick="setSelectedTotalsDay('Sat')">Sat<span class="block text-[9px] font-normal text-on-surface-variant mt-0.5">May 17</span></th>
+                                    <th class="p-3 w-[12.5%] text-center cursor-pointer hover:bg-slate-100/50 transition-colors" onclick="setSelectedTotalsDay('Sun')">Sun<span class="block text-[9px] font-normal text-on-surface-variant mt-0.5">May 18</span></th>
                                 </tr>
                             </thead>
                             <tbody id="weekly-meal-table-body" class="divide-y divide-surface-variant/20 text-xs">
