@@ -493,7 +493,7 @@ window.loadMealBuilderClientPlan = function() {
     state.selectedMealBuilderClient = select.value;
     
     // Load targets from local storage or fallback to defaults
-    const kcal = localStorage.getItem('nutriflow_client_calories_target') || 2000;
+    const kcal = localStorage.getItem('nutriflow_target_kcal_' + state.selectedMealBuilderClient) || 2000;
     const kcalInput = document.getElementById('target-kcal');
     if (kcalInput) kcalInput.value = kcal;
 
@@ -502,7 +502,7 @@ window.loadMealBuilderClientPlan = function() {
 
 window.saveClientTargets = function() {
     const kcal = document.getElementById('target-kcal').value || 2000;
-    localStorage.setItem('nutriflow_client_calories_target', kcal);
+    localStorage.setItem('nutriflow_target_kcal_' + state.selectedMealBuilderClient, kcal);
     renderWeeklyTotalsSummary();
     showToast(`Targets for ${state.selectedMealBuilderClient} updated to ${kcal} kcal/day`, 'success');
 };

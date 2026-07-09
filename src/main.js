@@ -232,17 +232,10 @@ function loadState() {
         state.clientMealPlans = JSON.parse(localStorage.getItem('nutriflow_client_meal_plans'));
     }
     
-    // Ensure all days are populated for Sarah Jenkins
-    const targetClient = 'Sarah Jenkins';
-    if (!state.clientMealPlans[targetClient]) {
-        state.clientMealPlans[targetClient] = {};
-    }
-    
+    // Ensure all days are populated for all active clients
+    const targetClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const allClientsList = ['Sarah Jenkins', 'Marcus Reid', 'Elena Lopez'];
     let changed = false;
-    if (state.clientMealPlans[targetClient]['Wed'] && state.clientMealPlans[targetClient]['Wed'].some(m => m.title && (m.title.includes('Smoothie') || m.title.includes('Salmon') || m.title.includes('Nuts')))) {
-        state.clientMealPlans[targetClient]['Wed'] = [];
-        changed = true;
-    }
     
     const daysList = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     
@@ -275,11 +268,22 @@ function loadState() {
         ]
     };
     
-    daysList.forEach(day => {
-        if (!state.clientMealPlans[targetClient][day] || state.clientMealPlans[targetClient][day].length === 0) {
-            state.clientMealPlans[targetClient][day] = defaults[day];
+    allClientsList.forEach(clientName => {
+        if (!state.clientMealPlans[clientName]) {
+            state.clientMealPlans[clientName] = {};
+        }
+        
+        if (state.clientMealPlans[clientName]['Wed'] && state.clientMealPlans[clientName]['Wed'].some(m => m.title && (m.title.includes('Smoothie') || m.title.includes('Salmon') || m.title.includes('Nuts')))) {
+            state.clientMealPlans[clientName]['Wed'] = [];
             changed = true;
         }
+
+        daysList.forEach(day => {
+            if (!state.clientMealPlans[clientName][day] || state.clientMealPlans[clientName][day].length === 0) {
+                state.clientMealPlans[clientName][day] = JSON.parse(JSON.stringify(defaults[day]));
+                changed = true;
+            }
+        });
     });
     
     if (changed) {
@@ -314,6 +318,14 @@ window.handleClientSignOut = function() {
 document.addEventListener('DOMContentLoaded', () => {
     checkClientSession();
     loadState();
+    
+    // Update greeting with dynamic logged-in client name
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const welcomeLabel = document.getElementById('client-welcome-name-label');
+    if (welcomeLabel) {
+        welcomeLabel.innerText = `Good morning, ${activeClient.split(' ')[0]}!`;
+    }
+
     navigateTo('dashboard');
     renderWaterTracker();
 });
@@ -389,7 +401,8 @@ window.showClientNotifications = function() {
 // ==================== DASHBOARD MEALS & KCAL ====================
 // ==================== DASHBOARD MEALS & KCAL ====================
 function updateKcalDisplay() {
-    let goal = parseInt(localStorage.getItem('nutriflow_client_calories_target')) || 2100;
+    const targetClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    let goal = parseInt(localStorage.getItem('nutriflow_target_kcal_' + targetClient)) || 2100;
     let consumed = 0;
     let pro = 0;
     let carb = 0;
@@ -400,7 +413,7 @@ function updateKcalDisplay() {
     let goalF = parseInt(localStorage.getItem('nutriflow_client_fats_target')) || 65;
 
     const today = 'Wed'; // wednesday is today in prototype
-    const clientPlan = state.clientMealPlans['Sarah Jenkins'][today] || [];
+    const clientPlan = state.clientMealPlans[localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins'][today] || [];
 
     clientPlan.forEach(meal => {
         consumed += meal.calories;
@@ -437,7 +450,7 @@ function renderDashboardMeals() {
     if (!grid) return;
     
     const today = 'Wed';
-    const clientPlan = state.clientMealPlans['Sarah Jenkins'][today] || [];
+    const clientPlan = state.clientMealPlans[localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins'][today] || [];
     const slots = ['Breakfast', 'Lunch', 'Snack', 'Dinner'];
     
     grid.innerHTML = slots.map(slotName => {
@@ -535,7 +548,7 @@ function renderMealPlans() {
         return `<button onclick="selectMealDay('${d}')" class="${btnClass}">${d}${isToday ? ' (Today)' : ''}</button>`;
     }).join('');
 
-    const clientPlan = state.clientMealPlans['Sarah Jenkins'][state.selectedDay] || [];
+    const clientPlan = state.clientMealPlans[localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins'][state.selectedDay] || [];
     let currentKcal = 0;
     let currentP = 0;
     let currentC = 0;
@@ -635,8 +648,9 @@ window.openAIScannerForSlot = function(slotName) {
 };
 
 window.removeMealFromSlot = function(day, slotName) {
-    if (!state.clientMealPlans['Sarah Jenkins'][day]) return;
-    state.clientMealPlans['Sarah Jenkins'][day] = state.clientMealPlans['Sarah Jenkins'][day].filter(m => m.type.toLowerCase() !== slotName.toLowerCase());
+    const clientName = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    if (!state.clientMealPlans[clientName][day]) return;
+    state.clientMealPlans[clientName][day] = state.clientMealPlans[clientName][day].filter(m => m.type.toLowerCase() !== slotName.toLowerCase());
     saveState();
     showToast(`Cleared ${slotName} entry.`, 'info');
     renderMealPlans();
@@ -796,17 +810,18 @@ window.logScannedMeal = function() {
     if (!activeScannedMeal) return;
 
     const day = state.selectedDay;
-    if (!state.clientMealPlans['Sarah Jenkins'][day]) {
-        state.clientMealPlans['Sarah Jenkins'][day] = [];
+    const clientName = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    if (!state.clientMealPlans[clientName][day]) {
+        state.clientMealPlans[clientName][day] = [];
     }
 
     const slot = state.activeScanSlot || 'Breakfast';
 
     // Clear existing entry in this slot
-    state.clientMealPlans['Sarah Jenkins'][day] = state.clientMealPlans['Sarah Jenkins'][day].filter(m => m.type.toLowerCase() !== slot.toLowerCase());
+    state.clientMealPlans[clientName][day] = state.clientMealPlans[clientName][day].filter(m => m.type.toLowerCase() !== slot.toLowerCase());
 
     // Push new logged food to slot
-    state.clientMealPlans['Sarah Jenkins'][day].push({
+    state.clientMealPlans[clientName][day].push({
         type: slot,
         title: activeScannedMeal.title,
         calories: activeScannedMeal.calories,

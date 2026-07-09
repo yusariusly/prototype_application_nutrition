@@ -67,13 +67,22 @@
             const u = document.getElementById('client-email').value;
             const p = document.getElementById('client-password').value;
 
-            if (u === 'sarah.j@email.com' && p === 'password') {
-                localStorage.setItem('nutriflow_client_logged', 'true');
-                window.location.href = './index.html'; // Redirect to client dashboard
-            } else {
-                const err = document.getElementById('error-message');
-                err.classList.remove('hidden');
+            if (p === 'password') {
+                let name = '';
+                if (u === 'sarah.j@email.com') name = 'Sarah Jenkins';
+                else if (u === 'm.reid@email.com') name = 'Marcus Reid';
+                else if (u === 'elena.l@email.com') name = 'Elena Lopez';
+
+                if (name) {
+                    localStorage.setItem('nutriflow_client_logged', 'true');
+                    localStorage.setItem('nutriflow_client_logged_name', name);
+                    window.location.href = './index.html'; // Redirect to client dashboard
+                    return;
+                }
             }
+            
+            const err = document.getElementById('error-message');
+            err.classList.remove('hidden');
         }
     </script>
 </body>
