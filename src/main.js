@@ -298,11 +298,6 @@ function loadState() {
         if (!state.clientMealPlans[clientName]) {
             state.clientMealPlans[clientName] = {};
         }
-        
-        if (state.clientMealPlans[clientName]['Wed'] && state.clientMealPlans[clientName]['Wed'].some(m => m.title && (m.title.includes('Smoothie') || m.title.includes('Salmon') || m.title.includes('Nuts')))) {
-            state.clientMealPlans[clientName]['Wed'] = [];
-            changed = true;
-        }
 
         daysList.forEach(day => {
             if (!state.clientMealPlans[clientName][day] || state.clientMealPlans[clientName][day].length === 0) {
