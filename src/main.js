@@ -590,15 +590,6 @@ function renderDashboardMeals() {
                             <span>${meal.p || 0}G P</span>
                             <span>${meal.f || 0}G F</span>
                         </div>
-                        ${meal.comment ? `
-                            <div class="mt-1 p-2 bg-primary/5 rounded-xl border border-primary/10 text-[9px] text-primary italic leading-tight flex items-start gap-1">
-                                <span class="material-symbols-outlined text-[12px] mt-0.5">chat_bubble</span>
-                                <div>
-                                    <span class="font-bold block not-italic">Note:</span>
-                                    <span>${meal.comment}</span>
-                                </div>
-                            </div>
-                        ` : ''}
                         <!-- Log Button (Below the macro bar & stats) -->
                         <div class="pt-2 border-t border-slate-100 flex justify-end">
                             ${btnHtml}
@@ -620,15 +611,6 @@ function renderDashboardMeals() {
                             <span class="text-[9px] font-bold text-slate-400 block mt-0.5">${meal.calories} kcal</span>
                         </div>
                     </div>
-                    ${meal.comment ? `
-                        <div class="p-2 bg-primary/5 rounded-xl border border-primary/10 text-[9px] text-primary italic leading-tight flex items-start gap-1">
-                            <span class="material-symbols-outlined text-[12px] mt-0.5">chat_bubble</span>
-                            <div>
-                                <span class="font-bold block not-italic">Note:</span>
-                                <span>${meal.comment}</span>
-                            </div>
-                        </div>
-                    ` : ''}
                     <!-- Log Button (Below the content) -->
                     <div class="pt-2 border-t border-slate-100 flex justify-end">
                         ${btnHtml}
@@ -761,9 +743,7 @@ function renderMealPlans() {
                 </div>
                 <div class="p-4 flex flex-col flex-grow">
                     <h3 class="font-bold text-on-surface text-base mb-1 leading-tight">${meal.title}</h3>
-                    <p class="text-[11px] text-on-surface-variant flex-grow line-clamp-2 mb-3 mt-1 leading-normal">
-                        ${meal.comment ? `<span class="text-primary font-bold">Specialist Note:</span> <span class="italic font-medium">"${meal.comment}"</span>` : 'Plan designed by your nutritionist pendamping.'}
-                    </p>
+                    <p class="text-[11px] text-on-surface-variant flex-grow line-clamp-2 mb-3 mt-1 leading-normal">Plan designed by your nutritionist pendamping.</p>
                     
                     <div class="grid grid-cols-4 gap-1 text-center bg-slate-50 p-1.5 rounded-lg border border-slate-200 text-[9px] font-bold text-on-surface-variant/90 mb-3">
                         <div><span class="block text-on-background">${meal.calories}</span>KCAL</div>
@@ -773,7 +753,7 @@ function renderMealPlans() {
                     </div>
 
                     <div class="flex items-center justify-between border-t border-outline-variant/20 pt-2 mt-auto gap-2">
-                        <button onclick="viewRecipeDetails('${meal.title}', '${slotName}', '${meal.image || ''}', ${meal.calories}, ${meal.p}, ${meal.c}, ${meal.f}, \`${encodeURIComponent(meal.recipeSteps || '')}\`, \`${encodeURIComponent(meal.recipeIngredients || '')}\`)" class="border border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold text-[10px] px-3.5 py-2.5 rounded-xl transition-all cursor-pointer w-full justify-center">View Recipe</button>
+                        <button onclick="viewRecipeDetails('${meal.title}', '${slotName}', '${meal.image || ''}', ${meal.calories}, ${meal.p}, ${meal.c}, ${meal.f}, \`${encodeURIComponent(meal.recipeSteps || '')}\`, \`${encodeURIComponent(meal.recipeIngredients || '')}\`, \`${encodeURIComponent(meal.comment || '')}\`)" class="border border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold text-[10px] px-3.5 py-2.5 rounded-xl transition-all cursor-pointer w-full justify-center">View Recipe</button>
                         <button onclick="toggleLogMeal('${state.selectedDay}', '${slotName}')" class="${btnClass}">
                             <span class="material-symbols-outlined text-[14px]">${btnIcon}</span> ${btnLabel}
                         </button>
@@ -1005,7 +985,7 @@ window.logScannedMeal = function() {
     updateKcalDisplay();
 };
 
-window.viewRecipeDetails = function(title, type, image, kcal, p, c, fat, customRecipeStepsEncoded, customRecipeIngredientsEncoded) {
+window.viewRecipeDetails = function(title, type, image, kcal, p, c, fat, customRecipeStepsEncoded, customRecipeIngredientsEncoded, commentEncoded) {
     const modal = document.getElementById('recipe-modal');
     if (!modal) return;
     
@@ -1032,6 +1012,28 @@ window.viewRecipeDetails = function(title, type, image, kcal, p, c, fat, customR
             customRecipeIngredients = decodeURIComponent(customRecipeIngredientsEncoded);
         } catch (e) {
             customRecipeIngredients = customRecipeIngredientsEncoded;
+        }
+    }
+
+    let comment = '';
+    if (commentEncoded) {
+        try {
+            comment = decodeURIComponent(commentEncoded);
+        } catch (e) {
+            comment = commentEncoded;
+        }
+    }
+
+    const noteContainer = document.getElementById('modal-recipe-note-container');
+    const noteText = document.getElementById('modal-recipe-note');
+    if (noteContainer && noteText) {
+        if (comment && comment.trim() !== '') {
+            noteText.innerText = comment;
+            noteContainer.classList.remove('hidden');
+            noteContainer.classList.add('flex');
+        } else {
+            noteContainer.classList.add('hidden');
+            noteContainer.classList.remove('flex');
         }
     }
 
