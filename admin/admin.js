@@ -174,6 +174,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (subtitle) {
         subtitle.innerText = `Logged in as: ${activeSpecialist} · Manage your active nutrition clients and monitor their progress.`;
     }
+
+    // Set practitioner avatar label
+    const avatarLabel = document.getElementById('practitioner-avatar-label');
+    if (avatarLabel) {
+        const initials = activeSpecialist.split(' ').map(s => s[0]).join('').substring(0, 2).toUpperCase();
+        avatarLabel.innerText = initials;
+    }
     
     navigateTo('admin-clients');
 });
@@ -234,6 +241,8 @@ window.navigateTo = function(viewId) {
         renderAdminCalendar();
     } else if (viewId === 'admin-reports') {
         setTimeout(initAdminReportsCharts, 50);
+    } else if (viewId === 'admin-profile') {
+        loadSpecialistProfileDetails();
     }
 };
 
@@ -243,6 +252,89 @@ window.handleAdminSignOut = function() {
     setTimeout(() => {
         window.location.href = './login.html';
     }, 1000);
+};
+
+function loadSpecialistProfileDetails() {
+    const activeSpecialistName = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
+    
+    // Find specialist details from the state/local storage of nutritionists
+    const nutritionists = JSON.parse(localStorage.getItem('nutriflow_nutritionists')) || [
+        { id: 'exp-1', name: 'Dr. Hasan', email: 'hasan@nutriflow.com', specialty: 'Weight Management', status: 'active', avatar: 'DH' },
+        { id: 'exp-2', name: 'Dr. Amanda', email: 'amanda@nutriflow.com', specialty: 'Sport Nutrition', status: 'active', avatar: 'DA' },
+        { id: 'exp-3', name: 'Dr. Marcus Reid', email: 'm.reid@email.com', specialty: 'Therapeutic Diets', status: 'active', avatar: 'MR' }
+    ];
+    
+    const spec = nutritionists.find(n => n.name === activeSpecialistName) || {
+        name: activeSpecialistName,
+        email: 'specialist@nutriflow.com',
+        specialty: 'Weight Management',
+        avatar: activeSpecialistName.split(' ').map(s => s[0]).join('').toUpperCase()
+    };
+
+    // Populate Left Card
+    document.getElementById('profile-practitioner-avatar').innerText = spec.avatar || 'N';
+    document.getElementById('profile-practitioner-name').innerText = spec.name;
+    document.getElementById('profile-practitioner-specialty').innerText = spec.specialty;
+    document.getElementById('profile-practitioner-email').innerText = spec.email;
+
+    // Populate Right Form
+    document.getElementById('edit-practitioner-name').value = spec.name;
+    document.getElementById('edit-practitioner-specialty').value = spec.specialty;
+    document.getElementById('edit-practitioner-email').value = spec.email;
+}
+
+window.handleSavePractitionerProfile = function(e) {
+    e.preventDefault();
+    const name = document.getElementById('edit-practitioner-name').value;
+    const specialty = document.getElementById('edit-practitioner-specialty').value;
+    const email = document.getElementById('edit-practitioner-email').value;
+    const avatar = name.split(' ').map(s => s[0]).join('').substring(0,2).toUpperCase();
+
+    const activeSpecialistName = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
+    
+    // Update nutriflow_nutritionists list
+    const nutritionists = JSON.parse(localStorage.getItem('nutriflow_nutritionists')) || [];
+    const index = nutritionists.findIndex(n => n.name === activeSpecialistName);
+    if (index !== -1) {
+        nutritionists[index].name = name;
+        nutritionists[index].specialty = specialty;
+        nutritionists[index].email = email;
+        nutritionists[index].avatar = avatar;
+    } else {
+        nutritionists.push({
+            id: `exp-${Date.now()}`,
+            name, specialty, email, status: 'active', avatar
+        });
+    }
+    localStorage.setItem('nutriflow_nutritionists', JSON.stringify(nutritionists));
+
+    // Update clients pendamping name in client list to maintain allocation consistency!
+    const clients = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
+    clients.forEach(c => {
+        if (c.therapist === activeSpecialistName) {
+            c.therapist = name;
+        }
+    });
+    localStorage.setItem('nutriflow_clients', JSON.stringify(clients));
+
+    // Update session name
+    localStorage.setItem('nutriflow_specialist_name', name);
+    
+    // Update UI headers
+    const label = document.getElementById('practitioner-avatar-label');
+    if (label) label.innerText = avatar;
+
+    const welcomeLabel = document.getElementById('specialist-welcome-subtitle');
+    if (welcomeLabel) {
+        welcomeLabel.innerText = `Logged in as: ${name} · Manage your active nutrition clients and monitor their progress.`;
+    }
+
+    loadSpecialistProfileDetails();
+    showToast('Practitioner Profile updated successfully!', 'success');
+};
+
+window.showSpecialistNotifications = function() {
+    showToast('No new practitioner alerts at this time.', 'info');
 };
 
 // ==================== CLIENTS LIST ====================
