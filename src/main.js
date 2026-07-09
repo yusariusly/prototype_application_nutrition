@@ -514,15 +514,13 @@ function renderDashboardMeals() {
         
         if (!meal) {
             return `
-                <div class="bg-white border border-outline-variant/35 rounded-2xl p-4 flex justify-between items-center shadow-sm min-h-[90px]">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center shrink-0">
-                            <span class="material-symbols-outlined text-lg">restaurant_menu</span>
-                        </div>
-                        <div>
-                            <span class="block text-[9px] uppercase tracking-wider text-slate-400 font-bold">${slotName}</span>
-                            <span class="font-bold text-xs text-slate-500">No meal planned for today</span>
-                        </div>
+                <div class="bg-white border border-outline-variant/35 rounded-2xl p-6 flex flex-col justify-center items-center text-center shadow-sm min-h-[120px] gap-2">
+                    <div class="w-10 h-10 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center shrink-0 border border-slate-100">
+                        <span class="material-symbols-outlined text-lg">restaurant_menu</span>
+                    </div>
+                    <div>
+                        <span class="block text-[8px] uppercase tracking-widest text-slate-400 font-bold leading-none">${slotName}</span>
+                        <span class="font-bold text-xs text-slate-400/90 block mt-1.5">No meal planned for today</span>
                     </div>
                 </div>
             `;
