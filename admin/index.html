@@ -257,16 +257,16 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-surface-variant/20 pb-4">
                         <div>
                             <h2 class="text-2xl font-bold text-on-background">Weekly Meal Builder</h2>
-                            <div class="flex items-center gap-1.5 mt-1">
-                                <span class="text-xs text-on-surface-variant">Client:</span>
-                                <select id="meal-builder-client-select" onchange="loadMealBuilderClientPlan()" class="text-xs font-bold text-primary bg-transparent border-none p-0 focus:ring-0 cursor-pointer">
+                            <div class="flex items-center gap-2 mt-2">
+                                <span class="text-xs text-on-surface-variant font-medium">Client:</span>
+                                <select id="meal-builder-client-select" onchange="loadMealBuilderClientPlan()" class="text-xs font-bold text-primary bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg px-2 py-1 focus:ring-1 focus:ring-primary cursor-pointer transition-all">
                                     <option value="Sarah Jenkins">Sarah Jenkins</option>
                                     <option value="Marcus Reid">Marcus Reid</option>
                                     <option value="Elena Lopez">Elena Lopez</option>
                                 </select>
-                                <span class="text-xs text-on-surface-variant">· Target:</span>
-                                <input type="number" id="target-kcal" onchange="saveClientTargets()" required value="2000" class="w-16 text-xs font-bold text-primary bg-transparent border-none p-0 focus:ring-0">
-                                <span class="text-xs text-on-surface-variant">kcal/day</span>
+                                <span class="text-xs text-on-surface-variant font-medium ml-1">· Target:</span>
+                                <input type="number" id="target-kcal" onchange="saveClientTargets()" required value="2000" class="w-20 text-xs font-bold text-primary bg-primary/5 border border-primary/20 rounded-lg px-2 py-1 text-center focus:ring-1 focus:ring-primary focus:border-primary transition-all">
+                                <span class="text-xs text-on-surface-variant font-medium">kcal/day</span>
                                 <input type="hidden" id="target-protein" value="150">
                                 <input type="hidden" id="target-carbs" value="250">
                                 <input type="hidden" id="target-fats" value="65">
