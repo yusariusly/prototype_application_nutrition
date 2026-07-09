@@ -124,6 +124,13 @@ function loadAdminState() {
         };
         saveAdminState();
     }
+
+    // Load Food Library
+    if (localStorage.getItem('nutriflow_food_library')) {
+        state.foodLibrary = JSON.parse(localStorage.getItem('nutriflow_food_library'));
+    } else {
+        localStorage.setItem('nutriflow_food_library', JSON.stringify(state.foodLibrary));
+    }
     
     // Ensure Wednesday snack is present in local cache for demonstration
     if (state.clientMealPlans['Sarah Jenkins'] && state.clientMealPlans['Sarah Jenkins']['Wed']) {
@@ -153,6 +160,7 @@ function saveAdminState() {
     localStorage.setItem('nutriflow_appointments', JSON.stringify(state.appointments));
     localStorage.setItem('nutriflow_client_meal_plans', JSON.stringify(state.clientMealPlans));
     localStorage.setItem('nutriflow_clients', JSON.stringify(state.clients));
+    localStorage.setItem('nutriflow_food_library', JSON.stringify(state.foodLibrary));
 }
 
 // ==================== INITIALIZATION ====================
@@ -562,11 +570,11 @@ function renderLibraryList() {
         }
 
         return `
-            <div class="bg-white border border-outline-variant/30 rounded-2xl p-4 flex gap-3.5 items-center shadow-sm">
-                <div class="w-14 h-14 rounded-xl overflow-hidden bg-slate-100 shrink-0">
+            <div draggable="true" ondragstart="handleLibraryDragStart(event, '${f.id}')" class="bg-white border border-outline-variant/30 rounded-2xl p-4 flex gap-3.5 items-center shadow-sm cursor-grab active:cursor-grabbing hover:border-primary/45 transition-colors">
+                <div class="w-14 h-14 rounded-xl overflow-hidden bg-slate-100 shrink-0 select-none pointer-events-none">
                     <img class="w-full h-full object-cover" src="${f.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100'}" alt="${f.title}">
                 </div>
-                <div class="min-w-0 flex-grow text-left">
+                <div class="min-w-0 flex-grow text-left select-none pointer-events-none">
                     <h4 class="font-bold text-xs text-slate-800 leading-snug">${f.title}</h4>
                     <p class="text-[10px] text-slate-500 font-medium mt-0.5">${f.calories} kcal · ${f.p}g P · ${f.c}g C · ${f.f}g F</p>
                     ${tagHtml}
@@ -625,7 +633,7 @@ function renderWeeklyMealTable() {
         days.forEach(day => {
             const meals = (clientPlan[day] || []).filter(m => m.type.toLowerCase() === rowType.toLowerCase());
             
-            html += `<td class="p-3 border-r border-outline-variant/20 align-middle relative min-h-[100px]">`;
+            html += `<td class="p-3 border-r border-outline-variant/20 align-middle relative min-h-[100px]" ondragover="handleCellDragOver(event)" ondrop="handleCellDrop(event, '${day}', '${rowType}')">`;
             
             if (meals.length === 0) {
                 // Centered circular plus icon
@@ -816,6 +824,98 @@ window.assignFoodToSlot = function(foodId) {
     saveAdminState();
     closeAssignFoodModal();
     renderWeeklyMealTable();
+};
+
+window.handleLibraryDragStart = function(event, foodId) {
+    event.dataTransfer.setData('text/plain', foodId);
+    event.dataTransfer.effectAllowed = 'copy';
+};
+
+window.handleCellDragOver = function(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+};
+
+window.handleCellDrop = function(event, day, mealType) {
+    event.preventDefault();
+    const foodId = event.dataTransfer.getData('text/plain');
+    if (!foodId) return;
+
+    const food = state.foodLibrary.find(f => f.id === foodId);
+    if (!food) return;
+
+    const client = state.selectedMealBuilderClient;
+    if (!state.clientMealPlans[client]) {
+        state.clientMealPlans[client] = {};
+    }
+    if (!state.clientMealPlans[client][day]) {
+        state.clientMealPlans[client][day] = [];
+    }
+
+    // Overwrite slot if it exists
+    state.clientMealPlans[client][day] = state.clientMealPlans[client][day].filter(m => m.type.toLowerCase() !== mealType.toLowerCase());
+
+    state.clientMealPlans[client][day].push({
+        type: mealType,
+        title: food.title,
+        calories: food.calories,
+        p: food.p,
+        c: food.c,
+        f: food.f,
+        image: food.image
+    });
+
+    saveAdminState();
+    renderWeeklyMealTable();
+    renderWeeklyTotalsSummary();
+    showToast(`Added ${food.title} to ${day} ${mealType}!`, 'success');
+};
+
+window.openAddFoodModal = function() {
+    document.getElementById('add-food-modal').classList.remove('hidden');
+    document.getElementById('add-food-modal').classList.add('flex');
+};
+
+window.closeAddFoodModal = function() {
+    document.getElementById('add-food-modal').classList.add('hidden');
+    document.getElementById('add-food-modal').classList.remove('flex');
+};
+
+window.handleAddFoodSubmit = function(e) {
+    e.preventDefault();
+    const name = document.getElementById('food-name').value;
+    const type = document.getElementById('food-category').value;
+    const calories = parseInt(document.getElementById('food-kcal').value) || 0;
+    const p = parseInt(document.getElementById('food-pro').value) || 0;
+    const c = parseInt(document.getElementById('food-carb').value) || 0;
+    const f = parseInt(document.getElementById('food-fat').value) || 0;
+    const imgUrl = document.getElementById('food-image-url').value.trim() || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200';
+
+    const newFood = {
+        id: `f-${Date.now()}`,
+        title: name,
+        type: type,
+        calories: calories,
+        p: p,
+        c: c,
+        f: f,
+        image: imgUrl,
+        favorite: false
+    };
+
+    state.foodLibrary.push(newFood);
+    saveAdminState();
+    closeAddFoodModal();
+    renderLibraryList();
+    showToast(`Added ${name} to library!`, 'success');
+
+    // Reset inputs
+    document.getElementById('food-name').value = '';
+    document.getElementById('food-kcal').value = '';
+    document.getElementById('food-pro').value = '';
+    document.getElementById('food-carb').value = '';
+    document.getElementById('food-fat').value = '';
+    document.getElementById('food-image-url').value = '';
 };
 
 window.removeFoodFromSlot = function(day, mealType, foodTitle) {
