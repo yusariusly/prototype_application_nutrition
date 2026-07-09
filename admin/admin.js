@@ -35,6 +35,13 @@ function checkAdminSession() {
 
 // ==================== STATE SYNC ====================
 function loadAdminState() {
+    // Helper to get formatted relative date (YYYY-MM-DD)
+    const getRelativeDate = (offsetDays) => {
+        const d = new Date();
+        d.setDate(d.getDate() + offsetDays);
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    };
+
     // Load appointments booked by Client
     if (localStorage.getItem('nutriflow_appointments')) {
         state.appointments = JSON.parse(localStorage.getItem('nutriflow_appointments'));
@@ -49,7 +56,7 @@ function loadAdminState() {
                 price: 150,
                 duration: '60 min',
                 therapist: 'Dr. Sarah Jenkins',
-                date: '2024-10-24',
+                date: getRelativeDate(0),
                 time: '10:00 AM',
                 status: 'approved',
                 type: 'Video Call'
@@ -63,7 +70,7 @@ function loadAdminState() {
                 price: 75,
                 duration: '30 min',
                 therapist: 'Mark Davies',
-                date: '2024-11-05',
+                date: getRelativeDate(5),
                 time: '02:30 PM',
                 status: 'approved',
                 type: 'In-Person'
@@ -77,7 +84,7 @@ function loadAdminState() {
                 price: 75,
                 duration: '30 min',
                 therapist: 'Dr. Eleanor Vance, RD',
-                date: '2024-10-15',
+                date: getRelativeDate(-2),
                 time: '02:00 PM',
                 status: 'approved',
                 type: 'Video Call'
@@ -91,7 +98,7 @@ function loadAdminState() {
                 price: 120,
                 duration: '45 min',
                 therapist: 'Dr. Sarah Jenkins',
-                date: '2024-10-15',
+                date: getRelativeDate(2),
                 time: '03:30 PM',
                 status: 'approved',
                 type: 'In-Person'
@@ -1088,17 +1095,32 @@ function renderAdminCalendar() {
     const monthGrid = document.getElementById('admin-calendar-month-grid');
     if (!monthGrid) return;
     
-    document.getElementById('admin-calendar-title').innerText = "October 2024";
+    const todayDate = new Date();
+    const curYear = todayDate.getFullYear();
+    const curMonth = todayDate.getMonth();
+    const curMonthName = todayDate.toLocaleString('default', { month: 'long' });
+    document.getElementById('admin-calendar-title').innerText = `${curMonthName} ${curYear}`;
+
+    // First day index of current month
+    const firstDayIndex = new Date(curYear, curMonth, 1).getDay();
+    const totalDays = new Date(curYear, curMonth + 1, 0).getDate();
+    const prevTotalDays = new Date(curYear, curMonth, 0).getDate();
 
     let gridHtml = '';
-    gridHtml += `<div class="p-2 border border-surface-variant/10 text-outline-variant/20 bg-surface-container-low/25 text-[10px]">29</div>`;
-    gridHtml += `<div class="p-2 border border-surface-variant/10 text-outline-variant/20 bg-surface-container-low/25 text-[10px]">30</div>`;
 
-    for (let day = 1; day <= 31; day++) {
-        const dateStr = `2024-10-${day.toString().padStart(2, '0')}`;
+    // Pad previous month days
+    for (let i = firstDayIndex - 1; i >= 0; i--) {
+        const prevDay = prevTotalDays - i;
+        gridHtml += `<div class="p-2 border border-surface-variant/10 text-outline-variant/20 bg-surface-container-low/25 text-[10px]">${prevDay}</div>`;
+    }
+
+    // Current month days
+    const todayDayNum = todayDate.getDate();
+    for (let day = 1; day <= totalDays; day++) {
+        const dateStr = `${curYear}-${(curMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
         const dayApts = state.appointments.filter(a => a.date === dateStr);
         let cellClass = 'p-2 border border-surface-variant/10 text-[10px] font-bold flex flex-col justify-between items-start ';
-        if (day === 15) {
+        if (day === todayDayNum) {
             cellClass += 'bg-[#006e2f]/5 ring-1 ring-primary';
         } else {
             cellClass += 'hover:bg-surface-container-low/20';
@@ -1112,14 +1134,18 @@ function renderAdminCalendar() {
 
         gridHtml += `
             <div class="${cellClass}">
-                <span class="${day === 15 ? 'text-primary' : 'text-on-surface-variant'}">${day}</span>
+                <span class="${day === todayDayNum ? 'text-primary' : 'text-on-surface-variant'}">${day}</span>
                 <div class="w-full overflow-hidden max-h-[70px]">${aptsHtml}</div>
             </div>
         `;
     }
 
-    gridHtml += `<div class="p-2 border border-surface-variant/10 text-outline-variant/20 bg-surface-container-low/25 text-[10px]">1</div>`;
-    gridHtml += `<div class="p-2 border border-surface-variant/10 text-outline-variant/20 bg-surface-container-low/25 text-[10px]">2</div>`;
+    // Pad next month days
+    const totalCellsUsed = firstDayIndex + totalDays;
+    const remainingCells = (7 - (totalCellsUsed % 7)) % 7;
+    for (let day = 1; day <= remainingCells; day++) {
+        gridHtml += `<div class="p-2 border border-surface-variant/10 text-outline-variant/20 bg-surface-container-low/25 text-[10px]">${day}</div>`;
+    }
 
     monthGrid.innerHTML = gridHtml;
 }
@@ -1155,7 +1181,10 @@ window.changeAdminCalendarMonth = function(dir) {
     showToast('Multi-month calendar paging disabled in this prototype.', 'info');
 };
 window.setAdminCalendarToday = function() {
-    showToast('Navigated to October 2024.', 'info');
+    const todayDate = new Date();
+    const curMonthName = todayDate.toLocaleString('default', { month: 'long' });
+    const curYear = todayDate.getFullYear();
+    showToast(`Navigated to ${curMonthName} ${curYear}.`, 'info');
 };
 
 // ==================== REPORTS ====================

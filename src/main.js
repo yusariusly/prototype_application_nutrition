@@ -187,6 +187,13 @@ function loadState() {
         localStorage.removeItem('nutriflow_last_logged_date');
     }
     
+    // Helper to get formatted relative date (YYYY-MM-DD)
+    const getRelativeDate = (offsetDays) => {
+        const d = new Date();
+        d.setDate(d.getDate() + offsetDays);
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    };
+
     // Appointments sync
     if (localStorage.getItem('nutriflow_appointments')) {
         state.appointments = JSON.parse(localStorage.getItem('nutriflow_appointments'));
@@ -202,7 +209,7 @@ function loadState() {
                 price: 150,
                 duration: '60 min',
                 therapist: 'Dr. Sarah Jenkins',
-                date: '2024-10-24',
+                date: getRelativeDate(0),
                 time: '10:00 AM',
                 status: 'approved',
                 type: 'Video Call'
@@ -216,7 +223,7 @@ function loadState() {
                 price: 75,
                 duration: '30 min',
                 therapist: 'Mark Davies',
-                date: '2024-11-05',
+                date: getRelativeDate(5),
                 time: '02:30 PM',
                 status: 'approved',
                 type: 'In-Person'
@@ -230,7 +237,7 @@ function loadState() {
                 price: 75,
                 duration: '30 min',
                 therapist: 'Dr. Eleanor Vance, RD',
-                date: '2024-10-15',
+                date: getRelativeDate(-2),
                 time: '02:00 PM',
                 status: 'approved',
                 type: 'Video Call'
@@ -244,7 +251,7 @@ function loadState() {
                 price: 120,
                 duration: '45 min',
                 therapist: 'Dr. Sarah Jenkins',
-                date: '2024-10-15',
+                date: getRelativeDate(2),
                 time: '03:30 PM',
                 status: 'approved',
                 type: 'In-Person'
@@ -1321,15 +1328,31 @@ function renderBookingStep2() {
     const grid = document.getElementById('booking-calendar-grid');
     if (!grid) return;
 
-    document.getElementById('calendar-month-year').innerText = "October 2024";
-    let daysHtml = '';
-    daysHtml += `<div class="p-3 text-center text-xs font-semibold text-outline-variant/30">29</div>`;
-    daysHtml += `<div class="p-3 text-center text-xs font-semibold text-outline-variant/30">30</div>`;
+    const todayDate = new Date();
+    const curYear = todayDate.getFullYear();
+    const curMonth = todayDate.getMonth();
+    const curMonthName = todayDate.toLocaleString('default', { month: 'long' });
+    document.getElementById('calendar-month-year').innerText = `${curMonthName} ${curYear}`;
     
-    for (let day = 1; day <= 31; day++) {
-        const dateStr = `2024-10-${day.toString().padStart(2, '0')}`;
+    // First day index of current month
+    const firstDayIndex = new Date(curYear, curMonth, 1).getDay();
+    const totalDays = new Date(curYear, curMonth + 1, 0).getDate();
+    const prevTotalDays = new Date(curYear, curMonth, 0).getDate();
+    
+    let daysHtml = '';
+    
+    // Pad previous month days
+    for (let i = firstDayIndex - 1; i >= 0; i--) {
+        const prevDay = prevTotalDays - i;
+        daysHtml += `<div class="p-3 text-center text-xs font-semibold text-outline-variant/30">${prevDay}</div>`;
+    }
+    
+    // Current month days
+    const todayDayNum = todayDate.getDate();
+    for (let day = 1; day <= totalDays; day++) {
+        const dateStr = `${curYear}-${(curMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
         const isSelected = state.bookingFlow.selectedDate === dateStr;
-        const isPast = day < 8;
+        const isPast = day < todayDayNum;
         
         let cellClass = 'p-3 text-center text-xs font-semibold rounded-lg cursor-pointer transition-all ';
         if (isSelected) {
@@ -1341,8 +1364,13 @@ function renderBookingStep2() {
         }
         daysHtml += `<div ${isPast ? '' : `onclick="selectBookingDate('${dateStr}')"`} class="${cellClass}">${day}</div>`;
     }
-    daysHtml += `<div class="p-3 text-center text-xs font-semibold text-outline-variant/30">1</div>`;
-    daysHtml += `<div class="p-3 text-center text-xs font-semibold text-outline-variant/30">2</div>`;
+    
+    // Pad next month days
+    const totalCellsUsed = firstDayIndex + totalDays;
+    const remainingCells = (7 - (totalCellsUsed % 7)) % 7;
+    for (let day = 1; day <= remainingCells; day++) {
+        daysHtml += `<div class="p-3 text-center text-xs font-semibold text-outline-variant/30">${day}</div>`;
+    }
     grid.innerHTML = daysHtml;
 
     const morningContainer = document.getElementById('booking-morning-slots');
