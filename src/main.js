@@ -753,7 +753,7 @@ function renderMealPlans() {
                     </div>
 
                     <div class="flex items-center justify-between border-t border-outline-variant/20 pt-2 mt-auto gap-2">
-                        <button onclick="viewRecipeDetails('${meal.title}', '${slotName}', '${meal.image || ''}', ${meal.calories}, ${meal.p}, ${meal.c}, ${meal.f}, \`${encodeURIComponent(meal.recipeSteps || '')}\`)" class="border border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold text-[10px] px-3.5 py-2.5 rounded-xl transition-all cursor-pointer w-full justify-center">View Recipe</button>
+                        <button onclick="viewRecipeDetails('${meal.title}', '${slotName}', '${meal.image || ''}', ${meal.calories}, ${meal.p}, ${meal.c}, ${meal.f}, \`${encodeURIComponent(meal.recipeSteps || '')}\`, \`${encodeURIComponent(meal.recipeIngredients || '')}\`)" class="border border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold text-[10px] px-3.5 py-2.5 rounded-xl transition-all cursor-pointer w-full justify-center">View Recipe</button>
                         <button onclick="toggleLogMeal('${state.selectedDay}', '${slotName}')" class="${btnClass}">
                             <span class="material-symbols-outlined text-[14px]">${btnIcon}</span> ${btnLabel}
                         </button>
@@ -985,7 +985,7 @@ window.logScannedMeal = function() {
     updateKcalDisplay();
 };
 
-window.viewRecipeDetails = function(title, type, image, kcal, p, c, fat, customRecipeStepsEncoded) {
+window.viewRecipeDetails = function(title, type, image, kcal, p, c, fat, customRecipeStepsEncoded, customRecipeIngredientsEncoded) {
     const modal = document.getElementById('recipe-modal');
     if (!modal) return;
     
@@ -1006,11 +1006,28 @@ window.viewRecipeDetails = function(title, type, image, kcal, p, c, fat, customR
         }
     }
 
+    let customRecipeIngredients = '';
+    if (customRecipeIngredientsEncoded) {
+        try {
+            customRecipeIngredients = decodeURIComponent(customRecipeIngredientsEncoded);
+        } catch (e) {
+            customRecipeIngredients = customRecipeIngredientsEncoded;
+        }
+    }
+
     const instructions = customRecipeSteps || (RECIPES_DB[title] ? RECIPES_DB[title].instructions : 'Combine ingredients. Prepare as directed by practitioner.');
-    const ingredients = RECIPES_DB[title] ? RECIPES_DB[title].ingredients : ['Portion as recommended by dietitian'];
+    
+    let ingredientsHTML = '';
+    if (customRecipeIngredients) {
+        const list = customRecipeIngredients.split('\n').map(item => item.trim()).filter(Boolean);
+        ingredientsHTML = list.map(ing => `<li>${ing}</li>`).join('');
+    } else {
+        const ingredients = RECIPES_DB[title] ? RECIPES_DB[title].ingredients : ['Portion as recommended by dietitian'];
+        ingredientsHTML = ingredients.map(ing => `<li>${ing}</li>`).join('');
+    }
 
     document.getElementById('modal-recipe-instructions').innerText = instructions;
-    document.getElementById('modal-recipe-ingredients').innerHTML = ingredients.map(ing => `<li>${ing}</li>`).join('');
+    document.getElementById('modal-recipe-ingredients').innerHTML = ingredientsHTML;
 
     modal.classList.remove('hidden');
     modal.classList.add('flex');

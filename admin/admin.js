@@ -10,12 +10,12 @@ const state = {
         { name: 'Elena Lopez', email: 'elena.l@email.com', goal: 'Maintenance', lastCheckIn: 'Yesterday', compliance: 95, weightTrend: [142, 142, 141, 142, 142, 142], avatar: 'EL', therapist: 'Dr. Amanda' }
     ],
     foodLibrary: [
-        { id: 'f-1', title: 'Avocado Egg Toast', type: 'Recipes', calories: 320, p: 14, c: 22, f: 18, image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=200', favorite: true, recipeSteps: "1. Toast 2 slices of whole wheat bread.\n2. Mash 1 avocado with lemon juice, salt, and pepper.\n3. Fry 2 eggs to your liking.\n4. Spread avocado on toast and top with eggs. Serve warm." },
-        { id: 'f-2', title: 'Grilled Chicken Salad', type: 'Recipes', calories: 450, p: 45, c: 12, f: 20, image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200', favorite: true, recipeSteps: "1. Season chicken breast with olive oil, salt, garlic powder, and pepper.\n2. Grill or pan-fry chicken breast for 6 mins per side.\n3. Chop romaine lettuce, cherry tomatoes, and cucumbers.\n4. Slice chicken and place on salad greens. Drizzle with light olive oil dressing." },
-        { id: 'f-3', title: 'Greek Yogurt Bowl', type: 'Recipes', calories: 250, p: 20, c: 30, f: 5, image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=200', favorite: true, recipeSteps: "1. Scoop Greek yogurt into a bowl.\n2. Top with mixed fresh berries (strawberries, blueberries).\n3. Sprinkle chia seeds and drizzle 1 tsp honey on top." },
-        { id: 'f-4', title: 'Baked Salmon & Quinoa', type: 'Recipes', calories: 520, p: 38, c: 45, f: 22, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=200', favorite: true, recipeSteps: "1. Pre-heat oven to 400°F (200°C).\n2. Place salmon fillet on a baking sheet, drizzle with olive oil and squeeze fresh lemon.\n3. Bake for 12-15 minutes.\n4. Serve alongside cooked quinoa and steamed asparagus." },
-        { id: 'f-5', title: 'Fresh Apple & Almonds', type: 'Raw Foods', calories: 150, p: 4, c: 18, f: 9, image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=200', favorite: false, recipeSteps: "Serve fresh apple sliced with raw almonds." },
-        { id: 'f-6', title: 'Mixed Raw Berries', type: 'Raw Foods', calories: 85, p: 1, c: 21, f: 0.5, image: 'https://images.unsplash.com/photo-1518635017498-87f514b751ba?w=200', favorite: false, recipeSteps: "Rinse berries and serve in a small bowl." }
+        { id: 'f-1', title: 'Avocado Egg Toast', type: 'Recipes', calories: 320, p: 14, c: 22, f: 18, image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=200', favorite: true, recipeIngredients: "2 slices whole wheat bread\n1 ripe avocado\n2 large eggs\n1 tsp lemon juice\nPinch of salt and black pepper", recipeSteps: "1. Toast 2 slices of whole wheat bread.\n2. Mash 1 avocado with lemon juice, salt, and pepper.\n3. Fry 2 eggs to your liking.\n4. Spread avocado on toast and top with eggs. Serve warm." },
+        { id: 'f-2', title: 'Grilled Chicken Salad', type: 'Recipes', calories: 450, p: 45, c: 12, f: 20, image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200', favorite: true, recipeIngredients: "150g chicken breast\n2 cups chopped romaine lettuce\n1/2 cup cherry tomatoes halved\n1/2 cucumber sliced\n1 tbsp olive oil dressing", recipeSteps: "1. Season chicken breast with olive oil, salt, garlic powder, and pepper.\n2. Grill or pan-fry chicken breast for 6 mins per side.\n3. Chop romaine lettuce, cherry tomatoes, and cucumbers.\n4. Slice chicken and place on salad greens. Drizzle with light olive oil dressing." },
+        { id: 'f-3', title: 'Greek Yogurt Bowl', type: 'Recipes', calories: 250, p: 20, c: 30, f: 5, image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=200', favorite: true, recipeIngredients: "1 cup plain Greek yogurt\n1/2 cup fresh mixed berries\n1 tbsp chia seeds\n1 tsp honey", recipeSteps: "1. Scoop Greek yogurt into a bowl.\n2. Top with mixed fresh berries (strawberries, blueberries).\n3. Sprinkle chia seeds and drizzle 1 tsp honey on top." },
+        { id: 'f-4', title: 'Baked Salmon & Quinoa', type: 'Recipes', calories: 520, p: 38, c: 45, f: 22, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=200', favorite: true, recipeIngredients: "150g salmon fillet\n1/2 cup cooked quinoa\n8-10 stalks of fresh asparagus\n1 tbsp lemon juice\n1 tsp olive oil", recipeSteps: "1. Pre-heat oven to 400°F (200°C).\n2. Place salmon fillet on a baking sheet, drizzle with olive oil and squeeze fresh lemon.\n3. Bake for 12-15 minutes.\n4. Serve alongside cooked quinoa and steamed asparagus." },
+        { id: 'f-5', title: 'Fresh Apple & Almonds', type: 'Raw Foods', calories: 150, p: 4, c: 18, f: 9, image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=200', favorite: false, recipeIngredients: "1 medium apple\n12 raw almonds", recipeSteps: "Serve fresh apple sliced with raw almonds." },
+        { id: 'f-6', title: 'Mixed Raw Berries', type: 'Raw Foods', calories: 85, p: 1, c: 21, f: 0.5, image: 'https://images.unsplash.com/photo-1518635017498-87f514b751ba?w=200', favorite: false, recipeIngredients: "1/2 cup fresh strawberries\n1/4 cup blueberries\n1/4 cup raspberries", recipeSteps: "Rinse berries and serve in a small bowl." }
     ],
     clientMealPlans: {},
     selectedMealBuilderClient: 'Sarah Jenkins',
@@ -933,6 +933,7 @@ window.assignFoodToSlot = function(foodId) {
         c: food.c,
         f: food.f,
         image: food.image,
+        recipeIngredients: food.recipeIngredients || '',
         recipeSteps: food.recipeSteps || ''
     });
     
@@ -978,6 +979,7 @@ window.handleCellDrop = function(event, day, mealType) {
         c: food.c,
         f: food.f,
         image: food.image,
+        recipeIngredients: food.recipeIngredients || '',
         recipeSteps: food.recipeSteps || ''
     });
 
@@ -1006,6 +1008,7 @@ window.handleAddFoodSubmit = function(e) {
     const c = parseInt(document.getElementById('food-carb').value) || 0;
     const f = parseInt(document.getElementById('food-fat').value) || 0;
     const imgUrl = document.getElementById('food-image-url').value.trim() || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200';
+    const recipeIngredients = document.getElementById('food-recipe-ingredients').value.trim();
     const recipeSteps = document.getElementById('food-recipe-steps').value.trim();
 
     const newFood = {
@@ -1018,6 +1021,7 @@ window.handleAddFoodSubmit = function(e) {
         f: f,
         image: imgUrl,
         favorite: false,
+        recipeIngredients: recipeIngredients,
         recipeSteps: recipeSteps
     };
 
@@ -1034,6 +1038,7 @@ window.handleAddFoodSubmit = function(e) {
     document.getElementById('food-carb').value = '';
     document.getElementById('food-fat').value = '';
     document.getElementById('food-image-url').value = '';
+    document.getElementById('food-recipe-ingredients').value = '';
     document.getElementById('food-recipe-steps').value = '';
 };
 
