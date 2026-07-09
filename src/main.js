@@ -140,6 +140,32 @@ function loadState() {
     if (localStorage.getItem('nutriflow_measurements_history')) {
         state.profileStats.bodyMeasurements = JSON.parse(localStorage.getItem('nutriflow_measurements_history'));
     }
+
+    if (localStorage.getItem('nutriflow_logged_status')) {
+        state.loggedStatus = JSON.parse(localStorage.getItem('nutriflow_logged_status'));
+    } else {
+        state.loggedStatus = {
+            'Sarah Jenkins': {
+                'Wed': {
+                    'Breakfast': true,
+                    'Lunch': true,
+                    'Snack': true
+                }
+            },
+            'Marcus Reid': {
+                'Wed': {
+                    'Breakfast': true,
+                    'Lunch': true
+                }
+            },
+            'Elena Lopez': {
+                'Wed': {
+                    'Breakfast': true
+                }
+            }
+        };
+        localStorage.setItem('nutriflow_logged_status', JSON.stringify(state.loggedStatus));
+    }
     
     // Automatically purge previous spam entries from history
     if (state.profileStats.weightHistory.length > 6 || state.profileStats.bodyMeasurements.length > 3) {
@@ -298,6 +324,7 @@ function saveState() {
     localStorage.setItem('nutriflow_weight_history', JSON.stringify(state.profileStats.weightHistory));
     localStorage.setItem('nutriflow_measurements_history', JSON.stringify(state.profileStats.bodyMeasurements));
     localStorage.setItem('nutriflow_appointments', JSON.stringify(state.appointments));
+    localStorage.setItem('nutriflow_logged_status', JSON.stringify(state.loggedStatus));
 }
 
 function checkClientSession() {
@@ -450,52 +477,74 @@ function renderDashboardMeals() {
     if (!grid) return;
     
     const today = 'Wed';
-    const clientPlan = state.clientMealPlans[localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins'][today] || [];
+    const clientName = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const clientPlan = state.clientMealPlans[clientName][today] || [];
     const slots = ['Breakfast', 'Lunch', 'Snack', 'Dinner'];
     
     grid.innerHTML = slots.map(slotName => {
         const meal = clientPlan.find(m => m.type.toLowerCase() === slotName.toLowerCase());
+        const isLogged = state.loggedStatus[clientName]?.[today]?.[slotName] === true;
         
-        if (!meal) {
-            return `
-                <div onclick="openAIScannerForSlot('${slotName}')" class="bg-surface border border-dashed border-outline-variant/30 hover:border-primary/60 rounded-2xl p-6 flex flex-col justify-center items-center min-h-[160px] shadow-sm cursor-pointer hover:bg-primary/5 transition-all group relative">
-                    <div class="flex flex-col items-center gap-1.5 text-on-surface-variant text-center pointer-events-none">
-                        <span class="material-symbols-outlined text-3xl text-outline-variant/60 group-hover:text-primary group-hover:scale-110 transition-transform">add_a_photo</span>
-                        <span class="font-bold text-xs text-on-background">${slotName}</span>
-                        <span class="text-[10px] text-on-surface-variant/70">Tap to scan and log with AI</span>
+        if (meal && isLogged) {
+            const totalMacros = (meal.p || 0) + (meal.c || 0) + (meal.f || 0) || 1;
+            const pPct = ((meal.p || 0) / totalMacros) * 100;
+            const cPct = ((meal.c || 0) / totalMacros) * 100;
+            const fPct = ((meal.f || 0) / totalMacros) * 100;
+
+            if (meal.image) {
+                return `
+                    <div class="bg-white border border-outline-variant/35 rounded-2xl overflow-hidden flex flex-col shadow-sm relative group">
+                        <button onclick="toggleLogMeal('${today}', '${slotName}')" class="absolute top-2.5 right-2.5 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 border border-outline-variant/35 shadow-md flex items-center justify-center cursor-pointer z-30 transition-transform active:scale-90" title="Unlog food">
+                            <span class="material-symbols-outlined text-[10px] font-bold">close</span>
+                        </button>
+                        <div class="h-28 w-full relative">
+                            <img class="w-full h-full object-cover" src="${meal.image}" alt="${meal.title}">
+                            <span class="absolute top-2.5 left-2.5 bg-white text-slate-700 font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider">${slotName}</span>
+                        </div>
+                        <div class="p-3 flex flex-col gap-2">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-xs text-slate-800 line-clamp-1">${meal.title}</span>
+                                <span class="text-xs font-bold text-slate-500 shrink-0">${meal.calories} kcal</span>
+                            </div>
+                            <div class="w-full h-1.5 rounded-full overflow-hidden flex bg-slate-100">
+                                <div class="bg-[#006e2f]" style="width: ${cPct}%"></div>
+                                <div class="bg-[#006a61]" style="width: ${pPct}%"></div>
+                                <div class="bg-[#9d4300]" style="width: ${fPct}%"></div>
+                            </div>
+                            <div class="flex justify-between text-[9px] text-slate-400 font-bold">
+                                <span>${meal.c || 0}G C</span>
+                                <span>${meal.p || 0}G P</span>
+                                <span>${meal.f || 0}G F</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            } else {
+                return `
+                    <div class="bg-white border border-outline-variant/35 rounded-2xl p-4 flex justify-between items-center shadow-sm relative group min-h-[90px]">
+                        <button onclick="toggleLogMeal('${today}', '${slotName}')" class="absolute top-2.5 right-2.5 bg-red-600 hover:bg-red-700 text-white rounded-full p-0.5 border border-outline-variant/35 shadow-md flex items-center justify-center cursor-pointer z-30 transition-transform active:scale-90" title="Unlog food">
+                            <span class="material-symbols-outlined text-[9px] font-bold">close</span>
+                        </button>
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-[#f0fdf4] text-[#006e2f] flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-lg">eco</span>
+                            </div>
+                            <div>
+                                <span class="block text-[9px] uppercase tracking-wider text-slate-400 font-bold">${slotName}</span>
+                                <span class="font-bold text-xs text-slate-800 line-clamp-1">${meal.title}</span>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-slate-500 shrink-0 pr-4">${meal.calories} kcal</span>
+                    </div>
+                `;
+            }
         }
         
         return `
-            <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-sm overflow-hidden flex flex-col relative group">
-                <!-- Delete Button directly on dashboard card -->
-                <button onclick="removeMealFromSlot('${today}', '${slotName}')" class="absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 border border-outline-variant/35 shadow-md flex items-center justify-center cursor-pointer z-30 transition-transform active:scale-90" title="Remove food">
-                    <span class="material-symbols-outlined text-[12px] font-bold">close</span>
-                </button>
-
-                <div class="h-32 bg-surface-variant relative overflow-hidden">
-                    ${meal.image ? `<img class="w-full h-full object-cover" src="${meal.image}" alt="${meal.title}">` : `
-                        <div class="w-full h-full bg-primary/10 flex items-center justify-center text-primary">
-                            <span class="material-symbols-outlined text-4xl">restaurant</span>
-                        </div>
-                    `}
-                    <div class="absolute top-3 left-3 bg-[#e5eeff] text-[#006a61] border border-[#86f2e4]/35 px-2 py-1 rounded text-[10px] font-bold shadow-sm uppercase tracking-wider">${slotName}</div>
-                </div>
-                <div class="p-4 flex flex-col flex-grow">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <h3 class="font-bold text-on-background text-sm leading-tight flex items-center gap-1">
-                                ${meal.title} 
-                                <span class="material-symbols-outlined text-primary text-[16px] fill-1" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-                            </h3>
-                            <span class="text-[9px] text-[#006e2f] font-bold">Logged with AI</span>
-                        </div>
-                        <span class="font-bold text-on-surface-variant text-xs">${meal.calories} kcal</span>
-                    </div>
-                </div>
-            </div>
+            <button onclick="toggleLogMeal('${today}', '${slotName}')" class="bg-white border-2 border-dashed border-slate-200 hover:border-primary hover:bg-primary/5 rounded-2xl p-6 flex flex-row justify-center items-center gap-2 min-h-[90px] w-full cursor-pointer transition-all hover:scale-[1.01] active:scale-95 group">
+                <span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">add_circle</span>
+                <span class="font-bold text-xs text-slate-500 group-hover:text-primary transition-colors">Log ${slotName}</span>
+            </button>
         `;
     }).join('');
 }
@@ -548,20 +597,24 @@ function renderMealPlans() {
         return `<button onclick="selectMealDay('${d}')" class="${btnClass}">${d}${isToday ? ' (Today)' : ''}</button>`;
     }).join('');
 
-    const clientPlan = state.clientMealPlans[localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins'][state.selectedDay] || [];
+    const clientName = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const clientPlan = state.clientMealPlans[clientName][state.selectedDay] || [];
     let currentKcal = 0;
     let currentP = 0;
     let currentC = 0;
     let currentF = 0;
     
     clientPlan.forEach(m => {
-        currentKcal += m.calories;
-        currentP += m.p;
-        currentC += m.c;
-        currentF += m.f;
+        const isLogged = state.loggedStatus[clientName]?.[state.selectedDay]?.[m.type] === true;
+        if (isLogged) {
+            currentKcal += m.calories;
+            currentP += m.p;
+            currentC += m.c;
+            currentF += m.f;
+        }
     });
 
-    let targetCal = parseInt(localStorage.getItem('nutriflow_client_calories_target')) || 2100;
+    let targetCal = parseInt(localStorage.getItem('nutriflow_target_kcal_' + clientName)) || 2100;
     let targetPro = parseInt(localStorage.getItem('nutriflow_client_protein_target')) || 150;
     let targetCarb = parseInt(localStorage.getItem('nutriflow_client_carbs_target')) || 250;
     let targetFat = parseInt(localStorage.getItem('nutriflow_client_fats_target')) || 65;
@@ -587,26 +640,26 @@ function renderMealPlans() {
     container.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-gutter w-full';
     container.innerHTML = slots.map(slotName => {
         const meal = clientPlan.find(m => m.type.toLowerCase() === slotName.toLowerCase());
+        const isLogged = state.loggedStatus[clientName]?.[state.selectedDay]?.[slotName] === true;
         
         if (!meal) {
             return `
-                <div onclick="openAIScannerForSlot('${slotName}')" class="bg-surface border-2 border-dashed border-outline-variant/30 hover:border-primary/60 rounded-2xl p-6 flex flex-col justify-center items-center min-h-[220px] shadow-sm cursor-pointer hover:bg-primary/5 transition-all group">
-                    <div class="flex flex-col items-center gap-2 text-on-surface-variant text-center pointer-events-none">
-                        <span class="material-symbols-outlined text-4xl text-outline-variant/60 group-hover:text-primary group-hover:scale-110 transition-transform">add_a_photo</span>
-                        <span class="font-bold text-sm text-on-background">${slotName}</span>
-                        <span class="text-xs text-on-surface-variant/70">Tap to scan with AI</span>
-                    </div>
+                <div class="bg-surface border-2 border-dashed border-outline-variant/30 rounded-2xl p-6 flex flex-col justify-center items-center min-h-[220px] shadow-sm">
+                    <span class="material-symbols-outlined text-4xl text-outline-variant/60">restaurant_menu</span>
+                    <span class="font-bold text-sm text-slate-500 mt-2">${slotName}</span>
+                    <span class="text-xs text-slate-400">No meal planned</span>
                 </div>
             `;
         }
         
+        const btnLabel = isLogged ? 'Logged' : 'Log Meal';
+        const btnIcon = isLogged ? 'check_circle' : 'radio_button_unchecked';
+        const btnClass = isLogged 
+            ? 'bg-primary hover:bg-[#005321] text-white font-bold text-[10px] px-3.5 py-2.5 rounded-xl flex items-center gap-1 cursor-pointer transition-all active:scale-95 w-full justify-center'
+            : 'bg-primary/10 hover:bg-primary/20 text-primary font-bold text-[10px] px-3.5 py-2.5 rounded-xl flex items-center gap-1 cursor-pointer transition-all active:scale-95 w-full justify-center';
+
         return `
             <div class="service-card glass-card rounded-2xl overflow-hidden flex flex-col h-full bg-white relative group w-full shadow-sm">
-                <!-- Delete Button -->
-                <button onclick="removeMealFromSlot('${state.selectedDay}', '${slotName}')" class="absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 border border-outline-variant/35 shadow-md flex items-center justify-center cursor-pointer z-30 transition-transform active:scale-90" title="Remove food">
-                    <span class="material-symbols-outlined text-[14px] font-bold">close</span>
-                </button>
-
                 <div class="h-36 w-full relative">
                     ${meal.image ? `<img class="w-full h-full object-cover" src="${meal.image}" alt="${meal.title}">` : `
                         <div class="w-full h-full bg-primary/10 flex items-center justify-center text-primary">
@@ -617,25 +670,44 @@ function renderMealPlans() {
                     <span class="absolute top-3 left-3 bg-[#e5eeff] text-[#006a61] border border-[#86f2e4]/35 font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider">${slotName}</span>
                 </div>
                 <div class="p-4 flex flex-col flex-grow">
-                    <h3 class="font-bold text-on-surface text-base mb-1 leading-tight group-hover:text-primary transition-colors-test">${meal.title}</h3>
-                    <p class="text-[11px] text-on-surface-variant flex-grow line-clamp-2 mb-3 mt-1 leading-normal">Logged via AI Scanner. Nutrient amounts calculated dynamically.</p>
+                    <h3 class="font-bold text-on-surface text-base mb-1 leading-tight">${meal.title}</h3>
+                    <p class="text-[11px] text-on-surface-variant flex-grow line-clamp-2 mb-3 mt-1 leading-normal">Plan designed by your nutritionist pendamping.</p>
                     
-                    <div class="grid grid-cols-4 gap-1 text-center bg-surface-container-low p-1.5 rounded-lg border border-surface-variant/35 text-[9px] font-bold text-on-surface-variant/90 mb-3">
+                    <div class="grid grid-cols-4 gap-1 text-center bg-slate-50 p-1.5 rounded-lg border border-slate-200 text-[9px] font-bold text-on-surface-variant/90 mb-3">
                         <div><span class="block text-on-background">${meal.calories}</span>KCAL</div>
                         <div><span class="block text-on-background">${meal.p}g</span>PRO</div>
                         <div><span class="block text-on-background">${meal.c}g</span>CARB</div>
                         <div><span class="block text-on-background">${meal.f}g</span>FAT</div>
                     </div>
 
-                    <div class="flex items-center justify-between border-t border-outline-variant/20 pt-2 mt-auto">
-                        <button onclick="viewRecipeDetails('${meal.title}', '${slotName}', '${meal.image}', ${meal.calories}, ${meal.p}, ${meal.c}, ${meal.f})" class="text-[10px] text-[#006a61] font-bold hover:underline">Recipe</button>
-                        <span class="text-[#006e2f] font-bold text-[9px] flex items-center gap-0.5"><span class="material-symbols-outlined text-[10px] font-bold">check_circle</span> Logged</span>
+                    <div class="flex items-center justify-between border-t border-outline-variant/20 pt-2 mt-auto gap-2">
+                        <button onclick="viewRecipeDetails('${meal.title}', '${slotName}', '${meal.image}', ${meal.calories}, ${meal.p}, ${meal.c}, ${meal.f})" class="border border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold text-[10px] px-3.5 py-2.5 rounded-xl transition-all cursor-pointer w-full justify-center">View Recipe</button>
+                        <button onclick="toggleLogMeal('${state.selectedDay}', '${slotName}')" class="${btnClass}">
+                            <span class="material-symbols-outlined text-[14px]">${btnIcon}</span> ${btnLabel}
+                        </button>
                     </div>
                 </div>
             </div>
         `;
     }).join('');
 }
+
+window.toggleLogMeal = function(day, slotName) {
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    state.loggedStatus[activeClient] = state.loggedStatus[activeClient] || {};
+    state.loggedStatus[activeClient][day] = state.loggedStatus[activeClient][day] || {};
+
+    const isCurrentlyLogged = state.loggedStatus[activeClient][day][slotName] === true;
+    state.loggedStatus[activeClient][day][slotName] = !isCurrentlyLogged;
+
+    localStorage.setItem('nutriflow_logged_status', JSON.stringify(state.loggedStatus));
+
+    renderMealPlans();
+    renderDashboardMeals();
+    updateKcalDisplay();
+    
+    showToast(isCurrentlyLogged ? `Removed ${slotName} log.` : `Logged ${slotName} successfully!`, 'success');
+};
 
 window.selectMealDay = function(day) {
     state.selectedDay = day;
