@@ -1364,3 +1364,79 @@ window.saveMealComment = function() {
     closeEditCommentModal();
 };
 
+window.shareClientPreviewLink = function() {
+    const client = state.selectedMealBuilderClient;
+    const specialist = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
+    
+    const origin = window.location.origin;
+    let clientUrl = origin;
+    if (clientUrl.endsWith('/admin') || clientUrl.endsWith('/admin/')) {
+        clientUrl = clientUrl.replace(/\/admin\/?$/, '');
+    }
+    const previewUrl = `${clientUrl}/index.html?client=${encodeURIComponent(client)}&preview=true`;
+    
+    const urlInput = document.getElementById('share-preview-url-input');
+    if (urlInput) urlInput.value = previewUrl;
+    
+    const subjectEl = document.getElementById('share-email-subject');
+    if (subjectEl) subjectEl.innerText = `Your Personalized Nutrition Program from ${specialist}`;
+    
+    const salutationEl = document.getElementById('share-email-body-salutation');
+    if (salutationEl) salutationEl.innerText = `Hi ${client},`;
+    
+    const doctorNameEl = document.getElementById('share-email-doctor-name');
+    if (doctorNameEl) doctorNameEl.innerText = specialist;
+    
+    const modal = document.getElementById('share-preview-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+};
+
+window.closeSharePreviewModal = function() {
+    const modal = document.getElementById('share-preview-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+window.copySharePreviewLink = function() {
+    const urlInput = document.getElementById('share-preview-url-input');
+    if (urlInput) {
+        urlInput.select();
+        navigator.clipboard.writeText(urlInput.value).then(() => {
+            showToast('Preview link copied to clipboard!', 'success');
+        }).catch(() => {
+            showToast('Failed to copy link. Please select and copy manually.', 'error');
+        });
+    }
+};
+
+window.copyInvitationEmailText = function() {
+    const client = state.selectedMealBuilderClient;
+    const specialist = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
+    const previewUrl = document.getElementById('share-preview-url-input')?.value || '';
+    
+    const emailBody = `Subject: Your Personalized Nutrition Program from ${specialist}
+
+Hi ${client},
+
+I have prepared your personalized nutrition program for this week to help you hit your daily goals.
+
+You can view your custom weekly plan directly on our client portal without needing to register first:
+${previewUrl}
+
+After reviewing the menu, simply click the "Register" button to start logging your meals and message me directly.
+
+Best regards,
+${specialist}`;
+
+    navigator.clipboard.writeText(emailBody).then(() => {
+        showToast('Email body copied to clipboard!', 'success');
+    }).catch(() => {
+        showToast('Failed to copy email body.', 'error');
+    });
+};
+
