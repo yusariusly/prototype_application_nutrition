@@ -354,6 +354,17 @@ function saveState() {
 }
 
 function checkClientSession() {
+    // Check URL parameters for Guest Preview Mode
+    const urlParams = new URLSearchParams(window.location.search);
+    const guestParam = urlParams.get('client');
+    const isPreview = urlParams.get('preview') === 'true';
+    if (guestParam && isPreview) {
+        state.isGuestPreview = true;
+        localStorage.setItem('nutriflow_client_logged_name', guestParam);
+        return; // Bypass check!
+    }
+
+    state.isGuestPreview = false;
     if (localStorage.getItem('nutriflow_client_logged') !== 'true') {
         window.location.href = './login.html';
     }
@@ -404,7 +415,40 @@ document.addEventListener('DOMContentLoaded', () => {
         avatarEl.innerText = therapistName.split(' ').map(s => s[0]).join('').substring(0, 2).toUpperCase();
     }
     
-    navigateTo('dashboard');
+    if (state.isGuestPreview) {
+        navigateTo('meal-plans');
+        
+        // Hide standard navbar links
+        const linksCont = document.getElementById('nav-links-container');
+        if (linksCont) {
+            linksCont.style.display = 'none';
+            linksCont.classList.add('hidden');
+        }
+        
+        // Show Register button on header
+        const rightCont = document.getElementById('nav-right-container');
+        if (rightCont) {
+            rightCont.innerHTML = `
+                <button onclick="openRegistrationModal()" class="bg-[#86f2e4] hover:bg-[#6be0d2] text-slate-800 font-extrabold text-[10px] uppercase tracking-wider px-4 py-2 rounded-xl transition-all cursor-pointer shadow-md">
+                    Register
+                </button>
+            `;
+        }
+
+        // Show floating guest banner
+        const banner = document.getElementById('guest-preview-banner');
+        if (banner) {
+            banner.classList.remove('hidden');
+            banner.classList.add('flex');
+            
+            const spNameSpan = document.getElementById('guest-specialist-name');
+            if (spNameSpan) {
+                spNameSpan.innerText = therapistName;
+            }
+        }
+    } else {
+        navigateTo('dashboard');
+    }
     renderWaterTracker();
 });
 
@@ -442,6 +486,10 @@ window.showToast = function(message, type = 'success') {
 
 // ==================== ROUTER ====================
 window.navigateTo = function(viewId) {
+    if (state.isGuestPreview && viewId !== 'meal-plans') {
+        openRegistrationModal();
+        return;
+    }
     state.activeView = viewId;
     
     document.querySelectorAll('.view-section').forEach(sec => sec.classList.add('hidden'));
@@ -754,7 +802,7 @@ function renderMealPlans() {
 
                     <div class="flex items-center justify-between border-t border-outline-variant/20 pt-2 mt-auto gap-2">
                         <button onclick="viewRecipeDetails('${meal.title}', '${slotName}', '${meal.image || ''}', ${meal.calories}, ${meal.p}, ${meal.c}, ${meal.f}, \`${encodeURIComponent(meal.recipeSteps || '')}\`, \`${encodeURIComponent(meal.recipeIngredients || '')}\`, \`${encodeURIComponent(meal.comment || '')}\`)" class="border border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold text-[10px] px-3.5 py-2.5 rounded-xl transition-all cursor-pointer w-full justify-center">View Recipe</button>
-                        <button onclick="toggleLogMeal('${state.selectedDay}', '${slotName}')" class="${btnClass}">
+                        <button onclick="${state.isGuestPreview ? 'openRegistrationModal()' : `toggleLogMeal('${state.selectedDay}', '${slotName}')`}" class="${btnClass}">
                             <span class="material-symbols-outlined text-[14px]">${btnIcon}</span> ${btnLabel}
                         </button>
                     </div>
@@ -1696,4 +1744,96 @@ window.handleStatsLogSubmit = function(e) {
     
     initProfileCharts();
     showToast('Saved health stats entry successfully!', 'success');
+};
+
+window.openRegistrationModal = function() {
+    const modal = document.getElementById('registration-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+    const nameInput = document.getElementById('reg-name');
+    if (nameInput) {
+        nameInput.value = localStorage.getItem('nutriflow_client_logged_name') || 'Elena Lopez';
+    }
+};
+
+window.closeRegistrationModal = function() {
+    const modal = document.getElementById('registration-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+window.handleRegistrationSubmit = function(e) {
+    e.preventDefault();
+    
+    const clientName = document.getElementById('reg-name').value;
+    const email = document.getElementById('reg-email').value;
+    const password = document.getElementById('reg-password').value;
+    
+    // Register the client in state.clients and write to LocalStorage
+    let clients = JSON.parse(localStorage.getItem('nutriflow_clients')) || [
+        { name: 'Sarah Jenkins', therapist: 'Dr. Hasan' },
+        { name: 'Marcus Reid', therapist: 'Dr. Hasan' },
+        { name: 'Elena Lopez', therapist: 'Dr. Amanda' }
+    ];
+    
+    // Find or create the client record
+    let clientObj = clients.find(c => c.name.toLowerCase() === clientName.toLowerCase());
+    if (clientObj) {
+        clientObj.registered = true;
+        clientObj.email = email;
+        clientObj.password = password; // simulated
+    } else {
+        clientObj = { name: clientName, therapist: 'Dr. Hasan', registered: true, email, password };
+        clients.push(clientObj);
+    }
+    
+    localStorage.setItem('nutriflow_clients', JSON.stringify(clients));
+    localStorage.setItem('nutriflow_client_logged', 'true');
+    localStorage.setItem('nutriflow_client_logged_name', clientName);
+    
+    // Exit guest mode
+    state.isGuestPreview = false;
+    
+    // Restore navigation headers
+    const linksCont = document.getElementById('nav-links-container');
+    if (linksCont) {
+        linksCont.style.display = 'flex';
+        linksCont.classList.remove('hidden');
+    }
+    
+    // Restore right container with default profile / notifications / logout buttons
+    const rightCont = document.getElementById('nav-right-container');
+    if (rightCont) {
+        rightCont.innerHTML = `
+            <button onclick="showClientNotifications()" class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-full transition-colors active:scale-95">
+                <span class="material-symbols-outlined">notifications</span>
+            </button>
+            <div class="w-9 h-9 rounded-full overflow-hidden border border-outline-variant/30 shrink-0">
+                <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACuxsdo8Z-Nl17WpH629BzA84HKeMAyR84ojL8M6_ChXIeE9bfCQBqPmwchAEQCT5lb5-2KDHD93QDQg2UUdEQJkacYZlIHcwjcLYGeVjP7qLy_IRIllE38Uzqf1QNJbaoVbJfU2d1xOmwzdumNrQrQWfgE1Jg6plIvgmlVhhKJnXCrpg0WjqXVw9AETngufeSZQaB8jSUc6wuYHyns96XH7QXmKMQDUc4xTIRPxACmKNRWwizJIHaSw" alt="Profile">
+            </div>
+            <button onclick="handleClientSignOut()" class="border border-[#ba1a1a]/30 hover:bg-red-55 text-[#ba1a1a] px-3 py-1.5 rounded-full font-bold text-xs transition-all flex items-center gap-1 cursor-pointer">
+                <span class="material-symbols-outlined text-[16px]">logout</span> Log Out
+            </button>
+        `;
+    }
+    
+    // Hide guest banner
+    const banner = document.getElementById('guest-preview-banner');
+    if (banner) {
+        banner.classList.add('hidden');
+        banner.classList.remove('flex');
+    }
+    
+    closeRegistrationModal();
+    
+    // Reload components so log buttons are active and navigate to dashboard
+    renderMealPlans();
+    renderDashboardMeals();
+    navigateTo('dashboard');
+    
+    showToast(`Welcome ${clientName.split(' ')[0]}! Your tracking account is now active.`, 'success');
 };
