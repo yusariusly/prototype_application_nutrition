@@ -517,10 +517,6 @@ function renderDashboardMeals() {
         if (meal.image) {
             return `
                 <div onclick="navigateTo('meal-plans')" class="${cardBgClass} border rounded-2xl overflow-hidden flex flex-col shadow-sm relative group cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all">
-                    <!-- Action Button -->
-                    <div class="absolute top-2.5 right-2.5 z-30">
-                        ${btnHtml}
-                    </div>
                     <div class="h-28 w-full relative overflow-hidden">
                         <img class="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300 pointer-events-none select-none" style="${imageStyle}" src="${meal.image}" alt="${meal.title}">
                         <span class="absolute top-2.5 left-2.5 bg-white/95 text-slate-700 font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm z-10">${slotName}</span>
@@ -535,10 +531,14 @@ function renderDashboardMeals() {
                             <div class="bg-[#006a61]" style="width: ${pPct}%"></div>
                             <div class="bg-[#9d4300]" style="width: ${fPct}%"></div>
                         </div>
-                        <div class="flex justify-between text-[9px] text-slate-400 font-bold">
+                        <div class="flex justify-between text-[9px] text-slate-400 font-bold mb-1">
                             <span>${meal.c || 0}G C</span>
                             <span>${meal.p || 0}G P</span>
                             <span>${meal.f || 0}G F</span>
+                        </div>
+                        <!-- Log Button (Below the macro bar & stats) -->
+                        <div class="pt-2 border-t border-slate-100 flex justify-end">
+                            ${btnHtml}
                         </div>
                     </div>
                 </div>
@@ -546,10 +546,7 @@ function renderDashboardMeals() {
         } else {
             // Compact style card
             return `
-                <div onclick="navigateTo('meal-plans')" class="${cardBgClass} border rounded-2xl p-4 flex justify-between items-center shadow-sm relative group cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all min-h-[90px]">
-                    <div class="absolute top-2.5 right-2.5 z-30">
-                        ${btnHtml}
-                    </div>
+                <div onclick="navigateTo('meal-plans')" class="${cardBgClass} border rounded-2xl p-4 flex flex-col gap-3 shadow-sm relative group cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all min-h-[90px]">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-full bg-[#f0fdf4] text-[#006e2f] flex items-center justify-center shrink-0" style="${imageStyle}">
                             <span class="material-symbols-outlined text-lg">eco</span>
@@ -560,8 +557,10 @@ function renderDashboardMeals() {
                             <span class="text-[9px] font-bold text-slate-400 block mt-0.5">${meal.calories} kcal</span>
                         </div>
                     </div>
-                    <!-- spacer for absolute absolute button -->
-                    <div class="w-16"></div>
+                    <!-- Log Button (Below the content) -->
+                    <div class="pt-2 border-t border-slate-100 flex justify-end">
+                        ${btnHtml}
+                    </div>
                 </div>
             `;
         }
