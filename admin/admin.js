@@ -10,10 +10,12 @@ const state = {
         { name: 'Elena Lopez', email: 'elena.l@email.com', goal: 'Maintenance', lastCheckIn: 'Yesterday', compliance: 95, weightTrend: [142, 142, 141, 142, 142, 142], avatar: 'EL' }
     ],
     foodLibrary: [
-        { id: 'f-1', title: 'Avocado Egg Toast', type: 'Vegetarian', calories: 320, p: 14, c: 22, f: 18, image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=200' },
-        { id: 'f-2', title: 'Grilled Chicken Salad', type: 'High Protein', calories: 450, p: 45, c: 12, f: 20, image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200' },
-        { id: 'f-3', title: 'Greek Yogurt Bowl', type: 'Vegetarian', calories: 250, p: 20, c: 30, f: 5, image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=200' },
-        { id: 'f-4', title: 'Baked Salmon & Quinoa', type: 'High Protein', calories: 520, p: 38, c: 45, f: 22, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=200' }
+        { id: 'f-1', title: 'Avocado Egg Toast', type: 'Recipes', calories: 320, p: 14, c: 22, f: 18, image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=200', favorite: true },
+        { id: 'f-2', title: 'Grilled Chicken Salad', type: 'Recipes', calories: 450, p: 45, c: 12, f: 20, image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200', favorite: true },
+        { id: 'f-3', title: 'Greek Yogurt Bowl', type: 'Recipes', calories: 250, p: 20, c: 30, f: 5, image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=200', favorite: true },
+        { id: 'f-4', title: 'Baked Salmon & Quinoa', type: 'Recipes', calories: 520, p: 38, c: 45, f: 22, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=200', favorite: true },
+        { id: 'f-5', title: 'Fresh Apple & Almonds', type: 'Raw Foods', calories: 150, p: 4, c: 18, f: 9, image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=200', favorite: false },
+        { id: 'f-6', title: 'Mixed Raw Berries', type: 'Raw Foods', calories: 85, p: 1, c: 21, f: 0.5, image: 'https://images.unsplash.com/photo-1518635017498-87f514b751ba?w=200', favorite: false }
     ],
     clientMealPlans: {},
     selectedMealBuilderClient: 'Sarah Jenkins',
@@ -459,9 +461,10 @@ window.handleAddNewClientSubmit = function(e) {
     showToast(`Added client ${name}!`, 'success');
 };
 
-// ==================== TARGETS & DIARIES ====================
+// ==================== WEEKLY MEAL BUILDER ====================
 function renderAdminMealBuilder() {
     loadMealBuilderClientPlan();
+    renderLibraryList();
 }
 
 window.loadMealBuilderClientPlan = function() {
@@ -470,117 +473,266 @@ window.loadMealBuilderClientPlan = function() {
     
     state.selectedMealBuilderClient = select.value;
     
-    // Set subtitle and badge goals
-    const subtitle = document.getElementById('diary-review-subtitle');
-    const badge = document.getElementById('diary-review-goal-badge');
-    
-    const clientData = state.clients.find(c => c.name === state.selectedMealBuilderClient) || { goal: 'Maintenance' };
-    if (subtitle) subtitle.innerText = `Reviewing actual food logs for ${state.selectedMealBuilderClient}`;
-    if (badge) badge.innerText = clientData.goal;
-
     // Load targets from local storage or fallback to defaults
-    const kcal = localStorage.getItem('nutriflow_client_calories_target') || 2100;
-    const protein = localStorage.getItem('nutriflow_client_protein_target') || 150;
-    const carbs = localStorage.getItem('nutriflow_client_carbs_target') || 250;
-    const fats = localStorage.getItem('nutriflow_client_fats_target') || 65;
-
+    const kcal = localStorage.getItem('nutriflow_client_calories_target') || 2000;
     const kcalInput = document.getElementById('target-kcal');
-    const proteinInput = document.getElementById('target-protein');
-    const carbsInput = document.getElementById('target-carbs');
-    const fatsInput = document.getElementById('target-fats');
-
     if (kcalInput) kcalInput.value = kcal;
-    if (proteinInput) proteinInput.value = protein;
-    if (carbsInput) carbsInput.value = carbs;
-    if (fatsInput) fatsInput.value = fats;
 
-    renderAdminDiaries();
+    renderWeeklyMealTable();
 };
 
 window.saveClientTargets = function() {
-    const kcal = document.getElementById('target-kcal').value;
-    const protein = document.getElementById('target-protein').value;
-    const carbs = document.getElementById('target-carbs').value;
-    const fats = document.getElementById('target-fats').value;
-
+    const kcal = document.getElementById('target-kcal').value || 2000;
     localStorage.setItem('nutriflow_client_calories_target', kcal);
-    localStorage.setItem('nutriflow_client_protein_target', protein);
-    localStorage.setItem('nutriflow_client_carbs_target', carbs);
-    localStorage.setItem('nutriflow_client_fats_target', fats);
-
-    showToast(`Targets for ${state.selectedMealBuilderClient} updated successfully!`, 'success');
+    renderWeeklyTotalsSummary();
+    showToast(`Targets for ${state.selectedMealBuilderClient} updated to ${kcal} kcal/day`, 'success');
 };
 
-function renderAdminDiaries() {
-    const container = document.getElementById('diary-days-list-container');
+window.setLibraryFilter = function(filter) {
+    state.adminSelectedFoodFilter = filter;
+    
+    // Toggle active class on chips
+    const chips = document.querySelectorAll('.library-chip');
+    chips.forEach(chip => {
+        const text = chip.innerText.trim();
+        if (filter === 'all' && text === 'All') {
+            chip.className = 'library-chip active bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full hover:opacity-95 transition-all';
+        } else if (text.toLowerCase() === filter.toLowerCase()) {
+            chip.className = 'library-chip active bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full hover:opacity-95 transition-all';
+        } else {
+            chip.className = 'library-chip bg-surface-container border text-[10px] font-bold text-on-surface-variant px-3 py-1 rounded-full hover:opacity-95 transition-all';
+        }
+    });
+    
+    renderLibraryList();
+};
+
+window.filterLibraryFoods = function() {
+    renderLibraryList();
+};
+
+function renderLibraryList() {
+    const container = document.getElementById('library-list-container');
     if (!container) return;
-
-    const client = state.selectedMealBuilderClient;
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const targetKcal = parseInt(localStorage.getItem('nutriflow_client_calories_target')) || 2100;
-
-    // Sync client meal plans from local storage if available
-    if (localStorage.getItem('nutriflow_client_meal_plans')) {
-        state.clientMealPlans = JSON.parse(localStorage.getItem('nutriflow_client_meal_plans'));
+    
+    const query = (document.getElementById('library-search')?.value || '').toLowerCase();
+    const activeFilter = state.adminSelectedFoodFilter || 'all';
+    
+    const filtered = state.foodLibrary.filter(f => {
+        const matchesQuery = f.title.toLowerCase().includes(query) || (f.type || '').toLowerCase().includes(query);
+        const matchesFilter = activeFilter === 'all' || 
+            (activeFilter === 'Recipes' && (f.type === 'Recipes' || f.type.toLowerCase().includes('recipe'))) ||
+            (activeFilter === 'Raw Foods' && (f.type === 'Raw Foods' || f.type.toLowerCase().includes('raw'))) ||
+            (activeFilter === 'Favorites' && f.favorite);
+        return matchesQuery && matchesFilter;
+    });
+    
+    if (filtered.length === 0) {
+        container.innerHTML = `<div class="text-[10px] text-on-surface-variant font-medium text-center py-6">No foods found.</div>`;
+        return;
     }
+    
+    container.innerHTML = filtered.map(f => `
+        <div class="bg-surface border border-outline-variant/20 rounded-xl p-2.5 flex gap-2.5 items-center hover:border-primary/45 transition-colors">
+            <div class="w-10 h-10 rounded-lg overflow-hidden bg-slate-100 shrink-0">
+                <img class="w-full h-full object-cover" src="${f.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100'}" alt="${f.title}">
+            </div>
+            <div class="min-w-0 flex-grow text-left">
+                <h4 class="font-bold text-xs text-on-background truncate" title="${f.title}">${f.title}</h4>
+                <p class="text-[9px] text-on-surface-variant font-semibold mt-0.5">${f.calories} kcal</p>
+                <p class="text-[8px] text-on-surface-variant/80 font-medium">P:${f.p}g • C:${f.c}g • F:${f.f}g</p>
+            </div>
+        </div>
+    `).join('');
+}
 
+function renderWeeklyMealTable() {
+    const tbody = document.getElementById('weekly-meal-table-body');
+    if (!tbody) return;
+    
+    const client = state.selectedMealBuilderClient;
     const clientPlan = state.clientMealPlans[client] || {};
-
-    container.innerHTML = days.map(day => {
-        const meals = clientPlan[day] || [];
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const rowTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
+    
+    let html = '';
+    
+    rowTypes.forEach(rowType => {
+        html += `<tr class="hover:bg-slate-50/50 transition-colors">`;
+        html += `<td class="p-3 font-bold text-center border-r border-outline-variant/20 bg-surface-container-low/20 align-middle text-on-surface">${rowType}</td>`;
         
-        let totalKcal = 0;
-        let totalP = 0;
-        let totalC = 0;
-        let totalF = 0;
-
-        meals.forEach(m => {
-            totalKcal += m.calories;
-            totalP += m.p || 0;
-            totalC += m.c || 0;
-            totalF += m.f || 0;
-        });
-
-        // Progress bar percentage
-        const progressPct = Math.min((totalKcal / targetKcal) * 100, 100);
-
-        const mealsListHtml = meals.length > 0 
-            ? `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
-                ${meals.map(m => `
-                    <div class="bg-surface rounded-xl p-3 border border-outline-variant/20 flex justify-between items-center">
-                        <div>
-                            <span class="bg-[#e5eeff] text-[#006a61] text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">${m.type}</span>
-                            <h5 class="font-bold text-xs text-on-background mt-1">${m.title}</h5>
-                        </div>
-                        <div class="text-right shrink-0">
-                            <span class="text-xs font-bold text-on-background">${m.calories} kcal</span>
-                            <span class="block text-[8px] text-on-surface-variant/80 font-medium">P:${m.p}g • C:${m.c}g • F:${m.f}g</span>
-                        </div>
+        days.forEach(day => {
+            const meals = (clientPlan[day] || []).filter(m => m.type.toLowerCase() === rowType.toLowerCase());
+            
+            html += `<td class="p-3 border-r border-outline-variant/20 align-top relative min-h-[100px]">`;
+            html += `<div class="flex flex-col gap-2">`;
+            
+            meals.forEach(m => {
+                html += `
+                    <div class="bg-surface border border-outline-variant/30 rounded-xl p-2 flex flex-col gap-1 relative shadow-sm text-[10px] text-left">
+                        <button onclick="removeFoodFromSlot('${day}', '${rowType}', '${m.title}')" class="absolute top-1.5 right-1.5 text-on-surface-variant hover:text-red-600 transition-colors flex items-center justify-center cursor-pointer shrink-0">
+                            <span class="material-symbols-outlined text-[12px] font-bold">close</span>
+                        </button>
+                        <div class="font-bold text-on-background pr-4 truncate" title="${m.title}">${m.title}</div>
+                        <div class="text-[9px] text-[#006e2f] font-semibold">${m.calories} kcal</div>
+                        <div class="text-[8px] text-on-surface-variant/80 font-medium">P:${m.p}g · C:${m.c}g · F:${m.f}g</div>
                     </div>
-                `).join('')}
-               </div>`
-            : `<div class="text-[10px] text-on-surface-variant/75 font-semibold py-3 text-center border border-dashed border-outline-variant/30 rounded-xl bg-surface/50 mt-2">
-                No entries logged by client for this day.
-               </div>`;
+                `;
+            });
+            
+            html += `
+                <button onclick="openAssignFoodModal('${day}', '${rowType}')" class="w-full border border-dashed border-outline-variant/30 hover:border-primary/60 hover:bg-primary/5 rounded-xl py-2 flex items-center justify-center text-outline-variant/80 hover:text-primary transition-all cursor-pointer">
+                    <span class="material-symbols-outlined text-sm">add</span>
+                </button>
+            `;
+            
+            html += `</div>`;
+            html += `</td>`;
+        });
+        
+        html += `</tr>`;
+    });
+    
+    tbody.innerHTML = html;
+    
+    renderWeeklyTotalsSummary();
+}
 
-        return `
-            <div class="bg-surface-container-low/50 border border-outline-variant/25 rounded-2xl p-4 flex flex-col gap-3">
+function renderWeeklyTotalsSummary() {
+    const container = document.getElementById('weekly-totals-summary-container');
+    if (!container) return;
+    
+    const client = state.selectedMealBuilderClient;
+    const clientPlan = state.clientMealPlans[client] || {};
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const targetKcal = parseInt(document.getElementById('target-kcal').value) || 2000;
+    
+    let html = '';
+    html += `<h4 class="text-xs font-bold uppercase tracking-wider text-on-surface mb-3 flex items-center gap-2">`;
+    html += `<span class="material-symbols-outlined text-primary text-base">analytics</span> Weekly Nutrition Summary`;
+    html += `</h4>`;
+    
+    html += `<div class="grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-7 gap-3">`;
+    
+    days.forEach(day => {
+        const meals = clientPlan[day] || [];
+        let kcal = 0;
+        let p = 0;
+        let c = 0;
+        let f = 0;
+        
+        meals.forEach(m => {
+            kcal += m.calories;
+            p += m.p || 0;
+            c += m.c || 0;
+            f += m.f || 0;
+        });
+        
+        const pct = Math.min((kcal / targetKcal) * 100, 100);
+        
+        html += `
+            <div class="bg-surface rounded-xl p-3 border border-outline-variant/20 shadow-sm flex flex-col gap-1.5">
                 <div class="flex justify-between items-center">
-                    <span class="font-bold text-sm text-on-background">${day}</span>
-                    <span class="text-xs font-bold text-on-surface-variant">${totalKcal} / ${targetKcal} kcal</span>
+                    <span class="font-bold text-[11px] text-on-background">${day} Totals</span>
+                    <span class="font-bold text-[10px] text-primary">${kcal} kcal</span>
                 </div>
-                
-                <!-- Progress Bar -->
-                <div class="w-full bg-surface-variant/60 h-2 rounded-full overflow-hidden">
-                    <div class="bg-primary h-full rounded-full" style="width: ${progressPct}%"></div>
+                <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                    <div class="bg-[#006e2f] h-full rounded-full transition-all" style="width: ${pct}%"></div>
                 </div>
-
-                <!-- Logged Meals List -->
-                ${mealsListHtml}
+                <div class="flex justify-between items-center text-[9px] text-on-surface-variant font-medium mt-1">
+                    <span>P: <b>${p}g</b></span>
+                    <span>C: <b>${c}g</b></span>
+                    <span>F: <b>${f}g</b></span>
+                </div>
             </div>
         `;
-    }).join('');
+    });
+    
+    html += `</div>`;
+    
+    container.innerHTML = html;
 }
+
+window.openAssignFoodModal = function(day, mealType) {
+    state.activeAssignDay = day;
+    state.activeAssignMealType = mealType;
+    
+    document.getElementById('assign-food-day-label').innerText = day;
+    document.getElementById('assign-food-type-label').innerText = mealType;
+    
+    const container = document.getElementById('assign-food-options-container');
+    if (container) {
+        container.innerHTML = state.foodLibrary.map(f => `
+            <div onclick="assignFoodToSlot('${f.id}')" class="bg-surface hover:bg-primary/5 border border-outline-variant/30 rounded-xl p-3 flex gap-3 items-center cursor-pointer transition-all">
+                <div class="w-10 h-10 rounded-lg overflow-hidden bg-slate-100 shrink-0">
+                    <img class="w-full h-full object-cover" src="${f.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100'}" alt="${f.title}">
+                </div>
+                <div class="min-w-0 flex-grow text-left">
+                    <h4 class="font-bold text-xs text-on-background truncate">${f.title}</h4>
+                    <p class="text-[9px] text-on-surface-variant font-medium mt-0.5">${f.calories} kcal · P:${f.p}g • C:${f.c}g • F:${f.f}g</p>
+                </div>
+                <span class="material-symbols-outlined text-primary text-base">add_circle</span>
+            </div>
+        `).join('');
+    }
+    
+    document.getElementById('assign-food-modal').classList.remove('hidden');
+    document.getElementById('assign-food-modal').classList.add('flex');
+};
+
+window.closeAssignFoodModal = function() {
+    document.getElementById('assign-food-modal').classList.add('hidden');
+    document.getElementById('assign-food-modal').classList.remove('flex');
+};
+
+window.assignFoodToSlot = function(foodId) {
+    const food = state.foodLibrary.find(f => f.id === foodId);
+    if (!food) return;
+    
+    const client = state.selectedMealBuilderClient;
+    if (!state.clientMealPlans[client]) {
+        state.clientMealPlans[client] = {};
+    }
+    const day = state.activeAssignDay;
+    if (!state.clientMealPlans[client][day]) {
+        state.clientMealPlans[client][day] = [];
+    }
+    
+    state.clientMealPlans[client][day].push({
+        type: state.activeAssignMealType,
+        title: food.title,
+        calories: food.calories,
+        p: food.p,
+        c: food.c,
+        f: food.f,
+        image: food.image
+    });
+    
+    saveAdminState();
+    closeAssignFoodModal();
+    renderWeeklyMealTable();
+};
+
+window.removeFoodFromSlot = function(day, mealType, foodTitle) {
+    const client = state.selectedMealBuilderClient;
+    if (!state.clientMealPlans[client] || !state.clientMealPlans[client][day]) return;
+    
+    state.clientMealPlans[client][day] = state.clientMealPlans[client][day].filter(
+        m => !(m.type.toLowerCase() === mealType.toLowerCase() && m.title === foodTitle)
+    );
+    
+    saveAdminState();
+    renderWeeklyMealTable();
+};
+
+window.publishWeeklyPlanToClient = function() {
+    saveAdminState();
+    showToast(`Weekly meal plan for ${state.selectedMealBuilderClient} published successfully!`, 'success');
+};
+
+window.saveWeeklyTemplate = function() {
+    showToast(`Weekly meal template saved successfully!`, 'success');
+};
 
 // ==================== CALENDAR ====================
 function renderAdminCalendar() {

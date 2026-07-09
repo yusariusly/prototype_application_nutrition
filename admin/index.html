@@ -209,62 +209,88 @@
 
         <!-- ==================== VIEW 2: TARGETS & DIARIES ==================== -->
         <section id="view-admin-meal-builder" class="view-section hidden grid grid-cols-1 lg:grid-cols-12 gap-gutter">
-            <!-- Left Column: Configure Client Targets -->
-            <div class="lg:col-span-4 bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-sm p-6 flex flex-col gap-5">
+            <!-- Left Column: Food Library -->
+            <div class="lg:col-span-3 bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-sm p-4 flex flex-col gap-4">
                 <div>
-                    <h3 class="text-lg font-bold text-on-background">Configure Targets</h3>
-                    <p class="text-[11px] text-on-surface-variant mt-0.5">Set daily calorie and macro goals for this client.</p>
+                    <h3 class="text-base font-bold text-on-background">Library</h3>
+                    <p class="text-[10px] text-on-surface-variant mt-0.5">Add foods and recipes to weekly builder.</p>
                 </div>
                 
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Select Client</label>
-                        <select id="meal-builder-client-select" onchange="loadMealBuilderClientPlan()" class="w-full rounded-xl border border-outline-variant/30 text-xs px-3 py-2.5 bg-surface text-on-background font-semibold">
-                            <option value="Sarah Jenkins">Sarah Jenkins</option>
-                            <option value="Marcus Reid">Marcus Reid</option>
-                            <option value="Elena Lopez">Elena Lopez</option>
-                        </select>
-                    </div>
-
-                    <div class="border-t border-surface-variant/20 pt-4 space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Calorie Target (kcal)</label>
-                            <input type="number" id="target-kcal" required value="2100" class="w-full rounded-xl border border-outline-variant/30 text-xs px-3 py-2 bg-surface">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Protein Target (g)</label>
-                            <input type="number" id="target-protein" required value="150" class="w-full rounded-xl border border-outline-variant/30 text-xs px-3 py-2 bg-surface">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Carbs Target (g)</label>
-                            <input type="number" id="target-carbs" required value="250" class="w-full rounded-xl border border-outline-variant/30 text-xs px-3 py-2 bg-surface">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Fats Target (g)</label>
-                            <input type="number" id="target-fats" required value="65" class="w-full rounded-xl border border-outline-variant/30 text-xs px-3 py-2 bg-surface">
-                        </div>
-                    </div>
+                <!-- Search Input -->
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant/60 text-lg">search</span>
+                    <input type="text" id="library-search" oninput="filterLibraryFoods()" placeholder="Search foods or recipes..." class="w-full rounded-xl border-outline-variant/40 focus:border-primary focus:ring-primary text-xs pl-9 pr-3 py-2 bg-surface-container-low/55">
                 </div>
 
-                <button onclick="saveClientTargets()" class="w-full bg-primary hover:bg-[#005321] text-white font-bold text-xs py-3 rounded-xl transition-all shadow-md mt-auto flex items-center justify-center gap-1.5 cursor-pointer">
-                    <span class="material-symbols-outlined text-[16px]">sync_saved_locally</span> Update Client Targets
-                </button>
+                <!-- Chips/Filters -->
+                <div class="flex flex-wrap gap-1" id="library-filter-chips">
+                    <button onclick="setLibraryFilter('all')" class="library-chip active bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full hover:opacity-95 transition-all">All</button>
+                    <button onclick="setLibraryFilter('Recipes')" class="library-chip bg-surface-container border text-[10px] font-bold text-on-surface-variant px-3 py-1 rounded-full hover:opacity-95 transition-all">Recipes</button>
+                    <button onclick="setLibraryFilter('Raw Foods')" class="library-chip bg-surface-container border text-[10px] font-bold text-on-surface-variant px-3 py-1 rounded-full hover:opacity-95 transition-all">Raw Foods</button>
+                    <button onclick="setLibraryFilter('Favorites')" class="library-chip bg-surface-container border text-[10px] font-bold text-on-surface-variant px-3 py-1 rounded-full hover:opacity-95 transition-all">Favorites</button>
+                </div>
+
+                <!-- Library List -->
+                <div class="flex-grow overflow-y-auto max-h-[550px] space-y-2 pr-1 hide-scrollbar" id="library-list-container">
+                    <!-- Populated dynamically via JS -->
+                </div>
             </div>
 
-            <!-- Right Column: Client Food Diary Logs -->
-            <div class="lg:col-span-8 flex flex-col gap-6">
-                <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm">
-                    <div class="flex justify-between items-center border-b border-surface-variant/20 pb-4 mb-4">
+            <!-- Right Column: Weekly Meal Builder -->
+            <div class="lg:col-span-9 flex flex-col gap-4">
+                <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-surface-variant/20 pb-4">
                         <div>
-                            <h2 class="text-xl font-bold text-on-background">Client Food Diary Logs</h2>
-                            <p class="text-xs text-on-surface-variant mt-0.5" id="diary-review-subtitle">Reviewing actual food logs for Sarah Jenkins</p>
+                            <h2 class="text-2xl font-bold text-on-background">Weekly Meal Builder</h2>
+                            <div class="flex items-center gap-1.5 mt-1">
+                                <span class="text-xs text-on-surface-variant">Client:</span>
+                                <select id="meal-builder-client-select" onchange="loadMealBuilderClientPlan()" class="text-xs font-bold text-primary bg-transparent border-none p-0 focus:ring-0 cursor-pointer">
+                                    <option value="Sarah Jenkins">Sarah Jenkins</option>
+                                    <option value="Marcus Reid">Marcus Reid</option>
+                                    <option value="Elena Lopez">Elena Lopez</option>
+                                </select>
+                                <span class="text-xs text-on-surface-variant">· Target:</span>
+                                <input type="number" id="target-kcal" onchange="saveClientTargets()" required value="2000" class="w-16 text-xs font-bold text-primary bg-transparent border-none p-0 focus:ring-0">
+                                <span class="text-xs text-on-surface-variant">kcal/day</span>
+                                <input type="hidden" id="target-protein" value="150">
+                                <input type="hidden" id="target-carbs" value="250">
+                                <input type="hidden" id="target-fats" value="65">
+                            </div>
                         </div>
-                        <span class="bg-[#e5eeff] text-[#006a61] px-3 py-1 rounded-full text-xs font-semibold" id="diary-review-goal-badge">Weight Loss</span>
+                        <div class="flex gap-2">
+                            <button onclick="saveWeeklyTemplate()" class="border border-outline-variant/30 hover:bg-surface-container-low text-on-surface font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[16px]">save</span> Save as Template
+                            </button>
+                            <button onclick="publishWeeklyPlanToClient()" class="bg-primary hover:bg-[#005321] text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[16px]">send</span> Publish to Client
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- Week list diary logs container -->
-                    <div class="space-y-4 max-h-[600px] overflow-y-auto pr-1 hide-scrollbar" id="diary-days-list-container">
-                        <!-- Populated dynamically via JS -->
+                    <!-- Weekly Meal Grid Container -->
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left border-collapse min-w-[800px] border border-outline-variant/20 rounded-xl overflow-hidden" style="table-layout: fixed;">
+                            <thead>
+                                <tr class="bg-surface-container-low/50 border-b border-surface-variant/30 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+                                    <th class="p-3 w-[12%] text-center border-r border-outline-variant/20">Meals</th>
+                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20">Mon</th>
+                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20">Tue</th>
+                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20">Wed</th>
+                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20">Thu</th>
+                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20">Fri</th>
+                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20">Sat</th>
+                                    <th class="p-3 w-[12.5%] text-center">Sun</th>
+                                </tr>
+                            </thead>
+                            <tbody id="weekly-meal-table-body" class="divide-y divide-surface-variant/20 text-xs">
+                                <!-- Generated Dynamically via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Weekday Totals Dashboard at the bottom -->
+                    <div class="bg-surface-container-low/30 border border-outline-variant/20 rounded-2xl p-4 mt-2" id="weekly-totals-summary-container">
+                        <!-- Populated dynamically via JS showing protein, carbs, fats, kcal progress -->
                     </div>
                 </div>
             </div>
