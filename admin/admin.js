@@ -1107,7 +1107,16 @@ window.saveWeeklyTemplate = function() {
 };
 
 window.previewWeeklyPlan = function() {
-    showToast(`Weekly meal plan preview simulated for ${state.selectedMealBuilderClient}.`, 'info');
+    const client = state.selectedMealBuilderClient;
+    const origin = window.location.origin;
+    let clientUrl = origin;
+    if (clientUrl.endsWith('/admin') || clientUrl.endsWith('/admin/')) {
+        clientUrl = clientUrl.replace(/\/admin\/?$/, '');
+    }
+    const previewUrl = `${clientUrl}/index.html?client=${encodeURIComponent(client)}&preview=true`;
+    
+    saveAdminState();
+    window.open(previewUrl, '_blank');
 };
 
 // ==================== CALENDAR ====================

@@ -285,7 +285,11 @@ function loadState() {
     }
 
     // Sync customized weekly plans from admin builder
-    if (localStorage.getItem('nutriflow_client_meal_plans')) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isPreview = urlParams.get('preview') === 'true';
+    if (isPreview && localStorage.getItem('nutriflow_client_meal_plans_draft')) {
+        state.clientMealPlans = JSON.parse(localStorage.getItem('nutriflow_client_meal_plans_draft'));
+    } else if (localStorage.getItem('nutriflow_client_meal_plans')) {
         state.clientMealPlans = JSON.parse(localStorage.getItem('nutriflow_client_meal_plans'));
     }
     
