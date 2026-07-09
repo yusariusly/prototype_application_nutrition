@@ -612,14 +612,19 @@ function renderAdminMealBuilder() {
     // Populate client select dropdown dynamically
     const select = document.getElementById('meal-builder-client-select');
     if (select) {
-        const currentVal = select.value || state.selectedMealBuilderClient;
-        select.innerHTML = state.clients.map(c => `
+        const activeSpecialist = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
+        const myClients = state.clients.filter(c => c.therapist === activeSpecialist);
+        const listToUse = myClients.length > 0 ? myClients : state.clients;
+
+        select.innerHTML = listToUse.map(c => `
             <option value="${c.name}">${c.name}</option>
         `).join('');
-        if (state.clients.some(c => c.name === currentVal)) {
-            select.value = currentVal;
-        } else if (state.clients.length > 0) {
-            select.value = state.clients[0].name;
+
+        if (state.selectedMealBuilderClient && listToUse.some(c => c.name === state.selectedMealBuilderClient)) {
+            select.value = state.selectedMealBuilderClient;
+        } else if (listToUse.length > 0) {
+            select.value = listToUse[0].name;
+            state.selectedMealBuilderClient = listToUse[0].name;
         }
     }
     
