@@ -5,9 +5,9 @@ const state = {
     activeView: 'admin-clients',
     appointments: [],
     clients: [
-        { name: 'Sarah Jenkins', email: 'sarah.j@email.com', goal: 'Weight Loss', lastCheckIn: 'Today, 9:00 AM', compliance: 92, weightTrend: [168, 169, 170, 173, 174, 176], avatar: 'SJ' },
-        { name: 'Marcus Reid', email: 'm.reid@email.com', goal: 'Muscle Gain', lastCheckIn: '2 days ago', compliance: 78, weightTrend: [180, 182, 181, 183, 182, 185], avatar: 'MR' },
-        { name: 'Elena Lopez', email: 'elena.l@email.com', goal: 'Maintenance', lastCheckIn: 'Yesterday', compliance: 95, weightTrend: [142, 142, 141, 142, 142, 142], avatar: 'EL' }
+        { name: 'Sarah Jenkins', email: 'sarah.j@email.com', goal: 'Weight Loss', lastCheckIn: 'Today, 9:00 AM', compliance: 92, weightTrend: [168, 169, 170, 173, 174, 176], avatar: 'SJ', therapist: 'Dr. Hasan' },
+        { name: 'Marcus Reid', email: 'm.reid@email.com', goal: 'Muscle Gain', lastCheckIn: '2 days ago', compliance: 78, weightTrend: [180, 182, 181, 183, 182, 185], avatar: 'MR', therapist: 'Dr. Hasan' },
+        { name: 'Elena Lopez', email: 'elena.l@email.com', goal: 'Maintenance', lastCheckIn: 'Yesterday', compliance: 95, weightTrend: [142, 142, 141, 142, 142, 142], avatar: 'EL', therapist: 'Dr. Amanda' }
     ],
     foodLibrary: [
         { id: 'f-1', title: 'Avocado Egg Toast', type: 'Recipes', calories: 320, p: 14, c: 22, f: 18, image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=200', favorite: true },
@@ -158,6 +158,21 @@ function loadAdminState() {
     // Load Clients List
     if (localStorage.getItem('nutriflow_clients')) {
         state.clients = JSON.parse(localStorage.getItem('nutriflow_clients'));
+        // Backfill therapist field if missing
+        let updated = false;
+        state.clients.forEach(c => {
+            if (!c.therapist) {
+                if (c.name === 'Elena Lopez') {
+                    c.therapist = 'Dr. Amanda';
+                } else {
+                    c.therapist = 'Dr. Hasan';
+                }
+                updated = true;
+            }
+        });
+        if (updated) {
+            localStorage.setItem('nutriflow_clients', JSON.stringify(state.clients));
+        }
     } else {
         localStorage.setItem('nutriflow_clients', JSON.stringify(state.clients));
     }
