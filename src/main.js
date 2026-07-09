@@ -117,6 +117,30 @@ const RECIPES_DB = {
     'Grilled Salmon & Asparagus': {
         ingredients: ['150g wild-caught salmon fillet', '8-10 stalks of fresh asparagus', '1 tbsp lemon juice', '1 tsp olive oil', 'Pinch of sea salt and black pepper'],
         instructions: 'Brush salmon and asparagus with olive oil, salt, and pepper. Grill the salmon for 4-5 minutes per side. Roast asparagus until tender. Serve with a splash of fresh lemon juice.'
+    },
+    'Avocado Egg Toast': {
+        ingredients: ['2 slices whole wheat bread', '1 ripe avocado', '2 large eggs', '1 tsp lemon juice', 'Pinch of salt and black pepper'],
+        instructions: 'Toast 2 slices of whole wheat bread. Mash 1 avocado with lemon juice, salt, and pepper. Fry 2 eggs to your liking. Spread avocado on toast, top with eggs, and serve warm.'
+    },
+    'Grilled Chicken Salad': {
+        ingredients: ['150g chicken breast', '2 cups chopped romaine lettuce', '1/2 cup cherry tomatoes halved', '1/2 cucumber sliced', '1 tbsp olive oil dressing'],
+        instructions: 'Season chicken breast with olive oil, salt, and pepper. Grill for 6 mins per side. Chop romaine lettuce, cherry tomatoes, and cucumber. Slice chicken, place over salad, and drizzle with dressing.'
+    },
+    'Greek Yogurt Bowl': {
+        ingredients: ['1 cup plain Greek yogurt', '1/2 cup fresh mixed berries', '1 tbsp chia seeds', '1 tsp honey'],
+        instructions: 'Scoop Greek yogurt into a bowl. Top with mixed fresh berries, sprinkle chia seeds, and drizzle honey on top.'
+    },
+    'Baked Salmon & Quinoa': {
+        ingredients: ['150g salmon fillet', '1/2 cup cooked quinoa', '8-10 stalks of fresh asparagus', '1 tbsp lemon juice', '1 tsp olive oil'],
+        instructions: 'Bake salmon at 400°F (200°C) for 12-15 mins with olive oil and lemon juice. Serve alongside warm cooked quinoa and steamed asparagus.'
+    },
+    'Fresh Apple & Almonds': {
+        ingredients: ['1 medium apple', '12 raw almonds'],
+        instructions: 'Slice the fresh apple and serve alongside raw almonds as a nutritious snack.'
+    },
+    'Mixed Raw Berries': {
+        ingredients: ['1/2 cup strawberries', '1/4 cup blueberries', '1/4 cup raspberries'],
+        instructions: 'Rinse fresh berries and serve chilled in a small bowl.'
     }
 };
 
