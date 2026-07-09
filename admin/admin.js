@@ -791,6 +791,15 @@ function renderWeeklyMealTable() {
                             </button>
                             <div class="font-bold text-slate-800 pr-4 leading-tight">${m.title}</div>
                             <div class="text-[10px] text-slate-500 mt-0.5">${m.calories} kcal</div>
+                            ${m.comment ? `
+                                <div class="mt-1.5 p-1.5 bg-[#e5eeff]/40 rounded-lg border border-[#86f2e4]/30 text-[9px] text-[#006a61] italic leading-normal">
+                                    "${m.comment}"
+                                </div>
+                            ` : ''}
+                            <button onclick="openEditCommentModal('${day}', '${rowType}', '${m.title}', \`${encodeURIComponent(m.comment || '')}\`)" class="mt-1.5 bg-slate-50 hover:bg-slate-100 border text-[9px] font-bold text-slate-500 py-0.5 px-1.5 rounded transition-all cursor-pointer flex items-center gap-1 w-fit">
+                                <span class="material-symbols-outlined text-[10px]">chat</span>
+                                ${m.comment ? 'Edit Note' : 'Add Note'}
+                            </button>
                         </div>
                     `;
                 });
@@ -1294,5 +1303,64 @@ window.filterFoodCategory = function(cat) {
 
 window.filterFoodLibrary = function() {
     renderAdminMealBuilder();
+};
+
+window.openEditCommentModal = function(day, mealType, mealTitle, currentCommentEncoded) {
+    state.activeCommentDay = day;
+    state.activeCommentMealType = mealType;
+    state.activeCommentMealTitle = mealTitle;
+
+    let currentComment = '';
+    if (currentCommentEncoded) {
+        try {
+            currentComment = decodeURIComponent(currentCommentEncoded);
+        } catch (e) {
+            currentComment = currentCommentEncoded;
+        }
+    }
+
+    const titleEl = document.getElementById('comment-modal-meal-title');
+    if (titleEl) {
+        titleEl.innerText = `${day} · ${mealType} · ${mealTitle}`;
+    }
+    const txtArea = document.getElementById('comment-textarea');
+    if (txtArea) {
+        txtArea.value = currentComment;
+    }
+
+    const modal = document.getElementById('edit-comment-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+};
+
+window.closeEditCommentModal = function() {
+    const modal = document.getElementById('edit-comment-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+window.saveMealComment = function() {
+    const day = state.activeCommentDay;
+    const mealType = state.activeCommentMealType;
+    const mealTitle = state.activeCommentMealTitle;
+    const commentVal = document.getElementById('comment-textarea').value.trim();
+
+    const client = state.selectedMealBuilderClient;
+    if (state.clientMealPlans[client] && state.clientMealPlans[client][day]) {
+        const meal = state.clientMealPlans[client][day].find(
+            m => m.type.toLowerCase() === mealType.toLowerCase() && m.title === mealTitle
+        );
+        if (meal) {
+            meal.comment = commentVal;
+            saveAdminState();
+            renderWeeklyMealTable();
+            showToast('Comment updated successfully!', 'success');
+        }
+    }
+    closeEditCommentModal();
 };
 

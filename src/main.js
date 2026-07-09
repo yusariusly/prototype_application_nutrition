@@ -590,6 +590,15 @@ function renderDashboardMeals() {
                             <span>${meal.p || 0}G P</span>
                             <span>${meal.f || 0}G F</span>
                         </div>
+                        ${meal.comment ? `
+                            <div class="mt-1 p-2 bg-primary/5 rounded-xl border border-primary/10 text-[9px] text-primary italic leading-tight flex items-start gap-1">
+                                <span class="material-symbols-outlined text-[12px] mt-0.5">chat_bubble</span>
+                                <div>
+                                    <span class="font-bold block not-italic">Note:</span>
+                                    <span>${meal.comment}</span>
+                                </div>
+                            </div>
+                        ` : ''}
                         <!-- Log Button (Below the macro bar & stats) -->
                         <div class="pt-2 border-t border-slate-100 flex justify-end">
                             ${btnHtml}
@@ -611,6 +620,15 @@ function renderDashboardMeals() {
                             <span class="text-[9px] font-bold text-slate-400 block mt-0.5">${meal.calories} kcal</span>
                         </div>
                     </div>
+                    ${meal.comment ? `
+                        <div class="p-2 bg-primary/5 rounded-xl border border-primary/10 text-[9px] text-primary italic leading-tight flex items-start gap-1">
+                            <span class="material-symbols-outlined text-[12px] mt-0.5">chat_bubble</span>
+                            <div>
+                                <span class="font-bold block not-italic">Note:</span>
+                                <span>${meal.comment}</span>
+                            </div>
+                        </div>
+                    ` : ''}
                     <!-- Log Button (Below the content) -->
                     <div class="pt-2 border-t border-slate-100 flex justify-end">
                         ${btnHtml}
@@ -743,7 +761,9 @@ function renderMealPlans() {
                 </div>
                 <div class="p-4 flex flex-col flex-grow">
                     <h3 class="font-bold text-on-surface text-base mb-1 leading-tight">${meal.title}</h3>
-                    <p class="text-[11px] text-on-surface-variant flex-grow line-clamp-2 mb-3 mt-1 leading-normal">Plan designed by your nutritionist pendamping.</p>
+                    <p class="text-[11px] text-on-surface-variant flex-grow line-clamp-2 mb-3 mt-1 leading-normal">
+                        ${meal.comment ? `<span class="text-primary font-bold">Specialist Note:</span> <span class="italic font-medium">"${meal.comment}"</span>` : 'Plan designed by your nutritionist pendamping.'}
+                    </p>
                     
                     <div class="grid grid-cols-4 gap-1 text-center bg-slate-50 p-1.5 rounded-lg border border-slate-200 text-[9px] font-bold text-on-surface-variant/90 mb-3">
                         <div><span class="block text-on-background">${meal.calories}</span>KCAL</div>

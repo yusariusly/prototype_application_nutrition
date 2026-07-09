@@ -613,6 +613,24 @@
         </div>
     </div>
 
+    <!-- Edit Comment Modal -->
+    <div id="edit-comment-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-surface max-w-sm w-full rounded-2xl p-6 border border-slate-100 shadow-2xl flex flex-col gap-4 text-slate-800">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-sm font-bold text-slate-800">Add/Edit Nutritionist Comment</h3>
+                <button onclick="closeEditCommentModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer"><span class="material-symbols-outlined text-[18px]">close</span></button>
+            </div>
+            <div>
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-2" id="comment-modal-meal-title">Avocado Egg Toast</p>
+                <textarea id="comment-textarea" rows="3" placeholder="e.g. Eat this before your workout, or chew slowly." class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary"></textarea>
+            </div>
+            <div class="flex justify-end gap-2 shrink-0">
+                <button onclick="closeEditCommentModal()" class="border border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer">Cancel</button>
+                <button onclick="saveMealComment()" class="bg-[#006e2f] hover:bg-[#005321] text-white font-semibold text-xs px-4 py-2 rounded-xl shadow-sm transition-all cursor-pointer">Save Comment</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Admin dashboard logic -->
     <script type="module" src="./admin.js"></script>
 </body>
