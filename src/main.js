@@ -480,67 +480,91 @@ function renderDashboardMeals() {
         const meal = clientPlan.find(m => m.type.toLowerCase() === slotName.toLowerCase());
         const isLogged = state.loggedStatus[clientName]?.[today]?.[slotName] === true;
         
-        if (meal && isLogged) {
-            const totalMacros = (meal.p || 0) + (meal.c || 0) + (meal.f || 0) || 1;
-            const pPct = ((meal.p || 0) / totalMacros) * 100;
-            const cPct = ((meal.c || 0) / totalMacros) * 100;
-            const fPct = ((meal.f || 0) / totalMacros) * 100;
-
-            if (meal.image) {
-                return `
-                    <div class="bg-white border border-outline-variant/35 rounded-2xl overflow-hidden flex flex-col shadow-sm relative group">
-                        <button onclick="toggleLogMeal('${today}', '${slotName}')" class="absolute top-2.5 right-2.5 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 border border-outline-variant/35 shadow-md flex items-center justify-center cursor-pointer z-30 transition-transform active:scale-90" title="Unlog food">
-                            <span class="material-symbols-outlined text-[10px] font-bold">close</span>
-                        </button>
-                        <div class="h-28 w-full relative">
-                            <img class="w-full h-full object-cover" src="${meal.image}" alt="${meal.title}">
-                            <span class="absolute top-2.5 left-2.5 bg-white text-slate-700 font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider">${slotName}</span>
+        if (!meal) {
+            return `
+                <div class="bg-white border border-outline-variant/35 rounded-2xl p-4 flex justify-between items-center shadow-sm min-h-[90px]">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-lg">restaurant_menu</span>
                         </div>
-                        <div class="p-3 flex flex-col gap-2">
-                            <div class="flex justify-between items-center">
-                                <span class="font-bold text-xs text-slate-800 line-clamp-1">${meal.title}</span>
-                                <span class="text-xs font-bold text-slate-500 shrink-0">${meal.calories} kcal</span>
-                            </div>
-                            <div class="w-full h-1.5 rounded-full overflow-hidden flex bg-slate-100">
-                                <div class="bg-[#006e2f]" style="width: ${cPct}%"></div>
-                                <div class="bg-[#006a61]" style="width: ${pPct}%"></div>
-                                <div class="bg-[#9d4300]" style="width: ${fPct}%"></div>
-                            </div>
-                            <div class="flex justify-between text-[9px] text-slate-400 font-bold">
-                                <span>${meal.c || 0}G C</span>
-                                <span>${meal.p || 0}G P</span>
-                                <span>${meal.f || 0}G F</span>
-                            </div>
+                        <div>
+                            <span class="block text-[9px] uppercase tracking-wider text-slate-400 font-bold">${slotName}</span>
+                            <span class="font-bold text-xs text-slate-500">No meal planned for today</span>
                         </div>
                     </div>
-                `;
-            } else {
-                return `
-                    <div class="bg-white border border-outline-variant/35 rounded-2xl p-4 flex justify-between items-center shadow-sm relative group min-h-[90px]">
-                        <button onclick="toggleLogMeal('${today}', '${slotName}')" class="absolute top-2.5 right-2.5 bg-red-600 hover:bg-red-700 text-white rounded-full p-0.5 border border-outline-variant/35 shadow-md flex items-center justify-center cursor-pointer z-30 transition-transform active:scale-90" title="Unlog food">
-                            <span class="material-symbols-outlined text-[9px] font-bold">close</span>
-                        </button>
-                        <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-full bg-[#f0fdf4] text-[#006e2f] flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-lg">eco</span>
-                            </div>
-                            <div>
-                                <span class="block text-[9px] uppercase tracking-wider text-slate-400 font-bold">${slotName}</span>
-                                <span class="font-bold text-xs text-slate-800 line-clamp-1">${meal.title}</span>
-                            </div>
-                        </div>
-                        <span class="text-xs font-bold text-slate-500 shrink-0 pr-4">${meal.calories} kcal</span>
-                    </div>
-                `;
-            }
+                </div>
+            `;
         }
+
+        const totalMacros = (meal.p || 0) + (meal.c || 0) + (meal.f || 0) || 1;
+        const pPct = ((meal.p || 0) / totalMacros) * 100;
+        const cPct = ((meal.c || 0) / totalMacros) * 100;
+        const fPct = ((meal.f || 0) / totalMacros) * 100;
+
+        // Visual styles based on log status (grayscale if not eaten yet)
+        const imageStyle = isLogged ? 'filter: none;' : 'filter: grayscale(100%) contrast(85%) opacity(70%);';
+        const cardBgClass = isLogged ? 'bg-white border-primary/25' : 'bg-slate-50/70 border-slate-200';
         
-        return `
-            <button onclick="toggleLogMeal('${today}', '${slotName}')" class="bg-white border-2 border-dashed border-slate-200 hover:border-primary hover:bg-primary/5 rounded-2xl p-6 flex flex-row justify-center items-center gap-2 min-h-[90px] w-full cursor-pointer transition-all hover:scale-[1.01] active:scale-95 group">
-                <span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">add_circle</span>
-                <span class="font-bold text-xs text-slate-500 group-hover:text-primary transition-colors">Log ${slotName}</span>
-            </button>
-        `;
+        // Log button styling
+        const btnHtml = isLogged 
+            ? `<button onclick="event.stopPropagation(); toggleLogMeal('${today}', '${slotName}')" class="bg-red-600 hover:bg-red-700 text-white rounded-full p-1 border border-outline-variant/35 shadow-md flex items-center justify-center cursor-pointer transition-transform active:scale-90" title="Unlog meal">
+                   <span class="material-symbols-outlined text-[10px] font-bold">close</span>
+               </button>`
+            : `<button onclick="event.stopPropagation(); toggleLogMeal('${today}', '${slotName}')" class="bg-primary hover:bg-[#005321] text-white font-bold text-[9px] px-2.5 py-1.5 rounded-xl flex items-center gap-0.5 shadow-sm transition-all active:scale-95 cursor-pointer" title="Log consumed">
+                   <span class="material-symbols-outlined text-[12px] font-bold">check_circle</span> Log Eat
+               </button>`;
+
+        if (meal.image) {
+            return `
+                <div onclick="navigateTo('meal-plans')" class="${cardBgClass} border rounded-2xl overflow-hidden flex flex-col shadow-sm relative group cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all">
+                    <!-- Action Button -->
+                    <div class="absolute top-2.5 right-2.5 z-30">
+                        ${btnHtml}
+                    </div>
+                    <div class="h-28 w-full relative overflow-hidden">
+                        <img class="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300 pointer-events-none select-none" style="${imageStyle}" src="${meal.image}" alt="${meal.title}">
+                        <span class="absolute top-2.5 left-2.5 bg-white/95 text-slate-700 font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm z-10">${slotName}</span>
+                    </div>
+                    <div class="p-3 flex flex-col gap-2">
+                        <div class="flex justify-between items-center gap-2">
+                            <span class="font-bold text-xs text-slate-800 line-clamp-1 group-hover:text-primary transition-colors">${meal.title}</span>
+                            <span class="text-xs font-bold text-slate-500 shrink-0">${meal.calories} kcal</span>
+                        </div>
+                        <div class="w-full h-1.5 rounded-full overflow-hidden flex bg-slate-100">
+                            <div class="bg-[#006e2f]" style="width: ${cPct}%"></div>
+                            <div class="bg-[#006a61]" style="width: ${pPct}%"></div>
+                            <div class="bg-[#9d4300]" style="width: ${fPct}%"></div>
+                        </div>
+                        <div class="flex justify-between text-[9px] text-slate-400 font-bold">
+                            <span>${meal.c || 0}G C</span>
+                            <span>${meal.p || 0}G P</span>
+                            <span>${meal.f || 0}G F</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Compact style card
+            return `
+                <div onclick="navigateTo('meal-plans')" class="${cardBgClass} border rounded-2xl p-4 flex justify-between items-center shadow-sm relative group cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all min-h-[90px]">
+                    <div class="absolute top-2.5 right-2.5 z-30">
+                        ${btnHtml}
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-[#f0fdf4] text-[#006e2f] flex items-center justify-center shrink-0" style="${imageStyle}">
+                            <span class="material-symbols-outlined text-lg">eco</span>
+                        </div>
+                        <div>
+                            <span class="block text-[9px] uppercase tracking-wider text-slate-400 font-bold">${slotName}</span>
+                            <span class="font-bold text-xs text-slate-800 line-clamp-1 group-hover:text-primary transition-colors">${meal.title}</span>
+                            <span class="text-[9px] font-bold text-slate-400 block mt-0.5">${meal.calories} kcal</span>
+                        </div>
+                    </div>
+                    <!-- spacer for absolute absolute button -->
+                    <div class="w-16"></div>
+                </div>
+            `;
+        }
     }).join('');
 }
 
