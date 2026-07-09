@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>NutriFlow Specialist - Portal Login</title>
+    <title>NutriFlow Admin - Control Center Login</title>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,19 +35,19 @@
         <div class="flex items-center gap-2 mb-6">
             <span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">eco</span>
             <div class="flex flex-col">
-                <span class="text-2xl font-bold tracking-tight text-primary leading-none">NutriFlow</span>
-                <span class="text-[9px] uppercase tracking-widest text-[#9d4300] font-bold mt-1">Practitioner Portal</span>
+                <span class="text-2xl font-bold tracking-tight text-primary leading-none">NutriFlow Admin</span>
+                <span class="text-[9px] uppercase tracking-widest text-[#9d4300] font-bold mt-1">Control Center</span>
             </div>
         </div>
 
-        <h2 class="text-xl font-bold text-center mb-1">Welcome Specialist</h2>
-        <p class="text-xs text-slate-500 text-center mb-6">Enter your practitioner credentials to access weekly planner and client tools.</p>
+        <h2 class="text-xl font-bold text-center mb-1">Welcome Administrator</h2>
+        <p class="text-xs text-slate-500 text-center mb-6">Enter your administrator credentials to access the high-level Control Center dashboard.</p>
 
         <!-- Form -->
-        <form onsubmit="handleAdminLogin(event)" class="w-full space-y-4">
+        <form onsubmit="handleSuperAdminLogin(event)" class="w-full space-y-4">
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Username / Email</label>
-                <input type="text" id="admin-user" required placeholder="specialist@nutriflow.com" value="specialist@nutriflow.com" class="w-full rounded-xl border-slate-200 text-xs px-3 py-2.5 focus:border-primary focus:ring-primary bg-slate-50">
+                <input type="text" id="admin-user" required placeholder="admin@nutriflow.com" value="admin@nutriflow.com" class="w-full rounded-xl border-slate-200 text-xs px-3 py-2.5 focus:border-primary focus:ring-primary bg-slate-50">
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Security Key / Password</label>
@@ -56,29 +56,20 @@
             <div class="text-red-500 text-[10px] font-semibold hidden text-center" id="error-message">Invalid key combination. Try again.</div>
 
             <button type="submit" class="w-full bg-primary hover:bg-[#005321] text-white font-bold text-xs py-3 rounded-xl transition-all shadow-md mt-2 flex items-center justify-center gap-1">
-                <span class="material-symbols-outlined text-[16px]">lock_open</span> Sign In
+                <span class="material-symbols-outlined text-[16px]">admin_panel_settings</span> Control Center Login
             </button>
         </form>
     </div>
 
     <script>
-        function handleAdminLogin(e) {
+        function handleSuperAdminLogin(e) {
             e.preventDefault();
             const u = document.getElementById('admin-user').value;
             const p = document.getElementById('admin-pass').value;
 
-            if ((u === 'specialist@nutriflow.com' || u === 'admin@nutriflow.com') && p === 'admin123') {
-                localStorage.setItem('nutriflow_admin_logged', 'true');
-                localStorage.setItem('nutriflow_specialist_name', 'Dr. Hasan');
-                window.location.href = './index.html'; // Redirect to specialist dashboard
-            } else if (u === 'amanda@nutriflow.com' && p === 'admin123') {
-                localStorage.setItem('nutriflow_admin_logged', 'true');
-                localStorage.setItem('nutriflow_specialist_name', 'Dr. Amanda');
-                window.location.href = './index.html';
-            } else if (u === 'm.reid@email.com' && p === 'admin123') {
-                localStorage.setItem('nutriflow_admin_logged', 'true');
-                localStorage.setItem('nutriflow_specialist_name', 'Dr. Marcus Reid');
-                window.location.href = './index.html';
+            if (u === 'admin@nutriflow.com' && p === 'admin123') {
+                localStorage.setItem('nutriflow_superadmin_logged', 'true');
+                window.location.href = './index.html'; // Redirect to super admin control center
             } else {
                 const err = document.getElementById('error-message');
                 err.classList.remove('hidden');

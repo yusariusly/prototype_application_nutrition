@@ -140,17 +140,33 @@ function loadAdminState() {
             saveAdminState();
         }
     }
+
+    // Load Clients List
+    if (localStorage.getItem('nutriflow_clients')) {
+        state.clients = JSON.parse(localStorage.getItem('nutriflow_clients'));
+    } else {
+        localStorage.setItem('nutriflow_clients', JSON.stringify(state.clients));
+    }
 }
 
 function saveAdminState() {
     localStorage.setItem('nutriflow_appointments', JSON.stringify(state.appointments));
     localStorage.setItem('nutriflow_client_meal_plans', JSON.stringify(state.clientMealPlans));
+    localStorage.setItem('nutriflow_clients', JSON.stringify(state.clients));
 }
 
 // ==================== INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', () => {
     checkAdminSession();
     loadAdminState();
+    
+    // Set subtitle welcome message with specialist name
+    const activeSpecialist = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
+    const subtitle = document.getElementById('specialist-welcome-subtitle');
+    if (subtitle) {
+        subtitle.innerText = `Logged in as: ${activeSpecialist} · Manage your active nutrition clients and monitor their progress.`;
+    }
+    
     navigateTo('admin-clients');
 });
 
@@ -241,11 +257,14 @@ function renderAdminClientsList() {
 
     const query = document.getElementById('admin-client-search').value.toLowerCase();
     const goalFilter = document.getElementById('admin-client-filter-goal').value;
+    const ownerFilter = document.getElementById('admin-client-filter-owner')?.value || 'mine';
+    const activeSpecialist = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
 
     const filtered = state.clients.filter(cli => {
         const matchesQuery = cli.name.toLowerCase().includes(query) || cli.email.toLowerCase().includes(query);
         const matchesGoal = goalFilter === 'all' || cli.goal === goalFilter;
-        return matchesQuery && matchesGoal;
+        const matchesOwner = ownerFilter === 'all' || cli.therapist === activeSpecialist;
+        return matchesQuery && matchesGoal && matchesOwner;
     });
 
     if (filtered.length === 0) {

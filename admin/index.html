@@ -99,8 +99,8 @@
         <div class="flex items-center gap-sm cursor-pointer" onclick="navigateTo('admin-clients')">
             <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">eco</span>
             <div class="flex flex-col">
-                <span class="text-xl font-bold tracking-tight text-primary leading-none">NutriFlow Admin</span>
-                <span class="text-[9px] uppercase tracking-widest text-[#9d4300] font-bold mt-0.5">Control Center</span>
+                <span class="text-xl font-bold tracking-tight text-primary leading-none">NutriFlow Specialist</span>
+                <span class="text-[9px] uppercase tracking-widest text-[#9d4300] font-bold mt-0.5">Practitioner Portal</span>
             </div>
         </div>
 
@@ -131,7 +131,7 @@
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 class="text-3xl font-bold tracking-tight text-on-surface">Client Overview</h1>
-                    <p class="text-body-md text-on-surface-variant mt-1">Manage your active nutrition clients and monitor their progress.</p>
+                    <p class="text-body-md text-on-surface-variant mt-1" id="specialist-welcome-subtitle">Manage your active nutrition clients and monitor their progress.</p>
                 </div>
                 <button onclick="showAddNewClientModal()" class="bg-[#006e2f] hover:bg-[#005321] text-white font-bold text-xs px-5 py-3 rounded-full flex items-center gap-2 shadow-md transition-all active:scale-95">
                     <span class="material-symbols-outlined text-[18px]">add</span> New Client
@@ -173,12 +173,18 @@
                         <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant/60">search</span>
                         <input type="text" id="admin-client-search" oninput="filterAdminClients()" placeholder="Search clients..." class="w-full rounded-xl border-outline-variant/40 focus:border-primary focus:ring-primary text-xs pl-10 pr-4 py-2.5 bg-surface-container-low/55">
                     </div>
-                    <select id="admin-client-filter-goal" onchange="filterAdminClients()" class="text-xs bg-surface border border-outline-variant/30 rounded-xl px-3 py-2 text-on-surface-variant font-semibold">
-                        <option value="all">All Goals</option>
-                        <option value="Weight Loss">Weight Loss</option>
-                        <option value="Muscle Gain">Muscle Gain</option>
-                        <option value="Maintenance">Maintenance</option>
-                    </select>
+                    <div class="flex gap-2">
+                        <select id="admin-client-filter-owner" onchange="filterAdminClients()" class="text-xs bg-surface border border-outline-variant/30 rounded-xl px-3 py-2 text-on-surface-variant font-semibold">
+                            <option value="mine">My Clients</option>
+                            <option value="all">All Clients</option>
+                        </select>
+                        <select id="admin-client-filter-goal" onchange="filterAdminClients()" class="text-xs bg-surface border border-outline-variant/30 rounded-xl px-3 py-2 text-on-surface-variant font-semibold">
+                            <option value="all">All Goals</option>
+                            <option value="Weight Loss">Weight Loss</option>
+                            <option value="Muscle Gain">Muscle Gain</option>
+                            <option value="Maintenance">Maintenance</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="overflow-x-auto">

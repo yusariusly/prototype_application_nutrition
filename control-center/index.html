@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>NutriFlow Admin - Control Center</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#006e2f",
+                "secondary": "#006a61",
+                "background": "#f8f9ff",
+                "surface": "#ffffff",
+                "surface-variant": "#e1e4dc",
+                "on-background": "#0b1c30",
+                "on-surface": "#1a1c18",
+                "on-surface-variant": "#43493e",
+                "outline-variant": "#c3c8bc",
+                "surface-container-low": "#f0f1eb",
+                "surface-container-lowest": "#ffffff"
+              }
+            }
+          }
+        }
+      </script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .nav-link.active {
+            color: #006e2f;
+            border-bottom: 2px solid #006e2f;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-sans min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-surface border-b border-outline-variant/30 flex justify-between items-center w-full px-6 md:px-12 h-20 z-50 sticky top-0 shadow-sm">
+        <!-- Logo -->
+        <div class="flex items-center gap-2 cursor-pointer" onclick="navigateToView('analytics')">
+            <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">eco</span>
+            <div class="flex flex-col">
+                <span class="text-xl font-bold tracking-tight text-primary leading-none">NutriFlow Admin</span>
+                <span class="text-[9px] uppercase tracking-widest text-[#9d4300] font-bold mt-0.5">Control Center</span>
+            </div>
+        </div>
+
+        <!-- Links -->
+        <div class="hidden md:flex gap-6 h-full items-center absolute left-1/2 transform -translate-x-1/2">
+            <a onclick="navigateToView('analytics')" id="link-analytics" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer">Analytics</a>
+            <a onclick="navigateToView('nutritionists')" id="link-nutritionists" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer">Nutritionists</a>
+            <a onclick="navigateToView('allocation')" id="link-allocation" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer">Client Allocation</a>
+        </div>
+
+        <!-- Sign Out -->
+        <div class="flex items-center gap-2">
+            <button onclick="handleSignOut()" class="border border-[#ba1a1a]/30 hover:bg-red-50 text-[#ba1a1a] px-3.5 py-1.5 rounded-full font-bold text-xs transition-all flex items-center gap-1 cursor-pointer">
+                <span class="material-symbols-outlined text-[16px]">logout</span> Sign Out
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="flex-grow w-full px-6 md:px-12 py-8 flex flex-col gap-8 max-w-7xl mx-auto">
+        
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Card 1 -->
+            <div class="bg-white border border-outline-variant/30 rounded-2xl p-5 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary shrink-0">
+                    <span class="material-symbols-outlined text-2xl font-bold">groups</span>
+                </div>
+                <div>
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Total Clients</span>
+                    <span class="text-2xl font-extrabold text-slate-800" id="stat-total-clients">3</span>
+                </div>
+            </div>
+            <!-- Card 2 -->
+            <div class="bg-white border border-outline-variant/30 rounded-2xl p-5 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center text-secondary shrink-0">
+                    <span class="material-symbols-outlined text-2xl font-bold">support_agent</span>
+                </div>
+                <div>
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Nutritionists</span>
+                    <span class="text-2xl font-extrabold text-slate-800" id="stat-total-experts">4</span>
+                </div>
+            </div>
+            <!-- Card 3 -->
+            <div class="bg-white border border-outline-variant/30 rounded-2xl p-5 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-700 shrink-0">
+                    <span class="material-symbols-outlined text-2xl font-bold">calendar_month</span>
+                </div>
+                <div>
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Janji Temu</span>
+                    <span class="text-2xl font-extrabold text-slate-800" id="stat-total-bookings">5</span>
+                </div>
+            </div>
+            <!-- Card 4 -->
+            <div class="bg-white border border-outline-variant/30 rounded-2xl p-5 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-700 shrink-0">
+                    <span class="material-symbols-outlined text-2xl font-bold">task_alt</span>
+                </div>
+                <div>
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Rata Kepatuhan</span>
+                    <span class="text-2xl font-extrabold text-slate-800" id="stat-avg-compliance">88.3%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== VIEW 1: ANALYTICS ==================== -->
+        <section id="view-analytics" class="view-section flex flex-col gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Chart 1: Line Chart -->
+                <div class="bg-white border border-outline-variant/30 rounded-2xl p-6 shadow-sm flex flex-col gap-3">
+                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">analytics</span> Client Registrations & Bookings Trend
+                    </h3>
+                    <div class="h-64 w-full">
+                        <canvas id="chart-growth-bookings"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Doughnut Chart -->
+                <div class="bg-white border border-outline-variant/30 rounded-2xl p-6 shadow-sm flex flex-col gap-3">
+                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">pie_chart</span> Client Goal Distribution
+                    </h3>
+                    <div class="h-64 w-full flex justify-center">
+                        <canvas id="chart-goals" class="max-w-[240px]"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW 2: NUTRITIONISTS ==================== -->
+        <section id="view-nutritionists" class="view-section hidden flex flex-col gap-6">
+            <div class="bg-white border border-outline-variant/30 rounded-2xl p-6 shadow-sm flex flex-col gap-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Nutritionists</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Manage and onboard professional dietitians and nutritionists.</p>
+                    </div>
+                    <button onclick="openAddNutritionistModal()" class="bg-primary hover:bg-[#005321] text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-1.5 cursor-pointer">
+                        <span class="material-symbols-outlined text-[16px]">person_add</span> Register Specialist
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                                <th class="p-4">Name</th>
+                                <th class="p-4">Email</th>
+                                <th class="p-4">Specialty</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4 text-center">Active Clients</th>
+                                <th class="p-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="nutritionists-table-body" class="divide-y divide-slate-100">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW 3: CLIENT ALLOCATION ==================== -->
+        <section id="view-allocation" class="view-section hidden flex flex-col gap-6">
+            <div class="bg-white border border-outline-variant/30 rounded-2xl p-6 shadow-sm flex flex-col gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">1-on-1 Practitioner Allocation</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Assign dietitians/therapists to manage individual client progress.</p>
+                </div>
+
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                                <th class="p-4">Client Name</th>
+                                <th class="p-4">Target Goal</th>
+                                <th class="p-4">Assigned Expert</th>
+                                <th class="p-4 text-center">Compliance</th>
+                                <th class="p-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allocation-table-body" class="divide-y divide-slate-100">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal: Add Nutritionist -->
+    <div id="add-nutritionist-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white max-w-sm w-full rounded-2xl p-6 border border-slate-100 shadow-2xl flex flex-col gap-4">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+                <h3 class="text-base font-bold text-slate-800">Onboard Specialist</h3>
+                <button onclick="closeAddNutritionistModal()" class="text-slate-400 hover:text-slate-600"><span class="material-symbols-outlined text-[20px]">close</span></button>
+            </div>
+            <form onsubmit="handleAddNutritionist(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Full Name</label>
+                    <input type="text" id="expert-name" required placeholder="e.g. Dr. Hasan" class="w-full rounded-xl border-slate-200 text-xs px-3 py-2.5 focus:border-primary focus:ring-primary bg-slate-50">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Email</label>
+                    <input type="email" id="expert-email" required placeholder="specialist@nutriflow.com" class="w-full rounded-xl border-slate-200 text-xs px-3 py-2.5 focus:border-primary focus:ring-primary bg-slate-50">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Specialty</label>
+                    <select id="expert-specialty" class="w-full rounded-xl border-slate-200 text-xs px-3 py-2.5 focus:border-primary focus:ring-primary bg-slate-50">
+                        <option value="Weight Management">Weight Management</option>
+                        <option value="Sport Nutrition">Sport Nutrition</option>
+                        <option value="Therapeutic Diets">Therapeutic Diets</option>
+                        <option value="Pediatric Nutrition">Pediatric Nutrition</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-primary hover:bg-[#005321] text-white font-bold text-xs py-3 rounded-xl transition-all shadow-md mt-2 flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span class="material-symbols-outlined text-[16px]">save</span> Register Practitioner
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Allocation -->
+    <div id="edit-allocation-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white max-w-sm w-full rounded-2xl p-6 border border-slate-100 shadow-2xl flex flex-col gap-4">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+                <h3 class="text-base font-bold text-slate-800">Assign Practitioner</h3>
+                <button onclick="closeEditAllocationModal()" class="text-slate-400 hover:text-slate-600"><span class="material-symbols-outlined text-[20px]">close</span></button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Client</label>
+                    <div id="allocation-client-name" class="font-bold text-slate-800 text-sm bg-slate-50 p-2.5 rounded-xl border border-slate-100">Sarah Jenkins</div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Select Specialist</label>
+                    <select id="allocation-expert-select" class="w-full rounded-xl border-slate-200 text-xs px-3 py-2.5 focus:border-primary focus:ring-primary bg-slate-50">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+                <button onclick="saveAllocationChange()" class="w-full bg-primary hover:bg-[#005321] text-white font-bold text-xs py-3 rounded-xl transition-all shadow-md mt-2 flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span class="material-symbols-outlined text-[16px]">save</span> Update Allocation
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="admin-toast" class="fixed bottom-6 right-6 z-50 bg-slate-800 text-white font-semibold text-xs px-4 py-3 rounded-xl shadow-lg translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-base" id="toast-icon">check_circle</span>
+        <span id="toast-text">Action successful</span>
+    </div>
+
+    <script type="module" src="./control-center.js"></script>
+</body>
+</html>
