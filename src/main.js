@@ -355,6 +355,31 @@ document.addEventListener('DOMContentLoaded', () => {
         welcomeLabel.innerText = `Good morning, ${activeClient.split(' ')[0]}!`;
     }
 
+    // Update dedicated practitioner card
+    const clients = JSON.parse(localStorage.getItem('nutriflow_clients')) || [
+        { name: 'Sarah Jenkins', therapist: 'Dr. Hasan' },
+        { name: 'Marcus Reid', therapist: 'Dr. Hasan' },
+        { name: 'Elena Lopez', therapist: 'Dr. Amanda' }
+    ];
+    const clientInfo = clients.find(c => c.name === activeClient) || { name: activeClient, therapist: 'Dr. Hasan' };
+    const therapistName = clientInfo.therapist || 'Dr. Hasan';
+
+    const nutritionists = JSON.parse(localStorage.getItem('nutriflow_nutritionists')) || [
+        { name: 'Dr. Hasan', specialty: 'Weight Management' },
+        { name: 'Dr. Amanda', specialty: 'Sport Nutrition' },
+        { name: 'Dr. Eleanor Vance, RD', specialty: 'General Wellness' }
+    ];
+    const therapistInfo = nutritionists.find(n => n.name === therapistName) || { name: therapistName, specialty: 'Weight Management & Wellness' };
+
+    const avatarEl = document.getElementById('dedicated-practitioner-avatar');
+    const nameEl = document.getElementById('dedicated-practitioner-name');
+    const specialtyEl = document.getElementById('dedicated-practitioner-specialty');
+    if (avatarEl && nameEl && specialtyEl) {
+        nameEl.innerText = therapistName;
+        specialtyEl.innerText = therapistInfo.specialty || 'Weight Management & Wellness';
+        avatarEl.innerText = therapistName.split(' ').map(s => s[0]).join('').substring(0, 2).toUpperCase();
+    }
+    
     navigateTo('dashboard');
     renderWaterTracker();
 });
