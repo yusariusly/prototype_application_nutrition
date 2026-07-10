@@ -431,7 +431,11 @@ window.openAddServiceModal = function() {
     document.getElementById('service-modal-title').innerText = 'Add Consultation Service';
     document.getElementById('service-modal-id').value = '';
     document.getElementById('service-modal-title-input').value = '';
-    document.getElementById('service-modal-description').value = '';
+    const descInput = document.getElementById('service-modal-description');
+    if (descInput) {
+        descInput.value = '';
+        descInput.style.height = 'auto';
+    }
     document.getElementById('service-modal-duration').value = '60 min';
     document.getElementById('service-modal-price').value = '150';
     document.getElementById('service-modal-type').value = 'Virtual or In-Person';
@@ -453,7 +457,17 @@ window.openEditServiceModal = function(srvId) {
     document.getElementById('service-modal-title').innerText = 'Edit Consultation Service';
     document.getElementById('service-modal-id').value = srv.id;
     document.getElementById('service-modal-title-input').value = srv.title;
-    document.getElementById('service-modal-description').value = srv.description;
+    
+    const descInput = document.getElementById('service-modal-description');
+    if (descInput) {
+        descInput.value = srv.description;
+        // Trigger auto-resize after a short timeout or immediately when layout updates
+        setTimeout(() => {
+            descInput.style.height = 'auto';
+            descInput.style.height = descInput.scrollHeight + 'px';
+        }, 50);
+    }
+    
     document.getElementById('service-modal-duration').value = srv.duration;
     document.getElementById('service-modal-price').value = srv.price;
     document.getElementById('service-modal-type').value = srv.type;

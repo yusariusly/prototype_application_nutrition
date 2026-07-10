@@ -809,7 +809,7 @@
                 </div>
                 <div>
                     <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Description</label>
-                    <textarea id="service-modal-description" required rows="3" placeholder="e.g. A comprehensive session to review progress..." class="w-full rounded-lg border-slate-200 text-sm px-3 py-2.5 bg-slate-50 focus:border-primary focus:ring-primary focus:bg-white transition-all"></textarea>
+                    <textarea id="service-modal-description" required rows="3" oninput="this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px';" placeholder="e.g. A comprehensive session to review progress..." class="w-full rounded-lg border-slate-200 text-sm px-3 py-2.5 bg-slate-50 focus:border-primary focus:ring-primary focus:bg-white transition-all overflow-hidden resize-none"></textarea>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
