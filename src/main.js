@@ -1406,9 +1406,14 @@ window.joinVideoCall = function(aptId) {
     const apt = state.appointments.find(a => a.id === aptId);
     if (!apt) return;
     
-    showToast(`Connecting to video session with ${apt.therapist}...`, 'success');
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
+    const clientDetails = clientsList.find(c => c.name === activeClient);
+    const assignedTherapist = clientDetails?.therapist || 'Dr. Hasan';
+    
+    showToast(`Connecting to video session with ${assignedTherapist}...`, 'success');
     setTimeout(() => {
-        window.location.href = `./telehealth.html?practitioner=${encodeURIComponent(apt.therapist)}`;
+        window.location.href = `./telehealth.html?practitioner=${encodeURIComponent(assignedTherapist)}`;
     }, 850);
 };
 
