@@ -1336,7 +1336,7 @@ function renderAdminCalendar() {
                             <p class="text-[9px] text-on-surface-variant/80 truncate mt-0.5">${apt.serviceTitle} • ${apt.time}</p>
                         </div>
                     </div>
-                    ${apt.type === 'Video Call' ? `
+                    ${apt.type === 'Video Call' || apt.type.toLowerCase().includes('virtual') || apt.type.toLowerCase().includes('video') ? `
                         <button onclick="joinAdminVideoCall('${apt.id}')" class="bg-primary hover:bg-[#005321] text-white font-bold text-[9px] px-2 py-1 rounded shadow-sm transition-all active:scale-95 shrink-0 cursor-pointer">Join Call</button>
                     ` : ''}
                 </div>
