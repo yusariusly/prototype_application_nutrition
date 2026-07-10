@@ -957,8 +957,7 @@ window.renderProgramsList = function() {
         return `
             <div class="bg-surface-container-lowest border border-outline-variant/30 hover:border-primary/40 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all hover:scale-[1.02] flex flex-col justify-between min-h-[190px]">
                 <div class="space-y-2">
-                    <div class="flex justify-between items-start">
-                        <span class="bg-primary/10 text-primary font-bold text-[9px] uppercase tracking-wider px-2.5 py-1 rounded-full">Active Plan</span>
+                    <div class="flex justify-end items-start">
                         <button onclick="deleteProgram('${p.id}')" class="text-outline-variant hover:text-red-500 cursor-pointer" title="Delete Program">
                             <span class="material-symbols-outlined text-[18px]">delete</span>
                         </button>
