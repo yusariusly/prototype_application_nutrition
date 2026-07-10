@@ -805,6 +805,12 @@ window.openCreateProgramModal = function() {
     const descInput = document.getElementById('new-prog-description');
     if (nameInput) nameInput.value = '';
     if (descInput) descInput.value = '';
+
+    const templateSelect = document.getElementById('new-prog-template');
+    if (templateSelect) {
+        templateSelect.innerHTML = `<option value="">Start Empty (No meals pre-populated)</option>` + 
+            state.programs.map(p => `<option value="${p.id}">Copy from "${p.name}"</option>`).join('');
+    }
 };
 
 window.closeCreateProgramModal = function() {
@@ -819,19 +825,31 @@ window.handleCreateProgramSubmit = function(e) {
     e.preventDefault();
     const name = document.getElementById('new-prog-name').value.trim();
     const description = document.getElementById('new-prog-description').value.trim();
+    const templateId = document.getElementById('new-prog-template')?.value;
     const activeSpecialist = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
     
     if (!name || !description) return;
+
+    let defaultMeals = {
+        'Mon': [], 'Tue': [], 'Wed': [], 'Thu': [], 'Fri': [], 'Sat': [], 'Sun': []
+    };
+    let targetKcal = 2000;
+    
+    if (templateId) {
+        const sourceProgram = state.programs.find(p => p.id === templateId);
+        if (sourceProgram) {
+            defaultMeals = JSON.parse(JSON.stringify(sourceProgram.meals || defaultMeals));
+            targetKcal = sourceProgram.targetKcal || 2000;
+        }
+    }
     
     const newProgram = {
         id: 'prog-' + Date.now(),
         name: name,
         description: description,
         creator: activeSpecialist,
-        targetKcal: 2000,
-        meals: {
-            'Mon': [], 'Tue': [], 'Wed': [], 'Thu': [], 'Fri': [], 'Sat': [], 'Sun': []
-        }
+        targetKcal: targetKcal,
+        meals: defaultMeals
     };
     
     state.programs.push(newProgram);
