@@ -754,6 +754,7 @@ window.renderProgramsList = function() {
                     <div class="flex gap-1.5">
                         <button onclick="editProgramPlan('${p.id}')" class="bg-[#dbeafe] hover:bg-[#bfdbfe] text-[#1e3a8a] font-bold text-[10px] px-3 py-2 rounded-lg transition-all cursor-pointer">Edit Plan</button>
                         <button onclick="shareProgramLink('${p.id}')" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-[10px] px-2.5 py-2 rounded-lg transition-all cursor-pointer" title="Share Program"><span class="material-symbols-outlined text-[14px]">share</span></button>
+                        <button onclick="openProgramDiscussion('${p.id}')" class="bg-sky-50 border border-sky-200 text-sky-700 hover:bg-sky-100 font-bold text-[10px] px-2.5 py-2 rounded-lg transition-all cursor-pointer" title="Program Discussion"><span class="material-symbols-outlined text-[14px]">forum</span></button>
                         <button onclick="openPublishProgramDialog('${p.id}')" class="bg-primary hover:bg-[#005321] text-white font-bold text-[10px] px-3 py-2 rounded-lg transition-all cursor-pointer">Publish</button>
                     </div>
                 </div>
@@ -1741,5 +1742,110 @@ window.previewWeeklyPlan = function() {
     
     saveAdminState();
     window.open(previewUrl, '_blank');
+};
+
+window.openProgramDiscussionDirect = function() {
+    const progId = state.editingProgramId;
+    if (progId) {
+        window.openProgramDiscussion(progId);
+    }
+};
+
+window.openProgramDiscussion = function(programId) {
+    state.activeDiscussionProgramId = programId;
+    const program = state.programs.find(p => p.id === programId);
+    if (!program) return;
+    
+    const titleEl = document.getElementById('discussion-modal-title');
+    if (titleEl) {
+        titleEl.innerText = `Discussion: ${program.name}`;
+    }
+    
+    const input = document.getElementById('admin-program-chat-input');
+    if (input) input.value = '';
+    
+    const modal = document.getElementById('program-discussion-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+    
+    window.renderAdminProgramChat();
+};
+
+window.closeProgramDiscussionModal = function() {
+    const modal = document.getElementById('program-discussion-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+window.renderAdminProgramChat = function() {
+    const container = document.getElementById('admin-program-chat-container');
+    if (!container) return;
+    
+    const progId = state.activeDiscussionProgramId;
+    const program = state.programs.find(p => p.id === progId);
+    if (!program) return;
+    
+    if (!program.chatHistory) {
+        program.chatHistory = [
+            {
+                sender: 'doctor',
+                senderName: program.creator || 'Dr. Hasan',
+                text: `Welcome to your customized nutrition program "${program.name}". Feel free to ask me any questions or request adjustments directly in this private chat thread!`,
+                time: '10:00 AM'
+            }
+        ];
+    }
+    
+    container.innerHTML = program.chatHistory.map(msg => {
+        const isDoc = msg.sender === 'doctor';
+        const bubbleBg = isDoc ? 'bg-primary text-white rounded-tr-none' : 'bg-[#e2e8f0] text-slate-800 rounded-tl-none';
+        const align = isDoc ? 'justify-end' : 'justify-start';
+        return `
+            <div class="flex ${align} w-full">
+                <div class="${bubbleBg} text-xs px-3.5 py-2.5 rounded-2xl max-w-[85%] shadow-sm leading-relaxed">
+                    <div class="flex justify-between items-baseline gap-4 mb-0.5 opacity-80 text-[8px] font-bold uppercase tracking-wider">
+                        <span>${msg.senderName}</span>
+                        <span>${msg.time}</span>
+                    </div>
+                    <div>${msg.text}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    container.scrollTop = container.scrollHeight;
+};
+
+window.handleAdminProgramChatSubmit = function(e) {
+    e.preventDefault();
+    const input = document.getElementById('admin-program-chat-input');
+    if (!input) return;
+    
+    const val = input.value.trim();
+    if (!val) return;
+    
+    const progId = state.activeDiscussionProgramId;
+    const program = state.programs.find(p => p.id === progId);
+    if (program) {
+        if (!program.chatHistory) program.chatHistory = [];
+        const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const specialist = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
+        
+        program.chatHistory.push({
+            sender: 'doctor',
+            senderName: specialist,
+            text: val,
+            time: timeNow
+        });
+        
+        saveAdminState();
+        input.value = '';
+        window.renderAdminProgramChat();
+        showToast('Reply sent successfully!', 'success');
+    }
 };
 

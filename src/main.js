@@ -858,7 +858,118 @@ function renderMealPlans() {
             </div>
         `;
     }).join('');
+    
+    renderProgramChat();
 }
+
+window.renderProgramChat = function() {
+    const container = document.getElementById('program-chat-container');
+    if (!container) return;
+    
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
+    const clientDetails = clientsList.find(c => c.name === activeClient);
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlProgramId = urlParams.get('programId');
+    
+    const progId = state.isGuestPreview ? (urlProgramId || 'prog-sarah') : (clientDetails?.activeProgramId || 'prog-sarah');
+    const programs = JSON.parse(localStorage.getItem('nutriflow_programs_draft')) || [];
+    const program = programs.find(p => p.id === progId);
+    
+    if (!program) {
+        container.innerHTML = `<div class="text-[10px] text-on-surface-variant font-medium text-center py-6">No program discussion thread available.</div>`;
+        return;
+    }
+    
+    if (!program.chatHistory) {
+        program.chatHistory = [
+            {
+                sender: 'doctor',
+                senderName: program.creator || 'Dr. Hasan',
+                text: `Welcome to your customized nutrition program "${program.name}". Feel free to ask me any questions or request adjustments directly in this private chat thread!`,
+                time: '10:00 AM'
+            }
+        ];
+    }
+    
+    container.innerHTML = program.chatHistory.map(msg => {
+        const isDoc = msg.sender === 'doctor';
+        const bubbleBg = isDoc ? 'bg-[#f1f5f9] text-slate-800 rounded-tl-none' : 'bg-primary text-white rounded-tr-none';
+        const align = isDoc ? 'justify-start' : 'justify-end';
+        return `
+            <div class="flex ${align} w-full">
+                <div class="${bubbleBg} text-xs px-3.5 py-2.5 rounded-2xl max-w-[85%] shadow-sm leading-relaxed">
+                    <div class="flex justify-between items-baseline gap-4 mb-0.5 opacity-80 text-[8px] font-bold uppercase tracking-wider">
+                        <span>${msg.senderName}</span>
+                        <span>${msg.time}</span>
+                    </div>
+                    <div>${msg.text}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    container.scrollTop = container.scrollHeight;
+};
+
+window.handleProgramChatSubmit = function(e) {
+    e.preventDefault();
+    if (state.isGuestPreview) {
+        openRegistrationModal();
+        return;
+    }
+    
+    const input = document.getElementById('program-chat-input');
+    if (!input) return;
+    
+    const val = input.value.trim();
+    if (!val) return;
+    
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
+    const clientDetails = clientsList.find(c => c.name === activeClient);
+    
+    const progId = clientDetails?.activeProgramId || 'prog-sarah';
+    const programs = JSON.parse(localStorage.getItem('nutriflow_programs_draft')) || [];
+    const program = programs.find(p => p.id === progId);
+    
+    if (program) {
+        if (!program.chatHistory) program.chatHistory = [];
+        const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        program.chatHistory.push({
+            sender: 'client',
+            senderName: activeClient,
+            text: val,
+            time: timeNow
+        });
+        
+        localStorage.setItem('nutriflow_programs_draft', JSON.stringify(programs));
+        input.value = '';
+        renderProgramChat();
+        
+        // Auto-reply simulation from nutritionist after 2 seconds
+        setTimeout(() => {
+            const timeRep = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const replyText = `Thanks for your question! I have reviewed your comment about "${val}" and will get back to you with updates on your program details shortly.`;
+            
+            const currentProgs = JSON.parse(localStorage.getItem('nutriflow_programs_draft')) || [];
+            const freshProg = currentProgs.find(p => p.id === progId);
+            if (freshProg) {
+                if (!freshProg.chatHistory) freshProg.chatHistory = [];
+                freshProg.chatHistory.push({
+                    sender: 'doctor',
+                    senderName: freshProg.creator || 'Dr. Hasan',
+                    text: replyText,
+                    time: timeRep
+                });
+                localStorage.setItem('nutriflow_programs_draft', JSON.stringify(currentProgs));
+            }
+            renderProgramChat();
+        }, 2000);
+    }
+};
 
 window.toggleLogMeal = function(day, slotName) {
     const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';

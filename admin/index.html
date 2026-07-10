@@ -303,6 +303,9 @@
                                  <button onclick="shareProgramDirect()" class="bg-white border border-slate-300 text-[#006e2f] hover:bg-slate-50 font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer">
                                      <span class="material-symbols-outlined text-[18px]">share</span> Share Link
                                  </button>
+                                 <button onclick="openProgramDiscussionDirect()" class="bg-[#e0f2fe] text-[#0369a1] hover:bg-[#bae6fd] font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer">
+                                     <span class="material-symbols-outlined text-[18px]">forum</span> Chat Q&A
+                                 </button>
                                  <button onclick="publishProgramDirect()" class="bg-[#006e2f] hover:bg-[#005321] text-white font-semibold text-xs px-5 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-1.5 cursor-pointer">
                                      <span class="material-symbols-outlined text-[18px] rotate-[-30deg] translate-y-[-1px]" style="font-size:18px;">send</span> Publish to Client
                                  </button>
@@ -742,6 +745,35 @@
                     </select>
                 </div>
                 <button type="submit" class="w-full bg-primary hover:bg-[#005321] text-white font-bold text-xs py-2.5 rounded-lg transition-all shadow-sm cursor-pointer mt-2">Publish Program</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Program Discussion Modal -->
+    <div id="program-discussion-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-surface max-w-md w-full rounded-2xl p-6 border border-slate-100 shadow-2xl flex flex-col gap-4 text-slate-800">
+            <div class="flex justify-between items-center border-b pb-2">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl">forum</span>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800" id="discussion-modal-title">Program Discussion</h3>
+                        <p class="text-[9px] text-slate-400 mt-0.5">Private channel between you and the client</p>
+                    </div>
+                </div>
+                <button onclick="closeProgramDiscussionModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer"><span class="material-symbols-outlined text-[18px]">close</span></button>
+            </div>
+            
+            <!-- Chat history -->
+            <div id="admin-program-chat-container" class="flex flex-col gap-3 max-h-[300px] min-h-[150px] overflow-y-auto pr-2 scroll-smooth bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                <!-- Dynamically populated messages -->
+            </div>
+            
+            <!-- Chat input -->
+            <form onsubmit="handleAdminProgramChatSubmit(event)" class="flex gap-2 items-center">
+                <input type="text" id="admin-program-chat-input" placeholder="Type a reply to the client..." required class="flex-1 rounded-lg border-slate-200 text-xs px-3 py-2.5 bg-slate-50 focus:border-primary focus:ring-primary text-slate-800">
+                <button type="submit" class="bg-primary hover:bg-[#005321] text-white p-2.5 rounded-lg shadow-sm transition-all active:scale-95 flex items-center justify-center cursor-pointer">
+                    <span class="material-symbols-outlined text-[18px]">send</span>
+                </button>
             </form>
         </div>
     </div>

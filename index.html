@@ -295,6 +295,30 @@
             </div>
 
             <div class="flex gap-gutter overflow-x-auto pb-4 w-full hide-scrollbar snap-x snap-mandatory" id="meals-plan-cards-container"></div>
+
+            <!-- Program Chat Discussion Board -->
+            <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 shadow-sm flex flex-col gap-4 mt-2">
+                <div class="flex items-center gap-3 border-b border-surface-variant/20 pb-4">
+                    <span class="material-symbols-outlined text-primary text-2xl">forum</span>
+                    <div>
+                        <h2 class="font-bold text-on-background text-sm">Program Discussion</h2>
+                        <p class="text-[10px] text-on-surface-variant leading-relaxed">Ask your practitioner any questions about your menu recommendations and adjustments.</p>
+                    </div>
+                </div>
+                
+                <!-- Chat History Container -->
+                <div id="program-chat-container" class="flex flex-col gap-3 max-h-[300px] overflow-y-auto pr-2 min-h-[120px] scroll-smooth">
+                    <!-- Dynamic chat messages go here -->
+                </div>
+                
+                <!-- Chat Input Form -->
+                <form onsubmit="handleProgramChatSubmit(event)" class="flex gap-2 items-center mt-2">
+                    <input type="text" id="program-chat-input" placeholder="Type a question or feedback about your program..." class="flex-1 bg-surface-container-low border border-outline-variant/30 text-xs px-4 py-3 rounded-xl focus:outline-none focus:border-primary/50 text-slate-800 transition-all">
+                    <button type="submit" class="bg-primary hover:bg-[#005321] text-white p-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center cursor-pointer">
+                        <span class="material-symbols-outlined text-[18px]">send</span>
+                    </button>
+                </form>
+            </div>
         </section>
 
         <!-- ==================== VIEW 3: CLIENT APPOINTMENTS ==================== -->
