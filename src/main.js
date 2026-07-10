@@ -287,10 +287,37 @@ function loadState() {
     // Sync customized weekly plans from admin builder
     const urlParams = new URLSearchParams(window.location.search);
     const isPreview = urlParams.get('preview') === 'true';
-    if (isPreview && localStorage.getItem('nutriflow_client_meal_plans_draft')) {
+    const urlProgramId = urlParams.get('programId');
+    const guestClientName = urlParams.get('client') || 'Guest User';
+    
+    if (isPreview && urlProgramId) {
+        const draftPrograms = JSON.parse(localStorage.getItem('nutriflow_programs_draft')) || [];
+        const activeProg = draftPrograms.find(p => p.id === urlProgramId);
+        if (activeProg) {
+            state.clientMealPlans = {};
+            state.clientMealPlans[guestClientName] = JSON.parse(JSON.stringify(activeProg.meals || {}));
+            state.activeProgramName = activeProg.name;
+            state.activeProgramDescription = activeProg.description;
+            state.activeProgramTargetKcal = activeProg.targetKcal || 2000;
+        }
+    } else if (isPreview && localStorage.getItem('nutriflow_client_meal_plans_draft')) {
         state.clientMealPlans = JSON.parse(localStorage.getItem('nutriflow_client_meal_plans_draft'));
     } else if (localStorage.getItem('nutriflow_client_meal_plans')) {
         state.clientMealPlans = JSON.parse(localStorage.getItem('nutriflow_client_meal_plans'));
+    }
+
+    // Set dynamic program metadata for registered users
+    const activeClientName = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
+    const clientDetails = clientsList.find(c => c.name === activeClientName);
+    if (clientDetails && clientDetails.activeProgramId) {
+        const draftPrograms = JSON.parse(localStorage.getItem('nutriflow_programs_draft')) || [];
+        const clientProg = draftPrograms.find(p => p.id === clientDetails.activeProgramId);
+        if (clientProg) {
+            state.activeProgramName = clientProg.name;
+            state.activeProgramDescription = clientProg.description;
+            state.activeProgramTargetKcal = clientProg.targetKcal || 2000;
+        }
     }
     
     // Ensure all days are populated for all active clients
@@ -360,10 +387,12 @@ function saveState() {
 function checkClientSession() {
     // Check URL parameters for Guest Preview Mode
     const urlParams = new URLSearchParams(window.location.search);
-    const guestParam = urlParams.get('client');
+    const guestParam = urlParams.get('client') || 'Guest User';
+    const programIdParam = urlParams.get('programId');
     const isPreview = urlParams.get('preview') === 'true';
-    if (guestParam && isPreview) {
+    if (isPreview && (programIdParam || guestParam)) {
         state.isGuestPreview = true;
+        state.guestProgramId = programIdParam;
         localStorage.setItem('nutriflow_client_logged_name', guestParam);
         return; // Bypass check!
     }
@@ -706,6 +735,21 @@ function renderMealPlans() {
     const switcher = document.getElementById('meal-weekday-switcher');
     if (!switcher) return;
     
+    // Set dynamic program headers
+    const titleEl = document.getElementById('client-program-title');
+    if (titleEl && state.activeProgramName) {
+        titleEl.innerText = state.activeProgramName;
+    } else if (titleEl) {
+        titleEl.innerText = "Your Nutrition Program";
+    }
+    
+    const descEl = document.getElementById('client-program-description');
+    if (descEl && state.activeProgramDescription) {
+        descEl.innerText = state.activeProgramDescription;
+    } else if (descEl) {
+        descEl.innerText = "Follow this program to reach your wellness goals.";
+    }
+    
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     switcher.innerHTML = days.map(d => {
         const isToday = d === 'Wed';
@@ -738,7 +782,7 @@ function renderMealPlans() {
         }
     });
 
-    let targetCal = parseInt(localStorage.getItem('nutriflow_target_kcal_' + clientName)) || 2100;
+    let targetCal = state.activeProgramTargetKcal || parseInt(localStorage.getItem('nutriflow_target_kcal_' + clientName)) || 2100;
     let targetPro = parseInt(localStorage.getItem('nutriflow_client_protein_target')) || 150;
     let targetCarb = parseInt(localStorage.getItem('nutriflow_client_carbs_target')) || 250;
     let targetFat = parseInt(localStorage.getItem('nutriflow_client_fats_target')) || 65;
@@ -1793,6 +1837,24 @@ window.handleRegistrationSubmit = function(e) {
     } else {
         clientObj = { name: clientName, therapist: 'Dr. Hasan', registered: true, email, password };
         clients.push(clientObj);
+    }
+    
+    // Auto-link program if registered from guest preview link
+    if (state.guestProgramId) {
+        const draftPrograms = JSON.parse(localStorage.getItem('nutriflow_programs_draft')) || [];
+        const activeProg = draftPrograms.find(p => p.id === state.guestProgramId);
+        if (activeProg) {
+            clientObj.activeProgramId = state.guestProgramId;
+            clientObj.therapist = activeProg.creator || 'Dr. Hasan';
+            
+            const livePlans = JSON.parse(localStorage.getItem('nutriflow_client_meal_plans')) || {};
+            livePlans[clientName] = JSON.parse(JSON.stringify(activeProg.meals || {}));
+            localStorage.setItem('nutriflow_client_meal_plans', JSON.stringify(livePlans));
+            
+            state.activeProgramName = activeProg.name;
+            state.activeProgramDescription = activeProg.description;
+            state.activeProgramTargetKcal = activeProg.targetKcal || 2000;
+        }
     }
     
     localStorage.setItem('nutriflow_clients', JSON.stringify(clients));

@@ -107,7 +107,7 @@
         <!-- Links -->
         <div class="hidden md:flex gap-md h-full items-center absolute left-1/2 transform -translate-x-1/2">
             <a onclick="navigateTo('admin-clients')" id="link-admin-clients" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Clients</a>
-            <a onclick="navigateTo('admin-meal-builder')" id="link-admin-meal-builder" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Meal Builder</a>
+            <a onclick="navigateTo('admin-meal-builder')" id="link-admin-meal-builder" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Programs</a>
             <a onclick="navigateTo('admin-calendar')" id="link-admin-calendar" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Calendar</a>
             <a onclick="navigateTo('admin-reports')" id="link-admin-reports" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Reports</a>
             <a onclick="navigateTo('admin-profile')" id="link-admin-profile" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Profile</a>
@@ -219,8 +219,8 @@
 
         <!-- ==================== VIEW 2: TARGETS & DIARIES ==================== -->
         <section id="view-admin-meal-builder" class="view-section hidden grid grid-cols-1 lg:grid-cols-12 gap-gutter">
-            <!-- Left Column: Food Library -->
-            <div class="lg:col-span-3 bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-sm p-4 flex flex-col gap-4">
+            <!-- Left Column: Food Library (Hidden in list mode) -->
+            <div id="library-sidebar" class="lg:col-span-3 bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-sm p-4 hidden flex-col gap-4">
                 <div class="flex justify-between items-center pb-2 border-b border-surface-variant/20">
                     <div>
                         <h3 class="text-sm font-extrabold text-on-background uppercase tracking-wider">Library</h3>
@@ -251,64 +251,86 @@
                 </div>
             </div>
 
-            <!-- Right Column: Weekly Meal Builder -->
-            <div class="lg:col-span-9 flex flex-col gap-4">
-                <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-surface-variant/20 pb-4">
+            <!-- Right Column: Main Content Area -->
+            <div id="meal-builder-main-content" class="lg:col-span-12 flex flex-col gap-4 transition-all">
+                
+                <!-- SUB-VIEW A: Programs Directory (List View) -->
+                <div id="programs-list-view" class="flex flex-col gap-4 w-full">
+                    <div class="flex justify-between items-center pb-4 border-b border-surface-variant/20">
                         <div>
-                            <h2 class="text-2xl font-bold text-on-background">Weekly Meal Builder</h2>
-                            <div class="flex items-center gap-2 mt-2">
-                                <span class="text-xs text-on-surface-variant font-medium">Client:</span>
-                                <select id="meal-builder-client-select" onchange="loadMealBuilderClientPlan()" class="text-xs font-bold text-primary bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg px-2 py-1 focus:ring-1 focus:ring-primary cursor-pointer transition-all">
-                                    <option value="Sarah Jenkins">Sarah Jenkins</option>
-                                    <option value="Marcus Reid">Marcus Reid</option>
-                                    <option value="Elena Lopez">Elena Lopez</option>
-                                </select>
-                                <span class="text-xs text-on-surface-variant font-medium ml-1">· Target:</span>
-                                <input type="number" id="target-kcal" onchange="saveClientTargets()" required value="2000" class="w-20 text-xs font-bold text-primary bg-primary/5 border border-primary/20 rounded-lg px-2 py-1 text-center focus:ring-1 focus:ring-primary focus:border-primary transition-all">
-                                <span class="text-xs text-on-surface-variant font-medium">kcal/day</span>
-                                <input type="hidden" id="target-protein" value="150">
-                                <input type="hidden" id="target-carbs" value="250">
-                                <input type="hidden" id="target-fats" value="65">
-                            </div>
+                            <h2 class="text-2xl font-bold text-on-background">Nutrition Programs</h2>
+                            <p class="text-xs text-on-surface-variant mt-1">Manage and assign custom meal plans for clients.</p>
                         </div>
-                        <div class="flex gap-2">
-                             <button onclick="previewWeeklyPlan()" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer">
-                                 <span class="material-symbols-outlined text-[18px]">preview</span> Preview
-                             </button>
-                             <button onclick="shareClientPreviewLink()" class="bg-white border border-slate-300 text-[#006e2f] hover:bg-slate-50 font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer">
-                                 <span class="material-symbols-outlined text-[18px]">share</span> Share Preview Link
-                             </button>
-                            <button onclick="saveWeeklyTemplate()" class="bg-[#dbeafe] text-[#1e3a8a] hover:bg-[#bfdbfe] font-semibold text-xs px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer">
-                                <span class="material-symbols-outlined text-[18px] fill-1" style="font-variation-settings: 'FILL' 1;">save</span> Save as Template
-                            </button>
-                            <button onclick="publishWeeklyPlanToClient()" class="bg-[#006e2f] hover:bg-[#005321] text-white font-semibold text-xs px-5 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-1.5 cursor-pointer">
-                                <span class="material-symbols-outlined text-[18px] rotate-[-30deg] translate-y-[-1px]" style="font-size:18px;">send</span> Publish to Client
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Weekly Meal Grid Container -->
-                    <div class="overflow-x-auto w-full">
-                        <table class="w-full text-left border-collapse border border-outline-variant/20 rounded-xl overflow-hidden" style="table-layout: fixed; min-width: 1300px;">
-                            <thead>
-                                <tr class="bg-surface-container-low/50 border-b border-surface-variant/30 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-                                    <th class="p-3 w-[12%] text-center border-r border-outline-variant/20">Meals</th>
-                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20 cursor-pointer hover:bg-slate-100/50 transition-colors" onclick="setSelectedTotalsDay('Mon')">Mon<span class="block text-[9px] font-normal text-on-surface-variant mt-0.5">May 12</span></th>
-                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20 cursor-pointer hover:bg-slate-100/50 transition-colors" onclick="setSelectedTotalsDay('Tue')">Tue<span class="block text-[9px] font-normal text-on-surface-variant mt-0.5">May 13</span></th>
-                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20 cursor-pointer hover:bg-slate-100/50 transition-colors" onclick="setSelectedTotalsDay('Wed')">Wed<span class="block text-[9px] font-normal text-on-surface-variant mt-0.5">May 14</span></th>
-                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20 cursor-pointer hover:bg-slate-100/50 transition-colors" onclick="setSelectedTotalsDay('Thu')">Thu<span class="block text-[9px] font-normal text-on-surface-variant mt-0.5">May 15</span></th>
-                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20 cursor-pointer hover:bg-slate-100/50 transition-colors" onclick="setSelectedTotalsDay('Fri')">Fri<span class="block text-[9px] font-normal text-on-surface-variant mt-0.5">May 16</span></th>
-                                    <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20 cursor-pointer hover:bg-slate-100/50 transition-colors" onclick="setSelectedTotalsDay('Sat')">Sat<span class="block text-[9px] font-normal text-on-surface-variant mt-0.5">May 17</span></th>
-                                    <th class="p-3 w-[12.5%] text-center cursor-pointer hover:bg-slate-100/50 transition-colors" onclick="setSelectedTotalsDay('Sun')">Sun<span class="block text-[9px] font-normal text-on-surface-variant mt-0.5">May 18</span></th>
-                                </tr>
-                            </thead>
-                            <tbody id="weekly-meal-table-body" class="divide-y divide-surface-variant/20 text-xs">
-                                <!-- Generated Dynamically via JS -->
-                            </tbody>
-                        </table>
+                        <button onclick="openCreateProgramModal()" class="bg-primary hover:bg-[#005321] text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-md transition-all hover:scale-105 active:scale-95">
+                            <span class="material-symbols-outlined text-[16px]">add</span> Create Program
+                        </button>
                     </div>
                     
+                    <!-- Search Programs -->
+                    <div class="flex gap-4 items-center">
+                        <div class="relative flex-grow">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant/60 text-base">search</span>
+                            <input type="text" id="programs-search" oninput="renderProgramsList()" placeholder="Search program name or description..." class="w-full rounded-xl border-outline-variant/40 focus:border-primary focus:ring-primary text-xs pl-8 pr-3 py-2.5 bg-surface-container-lowest border">
+                        </div>
+                    </div>
+                    
+                    <!-- Programs Cards Grid -->
+                    <div id="programs-cards-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-gutter">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+
+                <!-- SUB-VIEW B: Grid Editor (Weekly Meal Builder) -->
+                <div id="program-editor-view" class="hidden flex flex-col gap-4 w-full">
+                    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-surface-variant/20 pb-4">
+                            <div>
+                                <button onclick="exitProgramEditor()" class="mb-2 text-primary font-bold text-xs flex items-center gap-1 hover:underline cursor-pointer">
+                                    <span class="material-symbols-outlined text-xs">arrow_back</span> Back to Programs
+                                </button>
+                                <h2 class="text-2xl font-bold text-on-background" id="editor-program-title">Weekly Program Editor</h2>
+                                <p class="text-xs text-on-surface-variant mt-1" id="editor-program-description">Customize menu slot items for this program.</p>
+                                <div class="flex items-center gap-2 mt-2">
+                                    <span class="text-xs text-on-surface-variant font-medium">Target Calorie:</span>
+                                    <input type="number" id="target-kcal" onchange="saveProgramTargetKcal()" required value="2000" class="w-20 text-xs font-bold text-primary bg-primary/5 border border-primary/20 rounded-lg px-2 py-1 text-center focus:ring-1 focus:ring-primary focus:border-primary transition-all">
+                                    <span class="text-xs text-on-surface-variant font-medium">kcal/day</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                 <button onclick="previewWeeklyPlan()" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer">
+                                     <span class="material-symbols-outlined text-[18px]">preview</span> Preview
+                                 </button>
+                                 <button onclick="shareProgramDirect()" class="bg-white border border-slate-300 text-[#006e2f] hover:bg-slate-50 font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer">
+                                     <span class="material-symbols-outlined text-[18px]">share</span> Share Link
+                                 </button>
+                                 <button onclick="publishProgramDirect()" class="bg-[#006e2f] hover:bg-[#005321] text-white font-semibold text-xs px-5 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-1.5 cursor-pointer">
+                                     <span class="material-symbols-outlined text-[18px] rotate-[-30deg] translate-y-[-1px]" style="font-size:18px;">send</span> Publish to Client
+                                 </button>
+                            </div>
+                        </div>
+
+                        <!-- Weekly Meal Grid Container -->
+                        <div class="overflow-x-auto w-full">
+                            <table class="w-full text-left border-collapse border border-outline-variant/20 rounded-xl overflow-hidden" style="table-layout: fixed; min-width: 1300px;">
+                                <thead>
+                                    <tr class="bg-surface-container-low/50 border-b border-surface-variant/30 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+                                        <th class="p-3 w-[12%] text-center border-r border-outline-variant/20">Meals</th>
+                                        <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20 cursor-pointer hover:bg-slate-100/50 transition-colors" onclick="setSelectedTotalsDay('Mon')">Mon<span class="block text-[9px] font-normal text-on-surface-variant mt-0.5">May 12</span></th>
+                                        <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20 cursor-pointer hover:bg-slate-100/50 transition-colors" onclick="setSelectedTotalsDay('Tue')">Tue<span class="block text-[9px] font-normal text-on-surface-variant mt-0.5">May 13</span></th>
+                                        <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20 cursor-pointer hover:bg-slate-100/50 transition-colors" onclick="setSelectedTotalsDay('Wed')">Wed<span class="block text-[9px] font-normal text-on-surface-variant mt-0.5">May 14</span></th>
+                                        <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20 cursor-pointer hover:bg-slate-100/50 transition-colors" onclick="setSelectedTotalsDay('Thu')">Thu<span class="block text-[9px] font-normal text-on-surface-variant mt-0.5">May 15</span></th>
+                                        <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20 cursor-pointer hover:bg-slate-100/50 transition-colors" onclick="setSelectedTotalsDay('Fri')">Fri<span class="block text-[9px] font-normal text-on-surface-variant mt-0.5">May 16</span></th>
+                                        <th class="p-3 w-[12.5%] text-center border-r border-outline-variant/20 cursor-pointer hover:bg-slate-100/50 transition-colors" onclick="setSelectedTotalsDay('Sat')">Sat<span class="block text-[9px] font-normal text-on-surface-variant mt-0.5">May 17</span></th>
+                                        <th class="p-3 w-[12.5%] text-center cursor-pointer hover:bg-slate-100/50 transition-colors" onclick="setSelectedTotalsDay('Sun')">Sun<span class="block text-[9px] font-normal text-on-surface-variant mt-0.5">May 18</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="weekly-meal-table-body" class="divide-y divide-surface-variant/20 text-xs">
+                                    <!-- Generated Dynamically via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                
                     <!-- Weekday Totals Dashboard at the bottom -->
                     <div class="bg-surface-container-low/30 border border-outline-variant/20 rounded-2xl p-4 mt-2" id="weekly-totals-summary-container">
                         <!-- Populated dynamically via JS showing protein, carbs, fats, kcal progress -->
@@ -646,7 +668,12 @@
             
             <div class="flex flex-col gap-3">
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Generated Client Preview URL</label>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Recipient Email Address(es)</label>
+                    <input type="text" id="share-email-recipients" placeholder="e.g. client@email.com, another@email.com" class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary mb-2">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Generated Program Preview Link</label>
                     <div class="flex gap-2">
                         <input type="text" id="share-preview-url-input" readonly class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:outline-none select-all text-slate-600">
                         <button onclick="copySharePreviewLink()" class="bg-primary hover:bg-[#005321] text-white font-bold text-xs px-4 py-2 rounded-lg shadow-sm transition-all cursor-pointer shrink-0">Copy Link</button>
@@ -655,7 +682,7 @@
 
                 <div class="border-t border-slate-100 pt-3">
                     <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Invitation Email Template</label>
-                    <div class="bg-slate-50 rounded-xl p-3 border border-slate-200/80 text-[11px] text-slate-600 space-y-2 max-h-[200px] overflow-y-auto hide-scrollbar">
+                    <div class="bg-slate-50 rounded-xl p-3 border border-slate-200/80 text-[11px] text-slate-600 space-y-2 max-h-[150px] overflow-y-auto hide-scrollbar">
                         <p class="font-bold text-slate-800">Subject: <span id="share-email-subject">Your Personalized Nutrition Program from Dr. Hasan</span></p>
                         <hr class="border-slate-200">
                         <p id="share-email-body-salutation">Hi Elena Lopez,</p>
@@ -672,8 +699,50 @@
             
             <div class="flex justify-end gap-2 shrink-0 pt-2 border-t">
                 <button onclick="closeSharePreviewModal()" class="border border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer">Close</button>
-                <button onclick="copyInvitationEmailText()" class="bg-[#dbeafe] hover:bg-[#bfdbfe] text-[#1e3a8a] font-semibold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer">Copy Email Body</button>
+                <button onclick="copyInvitationEmailText()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer">Copy Email Body</button>
+                <button onclick="sendPreviewEmails()" class="bg-primary hover:bg-[#005321] text-white font-semibold text-xs px-4 py-2 rounded-xl shadow-md transition-all cursor-pointer">Send Email(s)</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Create Program Modal -->
+    <div id="create-program-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-surface max-w-sm w-full rounded-2xl p-6 border border-slate-100 shadow-2xl flex flex-col gap-4 text-slate-800">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-sm font-bold text-slate-800">Create New Nutrition Program</h3>
+                <button onclick="closeCreateProgramModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer"><span class="material-symbols-outlined text-[18px]">close</span></button>
+            </div>
+            <form onsubmit="handleCreateProgramSubmit(event)" class="space-y-3">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Program Name</label>
+                    <input type="text" id="new-prog-name" required placeholder="e.g. Keto Shred Protocol" class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Program Description</label>
+                    <textarea id="new-prog-description" required rows="3" placeholder="e.g. A 7-day low carb program designed for fast fat loss..." class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-primary hover:bg-[#005321] text-white font-bold text-xs py-2.5 rounded-lg transition-all shadow-sm cursor-pointer mt-2">Create Program</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Publish Program Modal -->
+    <div id="publish-program-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-surface max-w-sm w-full rounded-2xl p-6 border border-slate-100 shadow-2xl flex flex-col gap-4 text-slate-800">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-sm font-bold text-slate-800">Publish Program to Client</h3>
+                <button onclick="closePublishProgramModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer"><span class="material-symbols-outlined text-[18px]">close</span></button>
+            </div>
+            <p class="text-[10px] text-slate-500">Assign this nutrition program as the active meal plan for one of your clients.</p>
+            <form onsubmit="handlePublishProgramSubmit(event)" class="space-y-3">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Select Client</label>
+                    <select id="publish-target-client" required class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary">
+                        <!-- Filled dynamically -->
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-primary hover:bg-[#005321] text-white font-bold text-xs py-2.5 rounded-lg transition-all shadow-sm cursor-pointer mt-2">Publish Program</button>
+            </form>
         </div>
     </div>
 

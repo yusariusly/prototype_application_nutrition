@@ -5,9 +5,9 @@ const state = {
     activeView: 'admin-clients',
     appointments: [],
     clients: [
-        { name: 'Sarah Jenkins', email: 'sarah.j@email.com', goal: 'Weight Loss', lastCheckIn: 'Today, 9:00 AM', compliance: 92, weightTrend: [168, 169, 170, 173, 174, 176], avatar: 'SJ', therapist: 'Dr. Hasan' },
-        { name: 'Marcus Reid', email: 'm.reid@email.com', goal: 'Muscle Gain', lastCheckIn: '2 days ago', compliance: 78, weightTrend: [180, 182, 181, 183, 182, 185], avatar: 'MR', therapist: 'Dr. Hasan' },
-        { name: 'Elena Lopez', email: 'elena.l@email.com', goal: 'Maintenance', lastCheckIn: 'Yesterday', compliance: 95, weightTrend: [142, 142, 141, 142, 142, 142], avatar: 'EL', therapist: 'Dr. Amanda' }
+        { name: 'Sarah Jenkins', email: 'sarah.j@email.com', goal: 'Weight Loss', lastCheckIn: 'Today, 9:00 AM', compliance: 92, weightTrend: [168, 169, 170, 173, 174, 176], avatar: 'SJ', therapist: 'Dr. Hasan', activeProgramId: 'prog-sarah' },
+        { name: 'Marcus Reid', email: 'm.reid@email.com', goal: 'Muscle Gain', lastCheckIn: '2 days ago', compliance: 78, weightTrend: [180, 182, 181, 183, 182, 185], avatar: 'MR', therapist: 'Dr. Hasan', activeProgramId: 'prog-marcus' },
+        { name: 'Elena Lopez', email: 'elena.l@email.com', goal: 'Maintenance', lastCheckIn: 'Yesterday', compliance: 95, weightTrend: [142, 142, 141, 142, 142, 142], avatar: 'EL', therapist: 'Dr. Amanda', activeProgramId: 'prog-elena' }
     ],
     foodLibrary: [
         { id: 'f-1', title: 'Avocado Egg Toast', type: 'Recipes', calories: 320, p: 14, c: 22, f: 18, image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=200', favorite: true, recipeIngredients: "2 slices whole wheat bread\n1 ripe avocado\n2 large eggs\n1 tsp lemon juice\nPinch of salt and black pepper", recipeSteps: "1. Toast 2 slices of whole wheat bread.\n2. Mash 1 avocado with lemon juice, salt, and pepper.\n3. Fry 2 eggs to your liking.\n4. Spread avocado on toast and top with eggs. Serve warm." },
@@ -17,8 +17,8 @@ const state = {
         { id: 'f-5', title: 'Fresh Apple & Almonds', type: 'Raw Foods', calories: 150, p: 4, c: 18, f: 9, image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=200', favorite: false, recipeIngredients: "1 medium apple\n12 raw almonds", recipeSteps: "Serve fresh apple sliced with raw almonds." },
         { id: 'f-6', title: 'Mixed Raw Berries', type: 'Raw Foods', calories: 85, p: 1, c: 21, f: 0.5, image: 'https://images.unsplash.com/photo-1518635017498-87f514b751ba?w=200', favorite: false, recipeIngredients: "1/2 cup fresh strawberries\n1/4 cup blueberries\n1/4 cup raspberries", recipeSteps: "Rinse berries and serve in a small bowl." }
     ],
-    clientMealPlans: {},
-    selectedMealBuilderClient: 'Sarah Jenkins',
+    programs: [],
+    editingProgramId: null,
     adminSelectedFoodFilter: 'all',
     adminCalendarOffset: 0,
     clientsPage: 0
@@ -107,16 +107,19 @@ function loadAdminState() {
         saveAdminState();
     }
     
-    // Load Meal Plans Draft
-    if (localStorage.getItem('nutriflow_client_meal_plans_draft')) {
-        state.clientMealPlans = JSON.parse(localStorage.getItem('nutriflow_client_meal_plans_draft'));
+    // Load Programs Draft
+    if (localStorage.getItem('nutriflow_programs_draft')) {
+        state.programs = JSON.parse(localStorage.getItem('nutriflow_programs_draft'));
     } else {
-        if (localStorage.getItem('nutriflow_client_meal_plans')) {
-            state.clientMealPlans = JSON.parse(localStorage.getItem('nutriflow_client_meal_plans'));
-        } else {
-            // Init mock plans
-            state.clientMealPlans = {
-                'Sarah Jenkins': {
+        // Init default programs
+        state.programs = [
+            {
+                id: 'prog-sarah',
+                name: 'Sarah\'s Weight Loss Plan',
+                description: 'Weekly meal program designed to help Sarah lose weight safely through balanced nutrients.',
+                creator: 'Dr. Hasan',
+                targetKcal: 2000,
+                meals: {
                     'Mon': [
                         { type: 'Breakfast', title: 'Avocado Egg Toast', calories: 320, p: 14, c: 22, f: 18, image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=200', favorite: true, recipeIngredients: "2 slices whole wheat bread\n1 ripe avocado\n2 large eggs\n1 tsp lemon juice\nPinch of salt and black pepper", recipeSteps: "1. Toast 2 slices of whole wheat bread.\n2. Mash 1 avocado with lemon juice, salt, and pepper.\n3. Fry 2 eggs to your liking.\n4. Spread avocado on toast and top with eggs. Serve warm." },
                         { type: 'Lunch', title: 'Grilled Chicken Salad', calories: 450, p: 45, c: 12, f: 20, image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200', favorite: true, recipeIngredients: "150g chicken breast\n2 cups chopped romaine lettuce\n1/2 cup cherry tomatoes halved\n1/2 cucumber sliced\n1 tbsp olive oil dressing", recipeSteps: "1. Season chicken breast with olive oil, salt, garlic powder, and pepper.\n2. Grill or pan-fry chicken breast for 6 mins per side.\n3. Chop romaine lettuce, cherry tomatoes, and cucumbers.\n4. Slice chicken and place on salad greens. Drizzle with light olive oil dressing." }
@@ -129,12 +132,38 @@ function loadAdminState() {
                         { type: 'Lunch', title: 'Quinoa Buddha Bowl', calories: 450, p: 15, c: 65, f: 18, image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBEJYji3THZ26fZU1y7s_UlX3R5JiXYh8bDKQCgoB_eeBrxiKFJKp983-OzaHO2s7bOGibm_Ffq78DZMIj37z6OO73EXDwTwUKe7WEXsg1ejJE92FBq-nT19yX8htJOacJuuKupzenZJZZPm_6PtBatL55KP4abBQyqSrEMeSFnzbk1OzrX8qcm8ByqZ6WrAMGgLkkRh7lCkTEF5E8WTVQEvDVIoyGeZykvJ7PO6fmFFWMRZ_FlYGtFOw', favorite: true, recipeIngredients: "1/2 cup cooked quinoa\n1/2 sweet potato\n1/2 avocado\n1 cup spinach\n2 tbsp lemon tahini dressing", recipeSteps: "Arrange spinach, quinoa, sweet potato, and avocado. Drizzle dressing." },
                         { type: 'Snack', title: 'Mixed Nuts & Apple', calories: 200, p: 5, c: 25, f: 10, image: 'https://images.unsplash.com/photo-1596560548464-f01068e3dbf0?w=200', favorite: false, recipeIngredients: "1 small apple\n1 oz mixed nuts", recipeSteps: "Slice apple and serve with nuts." },
                         { type: 'Dinner', title: 'Grilled Salmon & Asparagus', calories: 520, p: 42, c: 12, f: 32, image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCmYwtQEKZuQeHbBcF8Z60P_F01JjQ-P01ItJBoz7lWy-FK2NVaEJb3Hqy6oemYRu6b2zWfF5bmfKj9u6PC4JZtGsHvyyUYGgU5hMj-BLnCgmbTc5VDZy-QI6zc259LqW5YPX2r_aCLcW5xsQzLAzlALozsVfWYENWIhLDvaf3jCLuApaunpIs9t0u-hPB3Rhks8C5OQ8Y2RQPiuPrtWg7JqSsunfQMLXnpQ4zAhuIl_qhOzqjCGJJPpw', favorite: true, recipeIngredients: "150g salmon\n1 bunch asparagus\n1 tbsp lemon juice\n1 tsp olive oil", recipeSteps: "Brush with oil, grill salmon and asparagus, drizzle with lemon juice." }
-                    ]
+                    ],
+                    'Thu': [], 'Fri': [], 'Sat': [], 'Sun': []
                 }
-            };
-            localStorage.setItem('nutriflow_client_meal_plans', JSON.stringify(state.clientMealPlans));
-        }
-        localStorage.setItem('nutriflow_client_meal_plans_draft', JSON.stringify(state.clientMealPlans));
+            },
+            {
+                id: 'prog-marcus',
+                name: 'Marcus\'s Muscle Gain Protocol',
+                description: 'High-protein diet customized to fuel muscle hypertrophy and support intense workout recovery.',
+                creator: 'Dr. Hasan',
+                targetKcal: 2500,
+                meals: {
+                    'Mon': [
+                        { type: 'Breakfast', title: 'Greek Yogurt Bowl', calories: 250, p: 20, c: 30, f: 5, image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=200', favorite: true, recipeIngredients: "1 cup plain Greek yogurt\n1/2 cup fresh mixed berries\n1 tbsp chia seeds\n1 tsp honey", recipeSteps: "1. Scoop Greek yogurt into a bowl.\n2. Top with mixed fresh berries (strawberries, blueberries).\n3. Sprinkle chia seeds and drizzle 1 tsp honey on top." }
+                    ],
+                    'Tue': [], 'Wed': [], 'Thu': [], 'Fri': [], 'Sat': [], 'Sun': []
+                }
+            },
+            {
+                id: 'prog-elena',
+                name: 'Elena\'s Maintenance Program',
+                description: 'General balanced diet with healthy snacks to keep energy levels stable and maintain body weight.',
+                creator: 'Dr. Amanda',
+                targetKcal: 1800,
+                meals: {
+                    'Mon': [
+                        { type: 'Lunch', title: 'Grilled Chicken Salad', calories: 450, p: 45, c: 12, f: 20, image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200', favorite: true, recipeIngredients: "150g chicken breast\n2 cups chopped romaine lettuce\n1/2 cup cherry tomatoes halved\n1/2 cucumber sliced\n1 tbsp olive oil dressing", recipeSteps: "1. Season chicken breast with olive oil, salt, garlic powder, and pepper.\n2. Grill or pan-fry chicken breast for 6 mins per side.\n3. Chop romaine lettuce, cherry tomatoes, and cucumbers.\n4. Slice chicken and place on salad greens. Drizzle with light olive oil dressing." }
+                    ],
+                    'Tue': [], 'Wed': [], 'Thu': [], 'Fri': [], 'Sat': [], 'Sun': []
+                }
+            }
+        ];
+        localStorage.setItem('nutriflow_programs_draft', JSON.stringify(state.programs));
     }
 
     // Load Food Library
@@ -143,27 +172,10 @@ function loadAdminState() {
     } else {
         localStorage.setItem('nutriflow_food_library', JSON.stringify(state.foodLibrary));
     }
-    
-    // Ensure Wednesday snack is present in local cache for demonstration
-    if (state.clientMealPlans['Sarah Jenkins'] && state.clientMealPlans['Sarah Jenkins']['Wed']) {
-        if (!state.clientMealPlans['Sarah Jenkins']['Wed'].find(m => m.type.toLowerCase() === 'snack')) {
-            state.clientMealPlans['Sarah Jenkins']['Wed'].push({
-                type: 'Snack',
-                title: 'Mixed Nuts & Apple',
-                calories: 200,
-                p: 5,
-                c: 25,
-                f: 10,
-                image: 'https://images.unsplash.com/photo-1596560548464-f01068e3dbf0?w=200'
-            });
-            saveAdminState();
-        }
-    }
 
     // Load Clients List
     if (localStorage.getItem('nutriflow_clients')) {
         state.clients = JSON.parse(localStorage.getItem('nutriflow_clients'));
-        // Backfill therapist field if missing
         let updated = false;
         state.clients.forEach(c => {
             if (!c.therapist) {
@@ -172,6 +184,12 @@ function loadAdminState() {
                 } else {
                     c.therapist = 'Dr. Hasan';
                 }
+                updated = true;
+            }
+            if (!c.activeProgramId) {
+                if (c.name === 'Sarah Jenkins') c.activeProgramId = 'prog-sarah';
+                else if (c.name === 'Marcus Reid') c.activeProgramId = 'prog-marcus';
+                else if (c.name === 'Elena Lopez') c.activeProgramId = 'prog-elena';
                 updated = true;
             }
         });
@@ -185,7 +203,7 @@ function loadAdminState() {
 
 function saveAdminState() {
     localStorage.setItem('nutriflow_appointments', JSON.stringify(state.appointments));
-    localStorage.setItem('nutriflow_client_meal_plans_draft', JSON.stringify(state.clientMealPlans));
+    localStorage.setItem('nutriflow_programs_draft', JSON.stringify(state.programs));
     localStorage.setItem('nutriflow_clients', JSON.stringify(state.clients));
     localStorage.setItem('nutriflow_food_library', JSON.stringify(state.foodLibrary));
 }
@@ -609,48 +627,203 @@ window.handleAddNewClientSubmit = function(e) {
 
 // ==================== WEEKLY MEAL BUILDER ====================
 function renderAdminMealBuilder() {
-    // Populate client select dropdown dynamically
-    const select = document.getElementById('meal-builder-client-select');
-    if (select) {
-        const activeSpecialist = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
-        const myClients = state.clients.filter(c => c.therapist === activeSpecialist);
-        const listToUse = myClients.length > 0 ? myClients : state.clients;
-
-        select.innerHTML = listToUse.map(c => `
-            <option value="${c.name}">${c.name}</option>
-        `).join('');
-
-        if (state.selectedMealBuilderClient && listToUse.some(c => c.name === state.selectedMealBuilderClient)) {
-            select.value = state.selectedMealBuilderClient;
-        } else if (listToUse.length > 0) {
-            select.value = listToUse[0].name;
-            state.selectedMealBuilderClient = listToUse[0].name;
-        }
+    if (state.editingProgramId) {
+        toggleProgramViewMode(true);
+        loadMealBuilderProgramPlan();
+    } else {
+        toggleProgramViewMode(false);
     }
-    
-    loadMealBuilderClientPlan();
     renderLibraryList();
 }
 
-window.loadMealBuilderClientPlan = function() {
-    const select = document.getElementById('meal-builder-client-select');
-    if (!select) return;
+window.toggleProgramViewMode = function(editing) {
+    const sidebar = document.getElementById('library-sidebar');
+    const mainContent = document.getElementById('meal-builder-main-content');
+    const listView = document.getElementById('programs-list-view');
+    const editorView = document.getElementById('program-editor-view');
     
-    state.selectedMealBuilderClient = select.value;
-    
-    // Load targets from local storage or fallback to defaults
-    const kcal = localStorage.getItem('nutriflow_target_kcal_' + state.selectedMealBuilderClient) || 2000;
-    const kcalInput = document.getElementById('target-kcal');
-    if (kcalInput) kcalInput.value = kcal;
+    if (editing) {
+        if (sidebar) {
+            sidebar.classList.remove('hidden');
+            sidebar.classList.add('flex');
+        }
+        if (mainContent) {
+            mainContent.className = 'lg:col-span-9 flex flex-col gap-4 transition-all';
+        }
+        if (listView) listView.classList.add('hidden');
+        if (editorView) editorView.classList.remove('hidden');
+    } else {
+        if (sidebar) {
+            sidebar.classList.add('hidden');
+            sidebar.classList.remove('flex');
+        }
+        if (mainContent) {
+            mainContent.className = 'lg:col-span-12 flex flex-col gap-4 transition-all';
+        }
+        if (listView) listView.classList.remove('hidden');
+        if (editorView) editorView.classList.add('hidden');
+        
+        state.editingProgramId = null;
+        renderProgramsList();
+    }
+};
 
+window.loadMealBuilderProgramPlan = function() {
+    const progId = state.editingProgramId;
+    const program = state.programs.find(p => p.id === progId);
+    if (!program) return;
+    
+    const titleEl = document.getElementById('editor-program-title');
+    if (titleEl) titleEl.innerText = program.name;
+    
+    const descEl = document.getElementById('editor-program-description');
+    if (descEl) descEl.innerText = program.description;
+    
+    const kcalInput = document.getElementById('target-kcal');
+    if (kcalInput) kcalInput.value = program.targetKcal || 2000;
+    
     renderWeeklyMealTable();
 };
 
-window.saveClientTargets = function() {
-    const kcal = document.getElementById('target-kcal').value || 2000;
-    localStorage.setItem('nutriflow_target_kcal_' + state.selectedMealBuilderClient, kcal);
+window.saveProgramTargetKcal = function() {
+    const progId = state.editingProgramId;
+    const program = state.programs.find(p => p.id === progId);
+    if (!program) return;
+    
+    const kcalVal = parseInt(document.getElementById('target-kcal').value) || 2000;
+    program.targetKcal = kcalVal;
+    
+    saveAdminState();
     renderWeeklyTotalsSummary();
-    showToast(`Targets for ${state.selectedMealBuilderClient} updated to ${kcal} kcal/day`, 'success');
+    showToast(`Target calorie for "${program.name}" updated to ${kcalVal} kcal/day`, 'success');
+};
+
+window.renderProgramsList = function() {
+    const grid = document.getElementById('programs-cards-grid');
+    if (!grid) return;
+    
+    const searchVal = (document.getElementById('programs-search')?.value || '').toLowerCase();
+    const activeSpecialist = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
+    
+    const filtered = state.programs.filter(p => {
+        const matchesSearch = p.name.toLowerCase().includes(searchVal) || p.description.toLowerCase().includes(searchVal);
+        const matchesCreator = p.creator === activeSpecialist;
+        return matchesSearch && matchesCreator;
+    });
+    
+    if (filtered.length === 0) {
+        grid.innerHTML = `
+            <div class="col-span-full py-12 text-center text-on-surface-variant font-medium bg-white rounded-2xl border border-outline-variant/35 p-6">
+                <span class="material-symbols-outlined text-4xl text-on-surface-variant/40 mb-2">assignment_late</span>
+                <p class="text-xs">No programs found. Click "+ Create Program" to build one!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    grid.innerHTML = filtered.map(p => {
+        let totalMeals = 0;
+        if (p.meals) {
+            Object.values(p.meals).forEach(dayMeals => {
+                if (Array.isArray(dayMeals)) {
+                    totalMeals += dayMeals.length;
+                }
+            });
+        }
+        
+        return `
+            <div class="bg-surface-container-lowest border border-outline-variant/30 hover:border-primary/40 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all hover:scale-[1.02] flex flex-col justify-between min-h-[190px]">
+                <div class="space-y-2">
+                    <div class="flex justify-between items-start">
+                        <span class="bg-primary/10 text-primary font-bold text-[9px] uppercase tracking-wider px-2.5 py-1 rounded-full">Active Plan</span>
+                        <button onclick="deleteProgram('${p.id}')" class="text-outline-variant hover:text-red-500 cursor-pointer" title="Delete Program">
+                            <span class="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-on-background text-sm leading-tight line-clamp-1">${p.name}</h3>
+                        <p class="text-[10px] text-on-surface-variant mt-1.5 leading-relaxed line-clamp-2">${p.description}</p>
+                    </div>
+                </div>
+                
+                <div class="border-t border-surface-variant/20 pt-4 mt-4 flex justify-between items-center gap-2">
+                    <div class="flex flex-col">
+                        <span class="text-[8px] text-on-surface-variant font-bold uppercase tracking-wider">Scheduled Meals</span>
+                        <span class="text-xs font-extrabold text-primary">${totalMeals} meals</span>
+                    </div>
+                    <div class="flex gap-1.5">
+                        <button onclick="editProgramPlan('${p.id}')" class="bg-[#dbeafe] hover:bg-[#bfdbfe] text-[#1e3a8a] font-bold text-[10px] px-3 py-2 rounded-lg transition-all cursor-pointer">Edit Plan</button>
+                        <button onclick="shareProgramLink('${p.id}')" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-[10px] px-2.5 py-2 rounded-lg transition-all cursor-pointer" title="Share Program"><span class="material-symbols-outlined text-[14px]">share</span></button>
+                        <button onclick="openPublishProgramDialog('${p.id}')" class="bg-primary hover:bg-[#005321] text-white font-bold text-[10px] px-3 py-2 rounded-lg transition-all cursor-pointer">Publish</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+};
+
+window.editProgramPlan = function(programId) {
+    state.editingProgramId = programId;
+    renderAdminMealBuilder();
+};
+
+window.exitProgramEditor = function() {
+    toggleProgramViewMode(false);
+};
+
+window.deleteProgram = function(programId) {
+    if (confirm("Are you sure you want to delete this program? This action cannot be undone.")) {
+        state.programs = state.programs.filter(p => p.id !== programId);
+        saveAdminState();
+        renderProgramsList();
+        showToast("Program deleted successfully.", "success");
+    }
+};
+
+window.openCreateProgramModal = function() {
+    const modal = document.getElementById('create-program-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+    const nameInput = document.getElementById('new-prog-name');
+    const descInput = document.getElementById('new-prog-description');
+    if (nameInput) nameInput.value = '';
+    if (descInput) descInput.value = '';
+};
+
+window.closeCreateProgramModal = function() {
+    const modal = document.getElementById('create-program-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+window.handleCreateProgramSubmit = function(e) {
+    e.preventDefault();
+    const name = document.getElementById('new-prog-name').value.trim();
+    const description = document.getElementById('new-prog-description').value.trim();
+    const activeSpecialist = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
+    
+    if (!name || !description) return;
+    
+    const newProgram = {
+        id: 'prog-' + Date.now(),
+        name: name,
+        description: description,
+        creator: activeSpecialist,
+        targetKcal: 2000,
+        meals: {
+            'Mon': [], 'Tue': [], 'Wed': [], 'Thu': [], 'Fri': [], 'Sat': [], 'Sun': []
+        }
+    };
+    
+    state.programs.push(newProgram);
+    saveAdminState();
+    closeCreateProgramModal();
+    renderProgramsList();
+    showToast(`Program "${name}" created successfully!`, "success");
 };
 
 window.setLibraryFilter = function(filter) {
@@ -725,8 +898,9 @@ function renderWeeklyMealTable() {
     const tbody = document.getElementById('weekly-meal-table-body');
     if (!tbody) return;
     
-    const client = state.selectedMealBuilderClient;
-    const clientPlan = state.clientMealPlans[client] || {};
+    const progId = state.editingProgramId;
+    const program = state.programs.find(p => p.id === progId) || {};
+    const clientPlan = program.meals || {};
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const rowTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
     
@@ -832,8 +1006,9 @@ function renderWeeklyTotalsSummary() {
     const container = document.getElementById('weekly-totals-summary-container');
     if (!container) return;
     
-    const client = state.selectedMealBuilderClient;
-    const clientPlan = state.clientMealPlans[client] || {};
+    const progId = state.editingProgramId;
+    const program = state.programs.find(p => p.id === progId) || {};
+    const clientPlan = program.meals || {};
     
     if (!state.selectedTotalsDay) {
         state.selectedTotalsDay = 'Mon';
@@ -948,16 +1123,15 @@ window.assignFoodToSlot = function(foodId) {
     const food = state.foodLibrary.find(f => f.id === foodId);
     if (!food) return;
     
-    const client = state.selectedMealBuilderClient;
-    if (!state.clientMealPlans[client]) {
-        state.clientMealPlans[client] = {};
-    }
-    const day = state.activeAssignDay;
-    if (!state.clientMealPlans[client][day]) {
-        state.clientMealPlans[client][day] = [];
-    }
+    const progId = state.editingProgramId;
+    const program = state.programs.find(p => p.id === progId);
+    if (!program) return;
     
-    state.clientMealPlans[client][day].push({
+    if (!program.meals) program.meals = {};
+    const day = state.activeAssignDay;
+    if (!program.meals[day]) program.meals[day] = [];
+    
+    program.meals[day].push({
         type: state.activeAssignMealType,
         title: food.title,
         calories: food.calories,
@@ -992,18 +1166,17 @@ window.handleCellDrop = function(event, day, mealType) {
     const food = state.foodLibrary.find(f => f.id === foodId);
     if (!food) return;
 
-    const client = state.selectedMealBuilderClient;
-    if (!state.clientMealPlans[client]) {
-        state.clientMealPlans[client] = {};
-    }
-    if (!state.clientMealPlans[client][day]) {
-        state.clientMealPlans[client][day] = [];
-    }
+    const progId = state.editingProgramId;
+    const program = state.programs.find(p => p.id === progId);
+    if (!program) return;
+
+    if (!program.meals) program.meals = {};
+    if (!program.meals[day]) program.meals[day] = [];
 
     // Overwrite slot if it exists
-    state.clientMealPlans[client][day] = state.clientMealPlans[client][day].filter(m => m.type.toLowerCase() !== mealType.toLowerCase());
+    program.meals[day] = program.meals[day].filter(m => m.type.toLowerCase() !== mealType.toLowerCase());
 
-    state.clientMealPlans[client][day].push({
+    program.meals[day].push({
         type: mealType,
         title: food.title,
         calories: food.calories,
@@ -1075,10 +1248,11 @@ window.handleAddFoodSubmit = function(e) {
 };
 
 window.removeFoodFromSlot = function(day, mealType, foodTitle) {
-    const client = state.selectedMealBuilderClient;
-    if (!state.clientMealPlans[client] || !state.clientMealPlans[client][day]) return;
+    const progId = state.editingProgramId;
+    const program = state.programs.find(p => p.id === progId);
+    if (!program || !program.meals || !program.meals[day]) return;
     
-    state.clientMealPlans[client][day] = state.clientMealPlans[client][day].filter(
+    program.meals[day] = program.meals[day].filter(
         m => !(m.type.toLowerCase() === mealType.toLowerCase() && m.title === foodTitle)
     );
     
@@ -1358,9 +1532,10 @@ window.saveMealComment = function() {
     const mealTitle = state.activeCommentMealTitle;
     const commentVal = document.getElementById('comment-textarea').value.trim();
 
-    const client = state.selectedMealBuilderClient;
-    if (state.clientMealPlans[client] && state.clientMealPlans[client][day]) {
-        const meal = state.clientMealPlans[client][day].find(
+    const progId = state.editingProgramId;
+    const program = state.programs.find(p => p.id === progId);
+    if (program && program.meals && program.meals[day]) {
+        const meal = program.meals[day].find(
             m => m.type.toLowerCase() === mealType.toLowerCase() && m.title === mealTitle
         );
         if (meal) {
@@ -1373,8 +1548,22 @@ window.saveMealComment = function() {
     closeEditCommentModal();
 };
 
-window.shareClientPreviewLink = function() {
-    const client = state.selectedMealBuilderClient;
+window.shareProgramLink = function(programId) {
+    shareProgramLinkLogic(programId);
+};
+
+window.shareProgramDirect = function() {
+    const progId = state.editingProgramId;
+    if (progId) {
+        shareProgramLinkLogic(progId);
+    }
+};
+
+function shareProgramLinkLogic(programId) {
+    const program = state.programs.find(p => p.id === programId);
+    if (!program) return;
+    
+    state.sharingProgramId = programId;
     const specialist = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
     
     const origin = window.location.origin;
@@ -1382,26 +1571,29 @@ window.shareClientPreviewLink = function() {
     if (clientUrl.endsWith('/admin') || clientUrl.endsWith('/admin/')) {
         clientUrl = clientUrl.replace(/\/admin\/?$/, '');
     }
-    const previewUrl = `${clientUrl}/index.html?client=${encodeURIComponent(client)}&preview=true`;
+    const previewUrl = `${clientUrl}/index.html?programId=${programId}&preview=true`;
     
     const urlInput = document.getElementById('share-preview-url-input');
     if (urlInput) urlInput.value = previewUrl;
     
     const subjectEl = document.getElementById('share-email-subject');
-    if (subjectEl) subjectEl.innerText = `Your Personalized Nutrition Program from ${specialist}`;
+    if (subjectEl) subjectEl.innerText = `Your Personalized Program "${program.name}" from ${specialist}`;
     
     const salutationEl = document.getElementById('share-email-body-salutation');
-    if (salutationEl) salutationEl.innerText = `Hi ${client},`;
+    if (salutationEl) salutationEl.innerText = `Hi,`;
     
     const doctorNameEl = document.getElementById('share-email-doctor-name');
     if (doctorNameEl) doctorNameEl.innerText = specialist;
+    
+    const recipientsInput = document.getElementById('share-email-recipients');
+    if (recipientsInput) recipientsInput.value = '';
     
     const modal = document.getElementById('share-preview-modal');
     if (modal) {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
-};
+}
 
 window.closeSharePreviewModal = function() {
     const modal = document.getElementById('share-preview-modal');
@@ -1424,15 +1616,19 @@ window.copySharePreviewLink = function() {
 };
 
 window.copyInvitationEmailText = function() {
-    const client = state.selectedMealBuilderClient;
+    const progId = state.sharingProgramId;
+    const program = state.programs.find(p => p.id === progId);
+    if (!program) return;
+    
     const specialist = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
     const previewUrl = document.getElementById('share-preview-url-input')?.value || '';
     
-    const emailBody = `Subject: Your Personalized Nutrition Program from ${specialist}
+    const emailBody = `Subject: Your Personalized Program "${program.name}" from ${specialist}
 
-Hi ${client},
+Hi,
 
-I have prepared your personalized nutrition program for this week to help you hit your daily goals.
+I have prepared your custom nutrition program "${program.name}" to help you hit your daily health goals:
+${program.description}
 
 You can view your custom weekly plan directly on our client portal without needing to register first:
 ${previewUrl}
@@ -1447,5 +1643,103 @@ ${specialist}`;
     }).catch(() => {
         showToast('Failed to copy email body.', 'error');
     });
+};
+
+window.sendPreviewEmails = function() {
+    const recipients = document.getElementById('share-email-recipients')?.value.trim();
+    if (!recipients) {
+        showToast('Please enter at least one recipient email address.', 'error');
+        return;
+    }
+    
+    const progId = state.sharingProgramId;
+    const program = state.programs.find(p => p.id === progId);
+    if (!program) return;
+    
+    showToast(`Program "${program.name}" successfully sent to: ${recipients}!`, 'success');
+    closeSharePreviewModal();
+};
+
+window.openPublishProgramDialog = function(programId) {
+    openPublishProgramDialogLogic(programId);
+};
+
+window.publishProgramDirect = function() {
+    const progId = state.editingProgramId;
+    if (progId) {
+        openPublishProgramDialogLogic(progId);
+    }
+};
+
+function openPublishProgramDialogLogic(programId) {
+    const program = state.programs.find(p => p.id === programId);
+    if (!program) return;
+    
+    state.publishingProgramId = programId;
+    
+    const select = document.getElementById('publish-target-client');
+    if (select) {
+        const activeSpecialist = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
+        const myClients = state.clients.filter(c => c.therapist === activeSpecialist);
+        const listToUse = myClients.length > 0 ? myClients : state.clients;
+        
+        select.innerHTML = listToUse.map(c => `
+            <option value="${c.name}">${c.name}</option>
+        `).join('');
+    }
+    
+    const modal = document.getElementById('publish-program-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+window.closePublishProgramModal = function() {
+    const modal = document.getElementById('publish-program-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+window.handlePublishProgramSubmit = function(e) {
+    e.preventDefault();
+    const clientName = document.getElementById('publish-target-client').value;
+    const progId = state.publishingProgramId;
+    
+    const program = state.programs.find(p => p.id === progId);
+    const client = state.clients.find(c => c.name === clientName);
+    
+    if (program && client) {
+        client.activeProgramId = progId;
+        
+        const livePlans = JSON.parse(localStorage.getItem('nutriflow_client_meal_plans')) || {};
+        livePlans[clientName] = JSON.parse(JSON.stringify(program.meals || {}));
+        localStorage.setItem('nutriflow_client_meal_plans', JSON.stringify(livePlans));
+        
+        const draftPlans = JSON.parse(localStorage.getItem('nutriflow_client_meal_plans_draft')) || {};
+        draftPlans[clientName] = JSON.parse(JSON.stringify(program.meals || {}));
+        localStorage.setItem('nutriflow_client_meal_plans_draft', JSON.stringify(draftPlans));
+        
+        saveAdminState();
+        closePublishProgramModal();
+        showToast(`Program "${program.name}" successfully published to ${clientName}!`, 'success');
+        
+        renderProgramsList();
+    }
+};
+
+window.previewWeeklyPlan = function() {
+    const progId = state.editingProgramId;
+    const origin = window.location.origin;
+    let clientUrl = origin;
+    if (clientUrl.endsWith('/admin') || clientUrl.endsWith('/admin/')) {
+        clientUrl = clientUrl.replace(/\/admin\/?$/, '');
+    }
+    const previewUrl = `${clientUrl}/index.html?programId=${progId}&preview=true`;
+    
+    saveAdminState();
+    window.open(previewUrl, '_blank');
 };
 

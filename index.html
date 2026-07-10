@@ -108,7 +108,7 @@
         <!-- Links -->
         <div id="nav-links-container" class="hidden md:flex gap-md h-full items-center absolute left-1/2 transform -translate-x-1/2">
             <a onclick="navigateTo('dashboard')" id="link-dashboard" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Dashboard</a>
-            <a onclick="navigateTo('meal-plans')" id="link-meal-plans" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Meal Plans</a>
+            <a onclick="navigateTo('meal-plans')" id="link-meal-plans" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Program</a>
             <a onclick="navigateTo('appointments')" id="link-appointments" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Appointments</a>
             <a onclick="navigateTo('profile')" id="link-profile" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Profile</a>
         </div>
@@ -240,8 +240,8 @@
         <section id="view-meal-plans" class="view-section hidden flex flex-col gap-gutter">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 class="text-3xl font-bold tracking-tight text-on-surface">Your Weekly Meal Plan</h1>
-                    <p class="text-body-md text-on-surface-variant mt-1">Focus on lean proteins and complex carbs.</p>
+                    <h1 class="text-3xl font-bold tracking-tight text-on-surface" id="client-program-title">Your Nutrition Program</h1>
+                    <p class="text-body-md text-on-surface-variant mt-1" id="client-program-description">Follow this program to reach your wellness goals.</p>
                 </div>
                 <div class="flex items-center gap-3 flex-wrap">
                     <div class="flex flex-wrap gap-1 bg-surface-container-low p-1 rounded-xl border border-outline-variant/20" id="meal-weekday-switcher"></div>
@@ -591,7 +591,7 @@
         </button>
         <button onclick="navigateTo('meal-plans')" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
             <span class="material-symbols-outlined text-[22px]">restaurant</span>
-            <span class="text-[9px] font-bold mt-0.5">Meal Plans</span>
+            <span class="text-[9px] font-bold mt-0.5">Program</span>
         </button>
         <button onclick="navigateTo('appointments')" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
             <span class="material-symbols-outlined text-[22px]">calendar_month</span>
