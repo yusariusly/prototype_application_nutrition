@@ -675,7 +675,14 @@
             <div class="flex flex-col gap-3">
                 <div>
                     <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Recipient Email Address(es)</label>
-                    <input type="text" id="share-email-recipients" placeholder="e.g. client@email.com, another@email.com" class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary mb-2">
+                    <div class="flex gap-2">
+                        <input type="text" id="share-email-recipients" onkeydown="if(event.key === 'Enter') { event.preventDefault(); addRecipientEmail(); }" placeholder="Enter recipient email address..." class="flex-grow rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary">
+                        <button onclick="addRecipientEmail()" type="button" class="bg-primary hover:bg-[#005321] text-white font-bold text-xs px-4 py-2 rounded-lg shadow-sm transition-all cursor-pointer shrink-0">Add</button>
+                    </div>
+                    <!-- Drafted Emails Container -->
+                    <div id="drafted-emails-container" class="flex flex-wrap gap-1.5 mt-2 max-h-[80px] overflow-y-auto hide-scrollbar">
+                        <!-- Chips loaded dynamically -->
+                    </div>
                 </div>
 
                 <div>

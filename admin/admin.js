@@ -24,6 +24,8 @@ const state = {
     clientsPage: 0
 };
 
+let draftedRecipients = [];
+
 
 // ==================== SESSION CHECK ====================
 function checkAdminSession() {
@@ -1570,6 +1572,9 @@ function shareProgramLinkLogic(programId) {
     const recipientsInput = document.getElementById('share-email-recipients');
     if (recipientsInput) recipientsInput.value = '';
     
+    draftedRecipients = [];
+    renderDraftedRecipients();
+    
     const modal = document.getElementById('share-preview-modal');
     if (modal) {
         modal.classList.remove('hidden');
@@ -1628,9 +1633,8 @@ ${specialist}`;
 };
 
 window.sendPreviewEmails = function() {
-    const recipients = document.getElementById('share-email-recipients')?.value.trim();
-    if (!recipients) {
-        showToast('Please enter at least one recipient email address.', 'error');
+    if (draftedRecipients.length === 0) {
+        showToast('Please add at least one recipient email address first.', 'error');
         return;
     }
     
@@ -1638,8 +1642,49 @@ window.sendPreviewEmails = function() {
     const program = state.programs.find(p => p.id === progId);
     if (!program) return;
     
-    showToast(`Program "${program.name}" successfully sent to: ${recipients}!`, 'success');
+    showToast(`Program "${program.name}" successfully sent to: ${draftedRecipients.join(', ')}!`, 'success');
     closeSharePreviewModal();
+};
+
+window.addRecipientEmail = function() {
+    const input = document.getElementById('share-email-recipients');
+    if (!input) return;
+    const email = input.value.trim();
+    if (!email) return;
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showToast('Please enter a valid email address.', 'error');
+        return;
+    }
+    
+    if (draftedRecipients.includes(email)) {
+        showToast('This email is already in the list.', 'info');
+        return;
+    }
+    
+    draftedRecipients.push(email);
+    input.value = '';
+    renderDraftedRecipients();
+};
+
+function renderDraftedRecipients() {
+    const container = document.getElementById('drafted-emails-container');
+    if (!container) return;
+    
+    container.innerHTML = draftedRecipients.map((email, idx) => `
+        <span class="inline-flex items-center gap-1 bg-primary/10 text-primary text-[10px] font-bold px-2.5 py-1 rounded-full border border-primary/20">
+            ${email}
+            <button onclick="removeRecipientEmail(${idx})" type="button" class="text-primary hover:text-[#ba1a1a] font-bold shrink-0 flex items-center justify-center cursor-pointer ml-1">
+                <span class="material-symbols-outlined text-[11px]">close</span>
+            </button>
+        </span>
+    `).join('');
+}
+
+window.removeRecipientEmail = function(idx) {
+    draftedRecipients.splice(idx, 1);
+    renderDraftedRecipients();
 };
 
 window.openPublishProgramDialog = function(programId) {
