@@ -52,37 +52,37 @@
 <body class="bg-background text-on-background font-sans min-h-screen flex flex-col">
 
     <!-- Navbar -->
-    <nav class="bg-surface border-b border-outline-variant/40 flex justify-between items-center w-full px-6 md:px-12 h-[68px] z-50 sticky top-0 shadow-sm">
+    <nav class="bg-surface border-b border-outline-variant/40 w-full px-6 md:px-10 h-[68px] z-50 sticky top-0 shadow-sm grid grid-cols-[auto_1fr_auto] items-center gap-4">
         <!-- Logo -->
-        <div class="flex items-center gap-2 cursor-pointer" onclick="navigateToView('analytics')">
-            <span class="material-symbols-outlined text-primary text-[28px]" style="font-variation-settings: 'FILL' 1;">eco</span>
+        <div class="flex items-center gap-2 cursor-pointer shrink-0" onclick="navigateToView('analytics')">
+            <span class="material-symbols-outlined text-primary text-[26px]" style="font-variation-settings: 'FILL' 1;">eco</span>
             <div class="flex flex-col leading-none">
-                <span class="text-lg font-bold tracking-tight text-primary">NutriFlow Admin</span>
+                <span class="text-base font-bold tracking-tight text-primary whitespace-nowrap">NutriFlow Admin</span>
                 <span class="text-[9px] uppercase tracking-widest text-tertiary font-bold mt-0.5">Control Center</span>
             </div>
         </div>
 
-        <!-- Links -->
-        <div class="hidden md:flex gap-1 h-full items-center absolute left-1/2 transform -translate-x-1/2">
-            <a onclick="navigateToView('analytics')" id="link-analytics" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-4 cursor-pointer gap-1.5">
-                <span class="material-symbols-outlined text-[16px]">analytics</span> Analytics
+        <!-- Links (center) -->
+        <div class="hidden md:flex justify-center gap-0 h-full items-center overflow-hidden">
+            <a onclick="navigateToView('analytics')" id="link-analytics" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer gap-1 whitespace-nowrap">
+                <span class="material-symbols-outlined text-[15px]">analytics</span> Analytics
             </a>
-            <a onclick="navigateToView('patients')" id="link-patients" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-4 cursor-pointer gap-1.5">
-                <span class="material-symbols-outlined text-[16px]">groups</span> Patients
+            <a onclick="navigateToView('patients')" id="link-patients" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer gap-1 whitespace-nowrap">
+                <span class="material-symbols-outlined text-[15px]">groups</span> Patients
             </a>
-            <a onclick="navigateToView('nutritionists')" id="link-nutritionists" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-4 cursor-pointer gap-1.5">
-                <span class="material-symbols-outlined text-[16px]">support_agent</span> Specialists
+            <a onclick="navigateToView('nutritionists')" id="link-nutritionists" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer gap-1 whitespace-nowrap">
+                <span class="material-symbols-outlined text-[15px]">support_agent</span> Specialists
             </a>
-            <a onclick="navigateToView('allocation')" id="link-allocation" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-4 cursor-pointer gap-1.5">
-                <span class="material-symbols-outlined text-[16px]">swap_horiz</span> Allocation
+            <a onclick="navigateToView('allocation')" id="link-allocation" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer gap-1 whitespace-nowrap">
+                <span class="material-symbols-outlined text-[15px]">swap_horiz</span> Allocation
             </a>
-            <a onclick="navigateToView('reports')" id="link-reports" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-4 cursor-pointer gap-1.5">
-                <span class="material-symbols-outlined text-[16px]">bar_chart</span> Reports
+            <a onclick="navigateToView('reports')" id="link-reports" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer gap-1 whitespace-nowrap">
+                <span class="material-symbols-outlined text-[15px]">bar_chart</span> Reports
             </a>
         </div>
 
         <!-- Sign Out -->
-        <div class="flex items-center gap-2">
+        <div class="flex items-center justify-end shrink-0">
             <button onclick="handleSignOut()" class="border border-red-200 hover:bg-red-50 text-red-600 px-3.5 py-1.5 rounded-full font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer">
                 <span class="material-symbols-outlined text-[15px]">logout</span> Sign Out
             </button>
