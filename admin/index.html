@@ -796,43 +796,47 @@
 
     <!-- Add/Edit Service Modal -->
     <div id="service-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="bg-surface max-w-sm w-full rounded-2xl p-6 border border-slate-100 shadow-2xl flex flex-col gap-4 text-slate-800">
-            <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="text-sm font-bold text-slate-800" id="service-modal-title">Add Consultation Service</h3>
-                <button onclick="closeServiceModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer"><span class="material-symbols-outlined text-[18px]">close</span></button>
+        <div class="bg-surface max-w-lg w-full rounded-2xl p-7 border border-slate-100 shadow-2xl flex flex-col gap-5 text-slate-800 animate-fade-in">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-base font-bold text-slate-800" id="service-modal-title">Add Consultation Service</h3>
+                <button onclick="closeServiceModal()" class="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"><span class="material-symbols-outlined text-[20px]">close</span></button>
             </div>
-            <form onsubmit="handleSaveService(event)" class="space-y-3">
+            <form onsubmit="handleSaveService(event)" class="space-y-4">
                 <input type="hidden" id="service-modal-id">
                 <div>
                     <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Service Title</label>
-                    <input type="text" id="service-modal-title-input" required placeholder="e.g. Initial Consultation" class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary">
+                    <input type="text" id="service-modal-title-input" required placeholder="e.g. Initial Consultation" class="w-full rounded-lg border-slate-200 text-sm px-3 py-2.5 bg-slate-50 focus:border-primary focus:ring-primary focus:bg-white transition-all">
                 </div>
                 <div>
                     <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Description</label>
-                    <textarea id="service-modal-description" required rows="2" placeholder="e.g. A comprehensive session to review progress..." class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary"></textarea>
+                    <textarea id="service-modal-description" required rows="3" placeholder="e.g. A comprehensive session to review progress..." class="w-full rounded-lg border-slate-200 text-sm px-3 py-2.5 bg-slate-50 focus:border-primary focus:ring-primary focus:bg-white transition-all"></textarea>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Duration</label>
-                        <input type="text" id="service-modal-duration" required placeholder="e.g. 60 min" class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary">
+                        <input type="text" id="service-modal-duration" required placeholder="e.g. 60 min" class="w-full rounded-lg border-slate-200 text-sm px-3 py-2.5 bg-slate-50 focus:border-primary focus:ring-primary focus:bg-white transition-all">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Price ($)</label>
-                        <input type="number" id="service-modal-price" required placeholder="e.g. 150" class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary">
+                        <input type="number" id="service-modal-price" required placeholder="e.g. 150" class="w-full rounded-lg border-slate-200 text-sm px-3 py-2.5 bg-slate-50 focus:border-primary focus:ring-primary focus:bg-white transition-all">
                     </div>
                 </div>
                 <div>
                     <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Type / Location</label>
-                    <select id="service-modal-type" class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary">
+                    <select id="service-modal-type" class="w-full rounded-lg border-slate-200 text-sm px-3 py-2.5 bg-slate-50 focus:border-primary focus:ring-primary focus:bg-white transition-all">
                         <option value="Virtual Only">Virtual Only</option>
                         <option value="In-Person">In-Person</option>
                         <option value="Virtual or In-Person">Virtual or In-Person</option>
                     </select>
                 </div>
-                <button type="submit" class="w-full bg-primary hover:bg-[#005321] text-white font-bold text-xs py-2.5 rounded-lg transition-all shadow-sm cursor-pointer mt-2">Save Service</button>
+                <div class="flex justify-end gap-3 pt-3 border-t">
+                    <button type="button" onclick="closeServiceModal()" class="border border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold text-xs px-5 py-2.5 rounded-xl transition-all cursor-pointer">Cancel</button>
+                    <button type="submit" class="bg-primary hover:bg-[#005321] text-white font-semibold text-xs px-6 py-2.5 rounded-xl shadow-md transition-all cursor-pointer">Save Service</button>
+                </div>
             </form>
         </div>
     </div>
+
 
     <!-- Admin dashboard logic -->
     <script type="module" src="./admin.js"></script>
