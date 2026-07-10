@@ -1316,7 +1316,11 @@ function renderAppointmentsView() {
     const list = document.getElementById('appointments-upcoming-list');
     if (!list) return;
     
-    const upcoming = state.appointments.filter(apt => apt.status === 'approved' || apt.status === 'pending');
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const upcoming = state.appointments.filter(apt => 
+        (apt.status === 'approved' || apt.status === 'pending') && 
+        apt.clientName === activeClient
+    );
     
     if (upcoming.length === 0) {
         list.innerHTML = `
@@ -1330,6 +1334,7 @@ function renderAppointmentsView() {
             const monthStr = dateObj.toLocaleString('en-US', { month: 'short' }).toUpperCase();
             const dayStr = dateObj.getDate();
             const isPending = apt.status === 'pending';
+            const isVideo = apt.type.toLowerCase().includes('video') || apt.type.toLowerCase().includes('virtual');
             
             return `
                 <div class="bg-surface-container-lowest rounded-2xl p-5 border border-outline-variant/30 shadow-sm flex items-center justify-between gap-4">
@@ -1357,7 +1362,7 @@ function renderAppointmentsView() {
                         </div>
                     </div>
                     <div class="flex flex-col sm:flex-row gap-2 shrink-0">
-                        ${!isPending && apt.type === 'Video Call' ? `
+                        ${!isPending && isVideo ? `
                             <button onclick="joinVideoCall('${apt.id}')" class="bg-primary hover:bg-[#005321] text-white font-bold text-xs px-4 py-2 rounded-lg shadow-sm transition-all active:scale-95">Join Call</button>
                         ` : ''}
                         <button onclick="rescheduleAppointment('${apt.id}')" class="border border-outline-variant/30 hover:bg-surface-container text-on-surface-variant font-bold text-xs px-4 py-2 rounded-lg transition-colors">Reschedule</button>
@@ -1367,7 +1372,7 @@ function renderAppointmentsView() {
         }).join('');
     }
 
-    const completedCount = state.appointments.filter(a => a.status === 'completed').length + 12;
+    const completedCount = state.appointments.filter(a => a.status === 'completed' && a.clientName === activeClient).length + 12;
     const upcomingCount = upcoming.filter(a => a.status === 'approved').length;
     document.getElementById('overview-completed-count').innerText = completedCount;
     document.getElementById('overview-upcoming-count').innerText = upcomingCount;
