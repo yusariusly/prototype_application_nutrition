@@ -109,6 +109,7 @@
             <a onclick="navigateTo('admin-clients')" id="link-admin-clients" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Clients</a>
             <a onclick="navigateTo('admin-meal-builder')" id="link-admin-meal-builder" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Programs</a>
             <a onclick="navigateTo('admin-calendar')" id="link-admin-calendar" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Calendar</a>
+            <a onclick="navigateTo('admin-services')" id="link-admin-services" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Services</a>
             <a onclick="navigateTo('admin-profile')" id="link-admin-profile" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Profile</a>
         </div>
 
@@ -490,23 +491,33 @@
                     </form>
                 </div>
             </div>
+        </section>
 
-            <!-- Manage Services Card -->
-            <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4 mt-6">
+
+
+        <!-- ==================== VIEW 6: SERVICES MANAGEMENT ==================== -->
+        <section id="view-admin-services" class="view-section hidden flex flex-col gap-gutter">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight text-on-surface">Consultation Services</h1>
+                <p class="text-body-md text-on-surface-variant mt-1">Manage the booking offerings that clients see when scheduling appointments with you.</p>
+            </div>
+
+            <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <div>
                         <h3 class="text-lg font-bold text-on-background">My Consultation Services</h3>
-                        <p class="text-xs text-on-surface-variant mt-0.5">Manage the booking offerings that clients see when scheduling appointments with you.</p>
+                        <p class="text-xs text-on-surface-variant mt-0.5">Define your session durations, pricing, locations, and modes of consultations.</p>
                     </div>
                     <button onclick="openAddServiceModal()" class="bg-primary hover:bg-[#005321] text-white font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-sm flex items-center gap-1 cursor-pointer">
                         <span class="material-symbols-outlined text-[16px]">add</span> Add Service
                     </button>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="specialist-services-list">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in" id="specialist-services-list">
                     <!-- Populated dynamically via JS -->
                 </div>
             </div>
+        </section>
 
     </main>
 
@@ -524,7 +535,14 @@
             <span class="material-symbols-outlined text-[22px]">calendar_month</span>
             <span class="text-[9px] font-bold mt-0.5">Calendar</span>
         </button>
-
+        <button onclick="navigateTo('admin-services')" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
+            <span class="material-symbols-outlined text-[22px]">medical_services</span>
+            <span class="text-[9px] font-bold mt-0.5">Services</span>
+        </button>
+        <button onclick="navigateTo('admin-profile')" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
+            <span class="material-symbols-outlined text-[22px]">account_circle</span>
+            <span class="text-[9px] font-bold mt-0.5">Profile</span>
+        </button>
     </div>
 
     <!-- Footer -->

@@ -285,6 +285,8 @@ window.navigateTo = function(viewId) {
         renderAdminMealBuilder();
     } else if (viewId === 'admin-calendar') {
         renderAdminCalendar();
+    } else if (viewId === 'admin-services') {
+        loadSpecialistServices();
     } else if (viewId === 'admin-profile') {
         loadSpecialistProfileDetails();
     }
@@ -325,8 +327,6 @@ function loadSpecialistProfileDetails() {
     document.getElementById('edit-practitioner-name').value = spec.name;
     document.getElementById('edit-practitioner-specialty').value = spec.specialty;
     document.getElementById('edit-practitioner-email').value = spec.email;
-
-    loadSpecialistServices();
 }
 
 function loadSpecialistServices() {
