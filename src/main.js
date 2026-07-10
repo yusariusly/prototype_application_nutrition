@@ -575,10 +575,13 @@ function updateKcalDisplay() {
     const clientPlan = state.clientMealPlans[localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins'][today] || [];
 
     clientPlan.forEach(meal => {
-        consumed += meal.calories;
-        pro += meal.p || 0;
-        carb += meal.c || 0;
-        fat += meal.f || 0;
+        const isLogged = state.loggedStatus[targetClient]?.[today]?.[meal.type] === true;
+        if (isLogged) {
+            consumed += meal.calories;
+            pro += meal.p || 0;
+            carb += meal.c || 0;
+            fat += meal.f || 0;
+        }
     });
     
     let left = goal - consumed;
@@ -773,13 +776,10 @@ function renderMealPlans() {
     let currentF = 0;
     
     clientPlan.forEach(m => {
-        const isLogged = state.loggedStatus[clientName]?.[state.selectedDay]?.[m.type] === true;
-        if (isLogged) {
-            currentKcal += m.calories;
-            currentP += m.p;
-            currentC += m.c;
-            currentF += m.f;
-        }
+        currentKcal += m.calories;
+        currentP += m.p || 0;
+        currentC += m.c || 0;
+        currentF += m.f || 0;
     });
 
     let targetCal = state.activeProgramTargetKcal || parseInt(localStorage.getItem('nutriflow_target_kcal_' + clientName)) || 2100;
