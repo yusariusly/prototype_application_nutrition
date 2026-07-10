@@ -1336,6 +1336,9 @@ function renderAppointmentsView() {
             const isPending = apt.status === 'pending';
             const isVideo = apt.type.toLowerCase().includes('video') || apt.type.toLowerCase().includes('virtual');
             
+            const therapistName = assignedTherapist;
+            const initials = therapistName.split(' ').pop().substring(0,2).toUpperCase();
+            
             return `
                 <div class="bg-surface-container-lowest rounded-2xl p-5 border border-outline-variant/30 shadow-sm flex items-center justify-between gap-4">
                     <div class="flex items-center gap-4">
@@ -1355,9 +1358,9 @@ function renderAppointmentsView() {
                             </div>
                             <div class="flex items-center gap-2 mt-2">
                                 <div class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-bold border shrink-0">
-                                    ${apt.therapist.split(' ').pop().substring(0,2).toUpperCase()}
+                                    ${initials}
                                 </div>
-                                <span class="text-xs text-on-surface font-semibold">${apt.therapist}</span>
+                                <span class="text-xs text-on-surface font-semibold">${therapistName}</span>
                             </div>
                         </div>
                     </div>
@@ -1380,8 +1383,8 @@ function renderAppointmentsView() {
     const historyList = document.getElementById('appointments-history-list');
     if (historyList) {
         const histories = [
-            { title: 'Initial Consultation', date: 'Sep 15, 2023', doc: 'Dr. Sarah Jenkins' },
-            { title: 'Check-in', date: 'Aug 02, 2023', doc: 'Mark Davies' }
+            { title: 'Initial Consultation', date: 'Sep 15, 2023', doc: assignedTherapist },
+            { title: 'Check-in', date: 'Aug 02, 2023', doc: assignedTherapist }
         ];
         historyList.innerHTML = histories.map(h => `
             <div class="flex justify-between items-center pb-2 border-b border-surface-variant/30 text-xs">
@@ -1653,10 +1656,15 @@ function renderBookingStep2() {
     const srv = SERVICES[state.bookingFlow.selectedServiceId];
     if (!srv) return;
     
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
+    const clientDetails = clientsList.find(c => c.name === activeClient);
+    const assignedTherapist = clientDetails?.therapist || 'Dr. Hasan';
+    
     document.getElementById('booking-summary-service-img').src = srv.image;
     document.getElementById('booking-summary-service-title').innerText = srv.title;
     document.getElementById('booking-summary-service-duration').innerText = `${srv.duration} Duration`;
-    document.getElementById('booking-summary-service-therapist').innerText = srv.therapist;
+    document.getElementById('booking-summary-service-therapist').innerText = assignedTherapist;
     document.getElementById('booking-summary-service-cost').innerText = `$${srv.price}.00`;
 
     const grid = document.getElementById('booking-calendar-grid');
@@ -1771,6 +1779,11 @@ window.handleDetailsSubmit = function(e) {
     
     const srv = SERVICES[state.bookingFlow.selectedServiceId];
     
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
+    const clientDetails = clientsList.find(c => c.name === activeClient);
+    const assignedTherapist = clientDetails?.therapist || 'Dr. Hasan';
+    
     const newApt = {
         id: `apt-${Math.random().toString(36).substr(2, 9)}`,
         clientName: name,
@@ -1779,7 +1792,7 @@ window.handleDetailsSubmit = function(e) {
         serviceTitle: srv.title,
         price: srv.price,
         duration: srv.duration,
-        therapist: srv.therapist,
+        therapist: assignedTherapist,
         date: state.bookingFlow.selectedDate,
         time: state.bookingFlow.selectedSlot,
         status: 'pending',
@@ -1792,7 +1805,7 @@ window.handleDetailsSubmit = function(e) {
     document.getElementById('success-service-title').innerText = srv.title;
     document.getElementById('success-date').innerText = new Date(state.bookingFlow.selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
     document.getElementById('success-time').innerText = state.bookingFlow.selectedSlot;
-    document.getElementById('success-practitioner').innerText = srv.therapist;
+    document.getElementById('success-practitioner').innerText = assignedTherapist;
     document.getElementById('success-price').innerText = `$${srv.price}.00`;
 
     advanceBookingStep(4);
