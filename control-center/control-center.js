@@ -6,10 +6,13 @@ const state = {
     nutritionists: [],
     clients: [],
     appointments: [],
-    selectedClientForAllocation: null
+    selectedClientForAllocation: null,
+    editingPatientId: null
 };
 
 let successTrendsChartInstance = null;
+let growthChartInstance = null;
+let goalsChartInstance = null;
 
 // ==================== SESSION CHECK ====================
 function checkSuperAdminSession() {
@@ -27,20 +30,29 @@ function loadState() {
         state.nutritionists = [
             { id: 'exp-1', name: 'Dr. Hasan', email: 'hasan@nutriflow.com', specialty: 'Weight Management', status: 'active', avatar: 'DH' },
             { id: 'exp-2', name: 'Dr. Amanda', email: 'amanda@nutriflow.com', specialty: 'Sport Nutrition', status: 'active', avatar: 'DA' },
-            { id: 'exp-3', name: 'Dr. Marcus Reid', email: 'm.reid@email.com', specialty: 'Therapeutic Diets', status: 'active', avatar: 'MR' },
+            { id: 'exp-3', name: 'Dr. Marcus Reid', email: 'm.reid@nutriflow.com', specialty: 'Therapeutic Diets', status: 'active', avatar: 'MR' },
             { id: 'exp-4', name: 'Dr. John Doe', email: 'john@nutriflow.com', specialty: 'Pediatric Nutrition', status: 'active', avatar: 'JD' }
         ];
         saveState();
     }
 
-    // 2. Load Clients
+    // 2. Load Clients/Patients
     if (localStorage.getItem('nutriflow_clients')) {
         state.clients = JSON.parse(localStorage.getItem('nutriflow_clients'));
+        // Ensure all clients have an id
+        let dirty = false;
+        state.clients.forEach(c => {
+            if (!c.id) {
+                c.id = `pat-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+                dirty = true;
+            }
+        });
+        if (dirty) saveState();
     } else {
         state.clients = [
-            { name: 'Sarah Jenkins', email: 'sarah.j@email.com', goal: 'Weight Loss', compliance: 92, therapist: 'Dr. Hasan', avatar: 'SJ' },
-            { name: 'Marcus Reid', email: 'm.reid@email.com', goal: 'Muscle Gain', compliance: 78, therapist: 'Dr. Amanda', avatar: 'MR' },
-            { name: 'Elena Lopez', email: 'elena.l@email.com', goal: 'Maintenance', compliance: 95, therapist: 'Dr. Marcus Reid', avatar: 'EL' }
+            { id: 'pat-1', name: 'Sarah Jenkins', email: 'sarah.j@email.com', goal: 'Weight Loss', compliance: 92, therapist: 'Dr. Hasan', avatar: 'SJ' },
+            { id: 'pat-2', name: 'Marcus Reid', email: 'm.reid@email.com', goal: 'Muscle Gain', compliance: 78, therapist: 'Dr. Amanda', avatar: 'MR' },
+            { id: 'pat-3', name: 'Elena Lopez', email: 'elena.l@email.com', goal: 'Maintenance', compliance: 95, therapist: 'Dr. Marcus Reid', avatar: 'EL' }
         ];
         saveState();
     }
@@ -68,36 +80,19 @@ function saveState() {
 window.navigateToView = function(viewName) {
     state.activeView = viewName;
 
-    // Toggle active link styling
-    const links = ['analytics', 'nutritionists', 'allocation', 'reports'];
+    const links = ['analytics', 'patients', 'nutritionists', 'allocation', 'reports'];
     links.forEach(l => {
         const linkEl = document.getElementById(`link-${l}`);
         const viewEl = document.getElementById(`view-${l}`);
-        if (linkEl) {
-            if (l === viewName) {
-                linkEl.classList.add('active');
-            } else {
-                linkEl.classList.remove('active');
-            }
-        }
-        if (viewEl) {
-            if (l === viewName) {
-                viewEl.classList.remove('hidden');
-            } else {
-                viewEl.classList.add('hidden');
-            }
-        }
+        if (linkEl) linkEl.classList.toggle('active', l === viewName);
+        if (viewEl) viewEl.classList.toggle('hidden', l !== viewName);
     });
 
-    if (viewName === 'analytics') {
-        renderAnalyticsCharts();
-    } else if (viewName === 'nutritionists') {
-        renderNutritionistsTable();
-    } else if (viewName === 'allocation') {
-        renderAllocationTable();
-    } else if (viewName === 'reports') {
-        setTimeout(initAdminReportsCharts, 50);
-    }
+    if (viewName === 'analytics') renderAnalyticsCharts();
+    else if (viewName === 'patients') renderPatientsTable();
+    else if (viewName === 'nutritionists') renderNutritionistsTable();
+    else if (viewName === 'allocation') renderAllocationTable();
+    else if (viewName === 'reports') setTimeout(initAdminReportsCharts, 50);
 };
 
 // ==================== SUMMARY STATS ====================
@@ -113,102 +108,231 @@ function updateSummaryStats() {
 
     if (avgComplianceEl && state.clients.length > 0) {
         const totalComp = state.clients.reduce((acc, c) => acc + (c.compliance || 0), 0);
-        const avg = (totalComp / state.clients.length).toFixed(1);
-        avgComplianceEl.innerText = `${avg}%`;
+        avgComplianceEl.innerText = `${(totalComp / state.clients.length).toFixed(1)}%`;
+    } else if (avgComplianceEl) {
+        avgComplianceEl.innerText = '—';
     }
 }
 
 // ==================== ANALYTICS & CHARTS ====================
-let growthChartInstance = null;
-let goalsChartInstance = null;
-
 function renderAnalyticsCharts() {
-    // 1. Line Chart: Growth & Bookings
     const growthCtx = document.getElementById('chart-growth-bookings');
     if (growthCtx) {
-        if (growthChartInstance) {
-            growthChartInstance.destroy();
-        }
+        if (growthChartInstance) growthChartInstance.destroy();
         growthChartInstance = new Chart(growthCtx, {
             type: 'line',
             data: {
                 labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
                 datasets: [
                     {
-                        label: 'Registered Clients',
+                        label: 'Registered Patients',
                         data: [1, 2, 2, 3, 3, state.clients.length],
                         borderColor: '#006e2f',
-                        backgroundColor: 'rgba(0, 110, 47, 0.05)',
-                        fill: true,
-                        tension: 0.3
+                        backgroundColor: 'rgba(0, 110, 47, 0.07)',
+                        fill: true, tension: 0.4, pointRadius: 4,
+                        pointBackgroundColor: '#006e2f'
                     },
                     {
-                        label: 'Janji Temu',
+                        label: 'Appointments',
                         data: [2, 3, 4, 3, 5, state.appointments.length],
                         borderColor: '#006a61',
-                        backgroundColor: 'rgba(0, 106, 97, 0.05)',
-                        fill: true,
-                        tension: 0.3
+                        backgroundColor: 'rgba(0, 106, 97, 0.07)',
+                        fill: true, tension: 0.4, pointRadius: 4,
+                        pointBackgroundColor: '#006a61'
                     }
                 ]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        labels: { font: { size: 10, weight: 'bold' } }
-                    }
-                },
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { labels: { font: { size: 11, weight: 'bold' } } } },
                 scales: {
-                    y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
-                    x: { grid: { display: false } }
+                    y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 } } },
+                    x: { grid: { display: false }, ticks: { font: { size: 10 } } }
                 }
             }
         });
     }
 
-    // 2. Doughnut Chart: Goals
     const goalsCtx = document.getElementById('chart-goals');
     if (goalsCtx) {
-        if (goalsChartInstance) {
-            goalsChartInstance.destroy();
-        }
-
-        // Count categories
-        let weightLossCount = 0;
-        let muscleGainCount = 0;
-        let maintenanceCount = 0;
-
+        if (goalsChartInstance) goalsChartInstance.destroy();
+        let weightLoss = 0, muscleGain = 0, maintenance = 0, other = 0;
         state.clients.forEach(c => {
-            if (c.goal === 'Weight Loss') weightLossCount++;
-            else if (c.goal === 'Muscle Gain') muscleGainCount++;
-            else maintenanceCount++;
+            if (c.goal === 'Weight Loss') weightLoss++;
+            else if (c.goal === 'Muscle Gain') muscleGain++;
+            else if (c.goal === 'Maintenance') maintenance++;
+            else other++;
         });
-
         goalsChartInstance = new Chart(goalsCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Weight Loss', 'Muscle Gain', 'Maintenance'],
-                datasets: [{
-                    data: [weightLossCount, muscleGainCount, maintenanceCount],
-                    backgroundColor: ['#006e2f', '#006a61', '#9d4300'],
-                    borderWidth: 1
-                }]
+                labels: ['Weight Loss', 'Muscle Gain', 'Maintenance', 'Other'],
+                datasets: [{ data: [weightLoss, muscleGain, maintenance, other], backgroundColor: ['#006e2f', '#006a61', '#9d4300', '#5c7a5a'], borderWidth: 2, borderColor: '#fff' }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: { font: { size: 9, weight: 'bold' } }
-                    }
-                }
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { font: { size: 10, weight: 'bold' }, padding: 12 } } }
             }
         });
     }
 }
+
+// ==================== PATIENTS TABLE ====================
+let filteredPatients = [];
+
+function renderPatientsTable(data) {
+    const tbody = document.getElementById('patients-table-body');
+    if (!tbody) return;
+
+    const patients = data || state.clients;
+    filteredPatients = patients;
+
+    if (patients.length === 0) {
+        tbody.innerHTML = `
+            <tr><td colspan="6" class="px-6 py-12 text-center text-on-surface-variant">
+                <div class="flex flex-col items-center gap-2">
+                    <span class="material-symbols-outlined text-4xl text-outline-variant">person_search</span>
+                    <p class="text-xs">No patients found. Click "Add Patient" to add one.</p>
+                </div>
+            </td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = patients.map(c => {
+        const compColor = c.compliance >= 80 ? 'text-emerald-700 bg-emerald-50' : c.compliance >= 60 ? 'text-amber-700 bg-amber-50' : 'text-red-700 bg-red-50';
+        const goalColors = {
+            'Weight Loss': 'bg-blue-50 text-blue-700',
+            'Muscle Gain': 'bg-purple-50 text-purple-700',
+            'Maintenance': 'bg-teal-50 text-teal-700',
+            'Therapeutic Diet': 'bg-orange-50 text-orange-700',
+        };
+        const goalColor = goalColors[c.goal] || 'bg-slate-100 text-slate-600';
+        return `
+            <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-secondary/10 text-secondary font-bold text-[11px] flex items-center justify-center shrink-0">${c.avatar || c.name?.split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase() || 'P'}</div>
+                        <span class="font-semibold text-on-background text-xs">${c.name}</span>
+                    </div>
+                </td>
+                <td class="px-6 py-4 text-on-surface-variant text-xs">${c.email || '—'}</td>
+                <td class="px-6 py-4"><span class="font-bold text-[10px] px-2.5 py-1 rounded-full ${goalColor}">${c.goal}</span></td>
+                <td class="px-6 py-4">
+                    ${c.therapist
+                        ? `<span class="bg-primary/8 text-primary font-semibold text-xs px-2.5 py-1 rounded-lg flex items-center gap-1 w-fit">
+                                <span class="material-symbols-outlined text-[12px]">support_agent</span>${c.therapist}
+                           </span>`
+                        : `<span class="text-on-surface-variant text-xs italic">Not assigned</span>`}
+                </td>
+                <td class="px-6 py-4 text-center">
+                    <span class="font-bold text-xs px-2.5 py-1 rounded-full ${compColor}">${c.compliance ?? '—'}%</span>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="flex items-center justify-end gap-2">
+                        <button onclick="openEditPatientModal('${c.id}')" class="text-primary hover:bg-primary/10 font-bold text-[10px] flex items-center gap-0.5 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer">
+                            <span class="material-symbols-outlined text-[14px]">edit</span> Edit
+                        </button>
+                        <button onclick="deletePatient('${c.id}')" class="text-red-500 hover:bg-red-50 font-bold text-[10px] flex items-center gap-0.5 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer">
+                            <span class="material-symbols-outlined text-[14px]">delete</span> Delete
+                        </button>
+                    </div>
+                </td>
+            </tr>`;
+    }).join('');
+}
+
+window.filterPatientsTable = function() {
+    const q = document.getElementById('patient-search')?.value?.toLowerCase() || '';
+    const filtered = state.clients.filter(c =>
+        c.name?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q)
+    );
+    renderPatientsTable(filtered);
+};
+
+// ==================== PATIENT MODAL ====================
+function populateSpecialistDropdown(selectId, selected = '') {
+    const sel = document.getElementById(selectId);
+    if (!sel) return;
+    sel.innerHTML = `<option value="">— Not Assigned —</option>` +
+        state.nutritionists.map(n => `<option value="${n.name}" ${n.name === selected ? 'selected' : ''}>${n.name} (${n.specialty})</option>`).join('');
+}
+
+window.openAddPatientModal = function() {
+    state.editingPatientId = null;
+    document.getElementById('patient-modal-title').innerText = 'Add Patient';
+    document.getElementById('patient-modal-id').value = '';
+    document.getElementById('patient-modal-name').value = '';
+    document.getElementById('patient-modal-email').value = '';
+    document.getElementById('patient-modal-goal').value = 'Weight Loss';
+    document.getElementById('patient-modal-compliance').value = '';
+    populateSpecialistDropdown('patient-modal-therapist', '');
+    const m = document.getElementById('patient-modal');
+    m.classList.remove('hidden'); m.classList.add('flex');
+};
+
+window.openEditPatientModal = function(patientId) {
+    const p = state.clients.find(c => c.id === patientId);
+    if (!p) return;
+    state.editingPatientId = patientId;
+    document.getElementById('patient-modal-title').innerText = 'Edit Patient';
+    document.getElementById('patient-modal-id').value = p.id;
+    document.getElementById('patient-modal-name').value = p.name;
+    document.getElementById('patient-modal-email').value = p.email || '';
+    document.getElementById('patient-modal-goal').value = p.goal || 'Weight Loss';
+    document.getElementById('patient-modal-compliance').value = p.compliance ?? '';
+    populateSpecialistDropdown('patient-modal-therapist', p.therapist || '');
+    const m = document.getElementById('patient-modal');
+    m.classList.remove('hidden'); m.classList.add('flex');
+};
+
+window.closePatientModal = function() {
+    const m = document.getElementById('patient-modal');
+    m.classList.add('hidden'); m.classList.remove('flex');
+};
+
+window.handleSavePatient = function(e) {
+    e.preventDefault();
+    const name = document.getElementById('patient-modal-name').value.trim();
+    const email = document.getElementById('patient-modal-email').value.trim();
+    const goal = document.getElementById('patient-modal-goal').value;
+    const compliance = parseInt(document.getElementById('patient-modal-compliance').value) || 0;
+    const therapist = document.getElementById('patient-modal-therapist').value;
+    const avatar = name.split(' ').map(s => s[0]).join('').substring(0, 2).toUpperCase();
+
+    if (state.editingPatientId) {
+        // Edit existing
+        const idx = state.clients.findIndex(c => c.id === state.editingPatientId);
+        if (idx !== -1) {
+            state.clients[idx] = { ...state.clients[idx], name, email, goal, compliance, therapist, avatar };
+            showToast(`Patient "${name}" updated successfully!`, 'success');
+        }
+    } else {
+        // Add new
+        const newPatient = {
+            id: `pat-${Date.now()}`,
+            name, email, goal, compliance, therapist, avatar
+        };
+        state.clients.push(newPatient);
+        showToast(`Patient "${name}" added successfully!`, 'success');
+    }
+
+    saveState();
+    closePatientModal();
+    renderPatientsTable();
+    updateSummaryStats();
+};
+
+window.deletePatient = function(patientId) {
+    const p = state.clients.find(c => c.id === patientId);
+    if (!p) return;
+    if (confirm(`Are you sure you want to remove patient "${p.name}"? This cannot be undone.`)) {
+        state.clients = state.clients.filter(c => c.id !== patientId);
+        saveState();
+        renderPatientsTable();
+        updateSummaryStats();
+        showToast(`Patient "${p.name}" removed.`, 'info');
+    }
+};
 
 // ==================== NUTRITIONISTS TABLE ====================
 function renderNutritionistsTable() {
@@ -216,82 +340,114 @@ function renderNutritionistsTable() {
     if (!tbody) return;
 
     tbody.innerHTML = state.nutritionists.map(n => {
-        // Count active clients assigned to this nutritionist
         const clientCount = state.clients.filter(c => c.therapist === n.name).length;
-
+        const statusColor = n.status === 'active' ? 'text-emerald-700 bg-emerald-50' : 'text-slate-500 bg-slate-100';
+        const dotColor = n.status === 'active' ? 'bg-emerald-500' : 'bg-slate-400';
         return `
-            <tr class="hover:bg-slate-50 transition-colors">
-                <td class="p-4 flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center shrink-0">${n.avatar || 'N'}</div>
-                    <span class="font-bold text-slate-800">${n.name}</span>
+            <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-[11px] flex items-center justify-center shrink-0">${n.avatar || 'N'}</div>
+                        <span class="font-semibold text-on-background text-xs">${n.name}</span>
+                    </div>
                 </td>
-                <td class="p-4 text-slate-500 font-medium">${n.email}</td>
-                <td class="p-4"><span class="bg-blue-50 text-blue-700 font-bold px-2.5 py-1 rounded-full text-[10px]">${n.specialty}</span></td>
-                <td class="p-4">
-                    <span class="inline-flex items-center gap-1.5 font-bold ${n.status === 'active' ? 'text-green-600' : 'text-slate-400'}">
-                        <span class="w-2 h-2 rounded-full ${n.status === 'active' ? 'bg-green-600' : 'bg-slate-400'}"></span>
-                        ${n.status.toUpperCase()}
+                <td class="px-6 py-4 text-on-surface-variant text-xs">${n.email}</td>
+                <td class="px-6 py-4"><span class="bg-blue-50 text-blue-700 font-bold px-2.5 py-1 rounded-full text-[10px]">${n.specialty}</span></td>
+                <td class="px-6 py-4">
+                    <span class="inline-flex items-center gap-1.5 font-bold text-[10px] px-2.5 py-1 rounded-full ${statusColor}">
+                        <span class="w-1.5 h-1.5 rounded-full ${dotColor}"></span>${n.status.toUpperCase()}
                     </span>
                 </td>
-                <td class="p-4 text-center font-bold text-slate-700">${clientCount}</td>
-                <td class="p-4 text-right">
-                    <button onclick="deleteNutritionist('${n.id}')" class="text-red-500 hover:text-red-700 font-bold flex items-center gap-0.5 justify-end w-full cursor-pointer">
-                        <span class="material-symbols-outlined text-[16px]">delete</span> Delete
-                    </button>
+                <td class="px-6 py-4 text-center font-bold text-on-background text-xs">${clientCount}</td>
+                <td class="px-6 py-4">
+                    <div class="flex items-center justify-end gap-2">
+                        <button onclick="openEditNutritionistModal('${n.id}')" class="text-primary hover:bg-primary/10 font-bold text-[10px] flex items-center gap-0.5 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer">
+                            <span class="material-symbols-outlined text-[14px]">edit</span> Edit
+                        </button>
+                        <button onclick="deleteNutritionist('${n.id}')" class="text-red-500 hover:bg-red-50 font-bold text-[10px] flex items-center gap-0.5 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer">
+                            <span class="material-symbols-outlined text-[14px]">delete</span> Delete
+                        </button>
+                    </div>
                 </td>
-            </tr>
-        `;
+            </tr>`;
     }).join('');
 }
 
 window.openAddNutritionistModal = function() {
-    document.getElementById('add-nutritionist-modal').classList.remove('hidden');
-    document.getElementById('add-nutritionist-modal').classList.add('flex');
+    document.getElementById('expert-name').value = '';
+    document.getElementById('expert-email').value = '';
+    document.getElementById('expert-specialty').value = 'Weight Management';
+    document.getElementById('expert-status').value = 'active';
+    const m = document.getElementById('add-nutritionist-modal');
+    m.classList.remove('hidden'); m.classList.add('flex');
 };
 
 window.closeAddNutritionistModal = function() {
-    document.getElementById('add-nutritionist-modal').classList.add('hidden');
-    document.getElementById('add-nutritionist-modal').classList.remove('flex');
+    const m = document.getElementById('add-nutritionist-modal');
+    m.classList.add('hidden'); m.classList.remove('flex');
 };
 
 window.handleAddNutritionist = function(e) {
     e.preventDefault();
-    const name = document.getElementById('expert-name').value;
-    const email = document.getElementById('expert-email').value;
+    const name = document.getElementById('expert-name').value.trim();
+    const email = document.getElementById('expert-email').value.trim();
     const specialty = document.getElementById('expert-specialty').value;
+    const status = document.getElementById('expert-status').value;
     const avatar = name.split(' ').map(s => s[0]).join('').substring(0, 2).toUpperCase();
 
-    const newExp = {
-        id: `exp-${Date.now()}`,
-        name,
-        email,
-        specialty,
-        status: 'active',
-        avatar
-    };
-
-    state.nutritionists.push(newExp);
+    state.nutritionists.push({ id: `exp-${Date.now()}`, name, email, specialty, status, avatar });
     saveState();
     closeAddNutritionistModal();
     renderNutritionistsTable();
     updateSummaryStats();
-    showToast(`Registered practitioner ${name} successfully!`, 'success');
+    showToast(`Registered specialist "${name}" successfully!`, 'success');
+};
 
-    // Clean inputs
-    document.getElementById('expert-name').value = '';
-    document.getElementById('expert-email').value = '';
+window.openEditNutritionistModal = function(id) {
+    const n = state.nutritionists.find(x => x.id === id);
+    if (!n) return;
+    document.getElementById('edit-expert-id').value = n.id;
+    document.getElementById('edit-expert-name').value = n.name;
+    document.getElementById('edit-expert-email').value = n.email;
+    document.getElementById('edit-expert-specialty').value = n.specialty;
+    document.getElementById('edit-expert-status').value = n.status;
+    const m = document.getElementById('edit-nutritionist-modal');
+    m.classList.remove('hidden'); m.classList.add('flex');
+};
+
+window.closeEditNutritionistModal = function() {
+    const m = document.getElementById('edit-nutritionist-modal');
+    m.classList.add('hidden'); m.classList.remove('flex');
+};
+
+window.handleEditNutritionist = function(e) {
+    e.preventDefault();
+    const id = document.getElementById('edit-expert-id').value;
+    const name = document.getElementById('edit-expert-name').value.trim();
+    const email = document.getElementById('edit-expert-email').value.trim();
+    const specialty = document.getElementById('edit-expert-specialty').value;
+    const status = document.getElementById('edit-expert-status').value;
+    const avatar = name.split(' ').map(s => s[0]).join('').substring(0, 2).toUpperCase();
+
+    const idx = state.nutritionists.findIndex(n => n.id === id);
+    if (idx !== -1) {
+        state.nutritionists[idx] = { ...state.nutritionists[idx], name, email, specialty, status, avatar };
+    }
+    saveState();
+    closeEditNutritionistModal();
+    renderNutritionistsTable();
+    showToast(`Specialist "${name}" updated successfully!`, 'success');
 };
 
 window.deleteNutritionist = function(id) {
-    if (confirm("Are you sure you want to remove this practitioner?")) {
-        const index = state.nutritionists.findIndex(n => n.id === id);
-        if (index !== -1) {
-            const removed = state.nutritionists.splice(index, 1)[0];
-            saveState();
-            renderNutritionistsTable();
-            updateSummaryStats();
-            showToast(`Practitioner ${removed.name} removed successfully!`, 'info');
-        }
+    const n = state.nutritionists.find(x => x.id === id);
+    if (!n) return;
+    if (confirm(`Are you sure you want to remove specialist "${n.name}"?`)) {
+        state.nutritionists = state.nutritionists.filter(x => x.id !== id);
+        saveState();
+        renderNutritionistsTable();
+        updateSummaryStats();
+        showToast(`Specialist "${n.name}" removed.`, 'info');
     }
 };
 
@@ -300,58 +456,70 @@ function renderAllocationTable() {
     const tbody = document.getElementById('allocation-table-body');
     if (!tbody) return;
 
+    if (state.clients.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-on-surface-variant text-xs">No patients registered yet.</td></tr>`;
+        return;
+    }
+
     tbody.innerHTML = state.clients.map(c => {
+        const compColor = c.compliance >= 80 ? 'text-emerald-700 bg-emerald-50' : c.compliance >= 60 ? 'text-amber-700 bg-amber-50' : 'text-red-700 bg-red-50';
         return `
-            <tr class="hover:bg-slate-50 transition-colors">
-                <td class="p-4 flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0">${c.avatar || 'C'}</div>
-                    <span class="font-bold text-slate-800">${c.name}</span>
+            <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-secondary/10 text-secondary font-bold text-[11px] flex items-center justify-center shrink-0">${c.avatar || 'P'}</div>
+                        <span class="font-semibold text-on-background text-xs">${c.name}</span>
+                    </div>
                 </td>
-                <td class="p-4 text-slate-500 font-medium">${c.goal}</td>
-                <td class="p-4">
-                    <span class="bg-primary/5 text-primary font-bold px-3 py-1 rounded-xl text-xs flex items-center gap-1.5 w-fit">
-                        <span class="material-symbols-outlined text-[14px]">support_agent</span>
-                        ${c.therapist || 'None'}
-                    </span>
+                <td class="px-6 py-4 text-on-surface-variant text-xs">${c.goal}</td>
+                <td class="px-6 py-4">
+                    ${c.therapist
+                        ? `<span class="bg-primary/8 text-primary font-semibold text-xs px-2.5 py-1 rounded-lg flex items-center gap-1 w-fit">
+                                <span class="material-symbols-outlined text-[12px]">support_agent</span>${c.therapist}
+                           </span>`
+                        : `<span class="text-on-surface-variant text-xs italic">Not assigned</span>`}
                 </td>
-                <td class="p-4 text-center font-bold text-emerald-700">${c.compliance}%</td>
-                <td class="p-4 text-right">
-                    <button onclick="openAllocationModal('${c.name}')" class="text-primary hover:text-[#005321] font-bold flex items-center gap-0.5 justify-end w-full cursor-pointer">
-                        <span class="material-symbols-outlined text-[16px]">sync_alt</span> Change
-                    </button>
+                <td class="px-6 py-4 text-center">
+                    <span class="font-bold text-xs px-2.5 py-1 rounded-full ${compColor}">${c.compliance ?? '—'}%</span>
                 </td>
-            </tr>
-        `;
+                <td class="px-6 py-4">
+                    <div class="flex justify-end">
+                        <button onclick="openAllocationModal('${c.name}')" class="text-primary hover:bg-primary/10 font-bold text-[10px] flex items-center gap-0.5 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer">
+                            <span class="material-symbols-outlined text-[14px]">sync_alt</span> Change
+                        </button>
+                    </div>
+                </td>
+            </tr>`;
     }).join('');
 }
 
 window.openAllocationModal = function(clientName) {
     state.selectedClientForAllocation = clientName;
     document.getElementById('allocation-client-name').innerText = clientName;
-
+    const currentClient = state.clients.find(c => c.name === clientName);
     const select = document.getElementById('allocation-expert-select');
     if (select) {
-        select.innerHTML = state.nutritionists.map(n => `<option value="${n.name}">${n.name} (${n.specialty})</option>`).join('');
+        select.innerHTML = `<option value="">— Not Assigned —</option>` +
+            state.nutritionists.map(n => `<option value="${n.name}" ${n.name === currentClient?.therapist ? 'selected' : ''}>${n.name} (${n.specialty})</option>`).join('');
     }
-
-    document.getElementById('edit-allocation-modal').classList.remove('hidden');
-    document.getElementById('edit-allocation-modal').classList.add('flex');
+    const m = document.getElementById('edit-allocation-modal');
+    m.classList.remove('hidden'); m.classList.add('flex');
 };
 
 window.closeEditAllocationModal = function() {
-    document.getElementById('edit-allocation-modal').classList.add('hidden');
-    document.getElementById('edit-allocation-modal').classList.remove('flex');
+    const m = document.getElementById('edit-allocation-modal');
+    m.classList.add('hidden'); m.classList.remove('flex');
 };
 
 window.saveAllocationChange = function() {
     const expert = document.getElementById('allocation-expert-select').value;
     const client = state.clients.find(c => c.name === state.selectedClientForAllocation);
     if (client) {
-        client.therapist = expert;
+        client.therapist = expert || null;
         saveState();
         closeEditAllocationModal();
         renderAllocationTable();
-        showToast(`Assigned ${expert} to ${state.selectedClientForAllocation}!`, 'success');
+        showToast(`Assigned "${expert || 'none'}" to ${state.selectedClientForAllocation}!`, 'success');
     }
 };
 
@@ -360,25 +528,22 @@ function showToast(message, type = 'success') {
     const toast = document.getElementById('admin-toast');
     const toastText = document.getElementById('toast-text');
     const toastIcon = document.getElementById('toast-icon');
-
-    if (toast && toastText) {
-        toastText.innerText = message;
-        if (type === 'success') {
-            toastIcon.innerText = 'check_circle';
-            toastIcon.className = 'material-symbols-outlined text-green-500 text-base';
-        } else {
-            toastIcon.innerText = 'info';
-            toastIcon.className = 'material-symbols-outlined text-blue-500 text-base';
-        }
-
-        toast.classList.remove('translate-y-20', 'opacity-0');
-        toast.classList.add('translate-y-0', 'opacity-100');
-
-        setTimeout(() => {
-            toast.classList.add('translate-y-20', 'opacity-0');
-            toast.classList.remove('translate-y-0', 'opacity-100');
-        }, 3000);
+    if (!toast || !toastText) return;
+    toastText.innerText = message;
+    if (type === 'success') {
+        toastIcon.innerText = 'check_circle';
+        toastIcon.className = 'material-symbols-outlined text-primary text-base';
+    } else {
+        toastIcon.innerText = 'info';
+        toastIcon.className = 'material-symbols-outlined text-secondary text-base';
     }
+    toastIcon.style.fontVariationSettings = "'FILL' 1";
+    toast.classList.remove('translate-y-20', 'opacity-0');
+    toast.classList.add('translate-y-0', 'opacity-100');
+    setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+    }, 3000);
 }
 
 // ==================== LOGOUT ====================
@@ -397,7 +562,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ==================== REPORTS CHART ====================
 function initAdminReportsCharts() {
-    const ctxSuccess = document.getElementById('adminSuccessTrendsChartCanvas').getContext('2d');
+    const ctxSuccess = document.getElementById('adminSuccessTrendsChartCanvas');
     if (!ctxSuccess) return;
     if (successTrendsChartInstance) successTrendsChartInstance.destroy();
     successTrendsChartInstance = new Chart(ctxSuccess, {
@@ -408,21 +573,21 @@ function initAdminReportsCharts() {
                 label: 'Compliance Rate (%)',
                 data: [55, 62, 60, 68, 75, 87],
                 borderColor: '#006a61',
-                backgroundColor: 'rgba(0, 106, 97, 0.05)',
-                borderWidth: 2,
+                backgroundColor: 'rgba(0, 106, 97, 0.07)',
+                borderWidth: 2.5,
                 pointBackgroundColor: '#006a61',
                 pointBorderColor: '#ffffff',
-                tension: 0.25,
+                pointBorderWidth: 2,
+                tension: 0.35,
                 fill: true
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-                y: { grid: { color: 'rgba(211, 228, 254, 0.4)' }, ticks: { color: '#6d7b6c', font: { size: 10 } } },
-                x: { grid: { display: false }, ticks: { color: '#6d7b6c', font: { size: 10 } } }
+                y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { color: '#43493e', font: { size: 10 } } },
+                x: { grid: { display: false }, ticks: { color: '#43493e', font: { size: 10 } } }
             }
         }
     });
