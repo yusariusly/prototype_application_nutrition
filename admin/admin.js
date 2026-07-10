@@ -1678,15 +1678,21 @@ function openPublishProgramDialogLogic(programId) {
     
     state.publishingProgramId = programId;
     
-    const select = document.getElementById('publish-target-client');
-    if (select) {
+    const container = document.getElementById('publish-target-clients-container');
+    if (container) {
         const activeSpecialist = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
         const myClients = state.clients.filter(c => c.therapist === activeSpecialist);
         const listToUse = myClients.length > 0 ? myClients : state.clients;
         
-        select.innerHTML = listToUse.map(c => `
-            <option value="${c.name}">${c.name}</option>
-        `).join('');
+        container.innerHTML = listToUse.map(c => {
+            const isChecked = c.activeProgramId === programId ? 'checked' : '';
+            return `
+                <label class="flex items-center gap-3 text-xs text-slate-700 hover:bg-slate-100 p-1.5 rounded-lg cursor-pointer transition-all">
+                    <input type="checkbox" name="publish-client-checkbox" value="${c.name}" ${isChecked} class="w-4 h-4 rounded text-primary focus:ring-primary border-slate-300">
+                    <span class="font-medium">${c.name}</span>
+                </label>
+            `;
+        }).join('');
     }
     
     const modal = document.getElementById('publish-program-modal');
@@ -1706,29 +1712,38 @@ window.closePublishProgramModal = function() {
 
 window.handlePublishProgramSubmit = function(e) {
     e.preventDefault();
-    const clientName = document.getElementById('publish-target-client').value;
-    const progId = state.publishingProgramId;
+    const checkedBoxes = document.querySelectorAll('input[name="publish-client-checkbox"]:checked');
+    const selectedClientNames = Array.from(checkedBoxes).map(box => box.value);
     
-    const program = state.programs.find(p => p.id === progId);
-    const client = state.clients.find(c => c.name === clientName);
-    
-    if (program && client) {
-        client.activeProgramId = progId;
-        
-        const livePlans = JSON.parse(localStorage.getItem('nutriflow_client_meal_plans')) || {};
-        livePlans[clientName] = JSON.parse(JSON.stringify(program.meals || {}));
-        localStorage.setItem('nutriflow_client_meal_plans', JSON.stringify(livePlans));
-        
-        const draftPlans = JSON.parse(localStorage.getItem('nutriflow_client_meal_plans_draft')) || {};
-        draftPlans[clientName] = JSON.parse(JSON.stringify(program.meals || {}));
-        localStorage.setItem('nutriflow_client_meal_plans_draft', JSON.stringify(draftPlans));
-        
-        saveAdminState();
-        closePublishProgramModal();
-        showToast(`Program "${program.name}" successfully published to ${clientName}!`, 'success');
-        
-        renderProgramsList();
+    if (selectedClientNames.length === 0) {
+        showToast('Please select at least one client to publish the program to.', 'error');
+        return;
     }
+    
+    const progId = state.publishingProgramId;
+    const program = state.programs.find(p => p.id === progId);
+    if (!program) return;
+    
+    const livePlans = JSON.parse(localStorage.getItem('nutriflow_client_meal_plans')) || {};
+    const draftPlans = JSON.parse(localStorage.getItem('nutriflow_client_meal_plans_draft')) || {};
+    
+    selectedClientNames.forEach(clientName => {
+        const client = state.clients.find(c => c.name === clientName);
+        if (client) {
+            client.activeProgramId = progId;
+            livePlans[clientName] = JSON.parse(JSON.stringify(program.meals || {}));
+            draftPlans[clientName] = JSON.parse(JSON.stringify(program.meals || {}));
+        }
+    });
+    
+    localStorage.setItem('nutriflow_client_meal_plans', JSON.stringify(livePlans));
+    localStorage.setItem('nutriflow_client_meal_plans_draft', JSON.stringify(draftPlans));
+    
+    saveAdminState();
+    closePublishProgramModal();
+    showToast(`Program "${program.name}" successfully published to: ${selectedClientNames.join(', ')}!`, 'success');
+    
+    renderProgramsList();
 };
 
 window.previewWeeklyPlan = function() {
