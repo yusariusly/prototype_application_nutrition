@@ -325,7 +325,202 @@ function loadSpecialistProfileDetails() {
     document.getElementById('edit-practitioner-name').value = spec.name;
     document.getElementById('edit-practitioner-specialty').value = spec.specialty;
     document.getElementById('edit-practitioner-email').value = spec.email;
+
+    loadSpecialistServices();
 }
+
+function loadSpecialistServices() {
+    const activeSpecialistName = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
+    const key = `nutriflow_services_${activeSpecialistName}`;
+    
+    let services = JSON.parse(localStorage.getItem(key));
+    if (!services) {
+        if (activeSpecialistName.includes('Hasan')) {
+            services = [
+                {
+                    id: 'srv-hasan-1',
+                    title: 'Weight Loss Consultation',
+                    description: 'A dedicated session focusing on weight loss strategies, body composition targets, and custom macro ratios.',
+                    duration: '60 min',
+                    type: 'Virtual or In-Person',
+                    price: 150,
+                    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDI0OL4dSef_9_KtBWKJ_8d0de_3jKJ307lRmzwECWHykwC2Sh_-p2uUnTh-2y0Yyj2x5txHJ1-_Z9u3YVyIFYjVwQFMkm0ufr1Envl8PlT8JyiHkOB-hHpJszVsfgn9wthQZBcxDIFw3emAo4TPjLWJ43YEqFZsYmGT0kh9do_2JTuvnjgBOOrtceFxVxH_JZX7krm4i7Rjsz16LRwnXm93LXDXh78J5Agw0JsZToFhkL6qU3xrqPBtQ'
+                },
+                {
+                    id: 'srv-hasan-2',
+                    title: 'Weekly Meal Review',
+                    description: 'A 30-minute check-in to adjust your weekly calorie limits, recipes, and raw ingredients in your active program.',
+                    duration: '30 min',
+                    type: 'Virtual Only',
+                    price: 75,
+                    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBGsbf12JBu1YUhQl78vA1aGmjNYjjGnyb8cmgHlmCOxHKWee0ybL9-1rqta2RUKAJJewh6CU3PkcStb675EhEkzaWohu52Oj7rEOvZZt5-KwE8CSpbidQcEI59WkIrdFAd1LKLAv1EB0t69XGbzUv3jpNPAxWeFPSO8fipEBXZWlqqzxB9GQ2cJzZSc6G7cGZVRlaCrNQ79-yv4AL_kM2EKJba8qTKqFux18RVXNHQHkGLV2pI17tZjw'
+                }
+            ];
+        } else if (activeSpecialistName.includes('Amanda')) {
+            services = [
+                {
+                    id: 'srv-amanda-1',
+                    title: 'Sports Performance Nutrition',
+                    description: 'Optimize your energy levels, muscle protein synthesis, and sports supplements to match your training cycles.',
+                    duration: '60 min',
+                    type: 'Virtual or In-Person',
+                    price: 160,
+                    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDI0OL4dSef_9_KtBWKJ_8d0de_3jKJ307lRmzwECWHykwC2Sh_-p2uUnTh-2y0Yyj2x5txHJ1-_Z9u3YVyIFYjVwQFMkm0ufr1Envl8PlT8JyiHkOB-hHpJszVsfgn9wthQZBcxDIFw3emAo4TPjLWJ43YEqFZsYmGT0kh9do_2JTuvnjgBOOrtceFxVxH_JZX7krm4i7Rjsz16LRwnXm93LXDXh78J5Agw0JsZToFhkL6qU3xrqPBtQ'
+                }
+            ];
+        } else {
+            services = [
+                {
+                    id: `srv-${Date.now()}-1`,
+                    title: 'General Wellness Consultation',
+                    description: 'Identify lifestyle habits, micronutrient deficiencies, and sleep profiles to improve general health.',
+                    duration: '60 min',
+                    type: 'Virtual or In-Person',
+                    price: 120,
+                    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDI0OL4dSef_9_KtBWKJ_8d0de_3jKJ307lRmzwECWHykwC2Sh_-p2uUnTh-2y0Yyj2x5txHJ1-_Z9u3YVyIFYjVwQFMkm0ufr1Envl8PlT8JyiHkOB-hHpJszVsfgn9wthQZBcxDIFw3emAo4TPjLWJ43YEqFZsYmGT0kh9do_2JTuvnjgBOOrtceFxVxH_JZX7krm4i7Rjsz16LRwnXm93LXDXh78J5Agw0JsZToFhkL6qU3xrqPBtQ'
+                }
+            ];
+        }
+        localStorage.setItem(key, JSON.stringify(services));
+    }
+    
+    renderSpecialistServicesList(services);
+}
+
+function renderSpecialistServicesList(services) {
+    const listContainer = document.getElementById('specialist-services-list');
+    if (!listContainer) return;
+    
+    if (services.length === 0) {
+        listContainer.innerHTML = `
+            <div class="col-span-full border border-dashed border-outline-variant/35 rounded-2xl p-8 text-center text-xs font-semibold text-on-surface-variant bg-surface-container-low/20">
+                You have no consultation services registered. Click "Add Service" to create one.
+            </div>
+        `;
+        return;
+    }
+    
+    listContainer.innerHTML = services.map(srv => `
+        <div class="bg-surface-container-lowest border border-outline-variant/20 rounded-xl overflow-hidden shadow-sm flex flex-col h-full text-slate-800 text-xs">
+            <div class="h-28 w-full bg-cover bg-center" style="background-image: url('${srv.image || 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=200'}')"></div>
+            <div class="p-4 flex flex-col flex-grow gap-2">
+                <div class="flex justify-between items-start">
+                    <h4 class="font-bold text-slate-900 text-sm">${srv.title}</h4>
+                    <span class="font-extrabold text-slate-900 text-sm">$${srv.price}</span>
+                </div>
+                <p class="text-slate-500 leading-normal line-clamp-2">${srv.description}</p>
+                <div class="flex gap-2 text-[10px] text-slate-400 font-semibold items-center mt-1">
+                    <span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[12px]">schedule</span> ${srv.duration}</span>
+                    <span>•</span>
+                    <span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[12px]">videocam</span> ${srv.type}</span>
+                </div>
+                <div class="flex justify-end gap-2 border-t border-slate-100 pt-3 mt-auto">
+                    <button onclick="openEditServiceModal('${srv.id}')" class="text-primary hover:underline font-bold text-[10px] flex items-center gap-0.5 cursor-pointer">
+                        <span class="material-symbols-outlined text-[12px]">edit</span> Edit
+                    </button>
+                    <button onclick="deleteSpecialistService('${srv.id}')" class="text-[#ba1a1a] hover:underline font-bold text-[10px] flex items-center gap-0.5 cursor-pointer">
+                        <span class="material-symbols-outlined text-[12px]">delete</span> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+window.openAddServiceModal = function() {
+    document.getElementById('service-modal-title').innerText = 'Add Consultation Service';
+    document.getElementById('service-modal-id').value = '';
+    document.getElementById('service-modal-title-input').value = '';
+    document.getElementById('service-modal-description').value = '';
+    document.getElementById('service-modal-duration').value = '60 min';
+    document.getElementById('service-modal-price').value = '150';
+    document.getElementById('service-modal-type').value = 'Virtual or In-Person';
+    
+    const modal = document.getElementById('service-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+};
+
+window.openEditServiceModal = function(srvId) {
+    const activeSpecialistName = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
+    const key = `nutriflow_services_${activeSpecialistName}`;
+    const services = JSON.parse(localStorage.getItem(key)) || [];
+    const srv = services.find(s => s.id === srvId);
+    if (!srv) return;
+    
+    document.getElementById('service-modal-title').innerText = 'Edit Consultation Service';
+    document.getElementById('service-modal-id').value = srv.id;
+    document.getElementById('service-modal-title-input').value = srv.title;
+    document.getElementById('service-modal-description').value = srv.description;
+    document.getElementById('service-modal-duration').value = srv.duration;
+    document.getElementById('service-modal-price').value = srv.price;
+    document.getElementById('service-modal-type').value = srv.type;
+    
+    const modal = document.getElementById('service-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+};
+
+window.closeServiceModal = function() {
+    const modal = document.getElementById('service-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+window.handleSaveService = function(e) {
+    e.preventDefault();
+    const activeSpecialistName = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
+    const key = `nutriflow_services_${activeSpecialistName}`;
+    const services = JSON.parse(localStorage.getItem(key)) || [];
+    
+    const id = document.getElementById('service-modal-id').value;
+    const title = document.getElementById('service-modal-title-input').value.trim();
+    const description = document.getElementById('service-modal-description').value.trim();
+    const duration = document.getElementById('service-modal-duration').value.trim();
+    const price = parseInt(document.getElementById('service-modal-price').value);
+    const type = document.getElementById('service-modal-type').value;
+    
+    const image = 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=200';
+    
+    if (id) {
+        const idx = services.findIndex(s => s.id === id);
+        if (idx !== -1) {
+            services[idx].title = title;
+            services[idx].description = description;
+            services[idx].duration = duration;
+            services[idx].price = price;
+            services[idx].type = type;
+        }
+    } else {
+        services.push({
+            id: `srv-${Date.now()}`,
+            title, description, duration, price, type, image
+        });
+    }
+    
+    localStorage.setItem(key, JSON.stringify(services));
+    closeServiceModal();
+    renderSpecialistServicesList(services);
+    showToast('Consultation Service saved successfully!', 'success');
+};
+
+window.deleteSpecialistService = function(srvId) {
+    if (confirm('Are you sure you want to remove this service offering?')) {
+        const activeSpecialistName = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
+        const key = `nutriflow_services_${activeSpecialistName}`;
+        const services = JSON.parse(localStorage.getItem(key)) || [];
+        const filtered = services.filter(s => s.id !== srvId);
+        localStorage.setItem(key, JSON.stringify(filtered));
+        renderSpecialistServicesList(filtered);
+        showToast('Service offering removed successfully.', 'info');
+    }
+};
 
 window.handleSavePractitionerProfile = function(e) {
     e.preventDefault();

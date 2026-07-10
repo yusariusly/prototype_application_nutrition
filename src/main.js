@@ -1600,7 +1600,76 @@ function renderBookingStep1() {
     const grid = document.getElementById('booking-services-grid');
     if (!grid) return;
     
-    grid.innerHTML = Object.values(SERVICES).map(srv => {
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
+    const clientDetails = clientsList.find(c => c.name === activeClient);
+    const assignedTherapist = clientDetails?.therapist || 'Dr. Hasan';
+    
+    const key = `nutriflow_services_${assignedTherapist}`;
+    let therapistServices = JSON.parse(localStorage.getItem(key));
+    
+    if (!therapistServices || therapistServices.length === 0) {
+        if (assignedTherapist.includes('Hasan')) {
+            therapistServices = [
+                {
+                    id: 'srv-hasan-1',
+                    title: 'Weight Loss Consultation',
+                    description: 'A dedicated session focusing on weight loss strategies, body composition targets, and custom macro ratios.',
+                    duration: '60 min',
+                    type: 'Virtual or In-Person',
+                    price: 150,
+                    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDI0OL4dSef_9_KtBWKJ_8d0de_3jKJ307lRmzwECWHykwC2Sh_-p2uUnTh-2y0Yyj2x5txHJ1-_Z9u3YVyIFYjVwQFMkm0ufr1Envl8PlT8JyiHkOB-hHpJszVsfgn9wthQZBcxDIFw3emAo4TPjLWJ43YEqFZsYmGT0kh9do_2JTuvnjgBOOrtceFxVxH_JZX7krm4i7Rjsz16LRwnXm93LXDXh78J5Agw0JsZToFhkL6qU3xrqPBtQ'
+                },
+                {
+                    id: 'srv-hasan-2',
+                    title: 'Weekly Meal Review',
+                    description: 'A 30-minute check-in to adjust your weekly calorie limits, recipes, and raw ingredients in your active program.',
+                    duration: '30 min',
+                    type: 'Virtual Only',
+                    price: 75,
+                    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBGsbf12JBu1YUhQl78vA1aGmjNYjjGnyb8cmgHlmCOxHKWee0ybL9-1rqta2RUKAJJewh6CU3PkcStb675EhEkzaWohu52Oj7rEOvZZt5-KwE8CSpbidQcEI59WkIrdFAd1LKLAv1EB0t69XGbzUv3jpNPAxWeFPSO8fipEBXZWlqqzxB9GQ2cJzZSc6G7cGZVRlaCrNQ79-yv4AL_kM2EKJba8qTKqFux18RVXNHQHkGLV2pI17tZjw'
+                }
+            ];
+        } else if (assignedTherapist.includes('Amanda')) {
+            therapistServices = [
+                {
+                    id: 'srv-amanda-1',
+                    title: 'Sports Performance Nutrition',
+                    description: 'Optimize your energy levels, muscle protein synthesis, and sports supplements to match your training cycles.',
+                    duration: '60 min',
+                    type: 'Virtual or In-Person',
+                    price: 160,
+                    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDI0OL4dSef_9_KtBWKJ_8d0de_3jKJ307lRmzwECWHykwC2Sh_-p2uUnTh-2y0Yyj2x5txHJ1-_Z9u3YVyIFYjVwQFMkm0ufr1Envl8PlT8JyiHkOB-hHpJszVsfgn9wthQZBcxDIFw3emAo4TPjLWJ43YEqFZsYmGT0kh9do_2JTuvnjgBOOrtceFxVxH_JZX7krm4i7Rjsz16LRwnXm93LXDXh78J5Agw0JsZToFhkL6qU3xrqPBtQ'
+                }
+            ];
+        } else {
+            therapistServices = [
+                {
+                    id: 'initial-consultation',
+                    title: 'Initial Consultation',
+                    description: 'A comprehensive 60-minute deep dive into your medical history, habits, and goals to build your plan.',
+                    duration: '60 min',
+                    type: 'Virtual or In-Person',
+                    price: 150,
+                    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDI0OL4dSef_9_KtBWKJ_8d0de_3jKJ307lRmzwECWHykwC2Sh_-p2uUnTh-2y0Yyj2x5txHJ1-_Z9u3YVyIFYjVwQFMkm0ufr1Envl8PlT8JyiHkOB-hHpJszVsfgn9wthQZBcxDIFw3emAo4TPjLWJ43YEqFZsYmGT0kh9do_2JTuvnjgBOOrtceFxVxH_JZX7krm4i7Rjsz16LRwnXm93LXDXh78J5Agw0JsZToFhkL6qU3xrqPBtQ'
+                },
+                {
+                    id: 'follow-up',
+                    title: 'Follow-up Session',
+                    description: 'A 30-minute check-in to review progress, adjust macros, and troubleshoot plan challenges.',
+                    duration: '30 min',
+                    type: 'Virtual Only',
+                    price: 75,
+                    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBGsbf12JBu1YUhQl78vA1aGmjNYjjGnyb8cmgHlmCOxHKWee0ybL9-1rqta2RUKAJJewh6CU3PkcStb675EhEkzaWohu52Oj7rEOvZZt5-KwE8CSpbidQcEI59WkIrdFAd1LKLAv1EB0t69XGbzUv3jpNPAxWeFPSO8fipEBXZWlqqzxB9GQ2cJzZSc6G7cGZVRlaCrNQ79-yv4AL_kM2EKJba8qTKqFux18RVXNHQHkGLV2pI17tZjw'
+                }
+            ];
+        }
+        localStorage.setItem(key, JSON.stringify(therapistServices));
+    }
+    
+    state.currentTherapistServices = therapistServices;
+    
+    grid.innerHTML = therapistServices.map(srv => {
         const isSelected = state.bookingFlow.selectedServiceId === srv.id;
         
         return `
@@ -1609,7 +1678,7 @@ function renderBookingStep1() {
                     <span class="material-symbols-outlined text-primary bg-white rounded-full p-1 shadow-sm">check_circle</span>
                 </div>
                 <div class="h-40 w-full relative overflow-hidden">
-                    <img class="w-full h-full object-cover" src="${srv.image}" alt="${srv.title}">
+                    <img class="w-full h-full object-cover" src="${srv.image || 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=200'}" alt="${srv.title}">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                     ${srv.popular ? `<span class="absolute bottom-3 left-3 bg-primary text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">Most Popular</span>` : ''}
                     ${srv.tag ? `<span class="absolute bottom-3 left-3 bg-secondary text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">${srv.tag}</span>` : ''}
@@ -1662,7 +1731,7 @@ window.goBackToBookingStep = function(stepNum) {
 };
 
 function renderBookingStep2() {
-    const srv = SERVICES[state.bookingFlow.selectedServiceId];
+    const srv = (state.currentTherapistServices || []).find(s => s.id === state.bookingFlow.selectedServiceId);
     if (!srv) return;
     
     const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
@@ -1786,7 +1855,7 @@ window.handleDetailsSubmit = function(e) {
     const email = document.getElementById('details-email').value;
     const goal = document.getElementById('details-goal').value;
     
-    const srv = SERVICES[state.bookingFlow.selectedServiceId];
+    const srv = (state.currentTherapistServices || []).find(s => s.id === state.bookingFlow.selectedServiceId);
     
     const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
     const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];

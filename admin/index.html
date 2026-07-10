@@ -491,6 +491,23 @@
                 </div>
             </div>
 
+            <!-- Manage Services Card -->
+            <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4 mt-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-lg font-bold text-on-background">My Consultation Services</h3>
+                        <p class="text-xs text-on-surface-variant mt-0.5">Manage the booking offerings that clients see when scheduling appointments with you.</p>
+                    </div>
+                    <button onclick="openAddServiceModal()" class="bg-primary hover:bg-[#005321] text-white font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-sm flex items-center gap-1 cursor-pointer">
+                        <span class="material-symbols-outlined text-[16px]">add</span> Add Service
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="specialist-services-list">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
     </main>
 
     <!-- Mobile Bottom Navigation (Only visible on mobile screens) -->
@@ -755,6 +772,46 @@
                     </div>
                 </div>
                 <button type="submit" class="w-full bg-primary hover:bg-[#005321] text-white font-bold text-xs py-2.5 rounded-lg transition-all shadow-sm cursor-pointer mt-2">Publish Program</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Service Modal -->
+    <div id="service-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-surface max-w-sm w-full rounded-2xl p-6 border border-slate-100 shadow-2xl flex flex-col gap-4 text-slate-800">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-sm font-bold text-slate-800" id="service-modal-title">Add Consultation Service</h3>
+                <button onclick="closeServiceModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer"><span class="material-symbols-outlined text-[18px]">close</span></button>
+            </div>
+            <form onsubmit="handleSaveService(event)" class="space-y-3">
+                <input type="hidden" id="service-modal-id">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Service Title</label>
+                    <input type="text" id="service-modal-title-input" required placeholder="e.g. Initial Consultation" class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Description</label>
+                    <textarea id="service-modal-description" required rows="2" placeholder="e.g. A comprehensive session to review progress..." class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Duration</label>
+                        <input type="text" id="service-modal-duration" required placeholder="e.g. 60 min" class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Price ($)</label>
+                        <input type="number" id="service-modal-price" required placeholder="e.g. 150" class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Type / Location</label>
+                    <select id="service-modal-type" class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary">
+                        <option value="Virtual Only">Virtual Only</option>
+                        <option value="In-Person">In-Person</option>
+                        <option value="Virtual or In-Person">Virtual or In-Person</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-primary hover:bg-[#005321] text-white font-bold text-xs py-2.5 rounded-lg transition-all shadow-sm cursor-pointer mt-2">Save Service</button>
             </form>
         </div>
     </div>
