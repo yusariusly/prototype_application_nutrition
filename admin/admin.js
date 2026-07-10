@@ -923,7 +923,10 @@ window.toggleProgramViewMode = function(editing) {
     const mainContent = document.getElementById('meal-builder-main-content');
     const listView = document.getElementById('programs-list-view');
     const editorView = document.getElementById('program-editor-view');
+    const discView = document.getElementById('program-discussion-view');
     
+    if (discView) discView.classList.add('hidden');
+
     if (editing) {
         if (sidebar) {
             sidebar.classList.remove('hidden');
