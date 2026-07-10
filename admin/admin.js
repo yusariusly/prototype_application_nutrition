@@ -980,15 +980,7 @@ function renderWeeklyMealTable() {
                             </button>
                             <div class="font-bold text-slate-800 pr-4 leading-tight">${m.title}</div>
                             <div class="text-[10px] text-slate-500 mt-0.5">${m.calories} kcal</div>
-                            ${m.comment ? `
-                                <div class="mt-1.5 p-1.5 bg-[#e5eeff]/40 rounded-lg border border-[#86f2e4]/30 text-[9px] text-[#006a61] italic leading-normal">
-                                    "${m.comment}"
-                                </div>
-                            ` : ''}
-                            <button onclick="openEditCommentModal('${day}', '${rowType}', '${m.title}', \`${encodeURIComponent(m.comment || '')}\`)" class="mt-1.5 bg-slate-50 hover:bg-slate-100 border text-[9px] font-bold text-slate-500 py-0.5 px-1.5 rounded transition-all cursor-pointer flex items-center gap-1 w-fit">
-                                <span class="material-symbols-outlined text-[10px]">chat</span>
-                                ${m.comment ? 'Edit Note' : 'Add Note'}
-                            </button>
+
                         </div>
                     `;
                 });
