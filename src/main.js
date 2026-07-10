@@ -555,10 +555,10 @@ window.navigateTo = function(viewId) {
 
 // Client Notifications Dropdown
 const clientNotificationsData = [
-    { type: 'booking', message: 'New booking: Sarah — Deep Tissue Massage', time: '2 mins ago', icon: 'calendar_month', bg: 'bg-[#fff8e1]', text: 'text-[#d48806]' },
-    { type: 'confirmed', message: 'Reservation #R-012 confirmed by Siti', time: '18 mins ago', icon: 'check_circle', bg: 'bg-[#e6f4ea]', text: 'text-[#1e8e3e]' },
-    { type: 'cancelled', message: 'Booking cancelled — Room 3 now free', time: '1 hour ago', icon: 'cancel', bg: 'bg-[#fce8e6]', text: 'text-[#d93025]' },
-    { type: 'staff', message: 'New staff member added: Rina Dewi', time: 'Yesterday', icon: 'person_add', bg: 'bg-[#f1f3f4]', text: 'text-[#5f6368]' }
+    { type: 'confirmed', message: 'Appointment Confirmed: Dr. Hasan (Tomorrow, 10:00 AM)', time: '1 hour ago', icon: 'check_circle', bg: 'bg-[#e6f4ea]', text: 'text-[#1e8e3e]' },
+    { type: 'reminder', message: 'Don\'t forget to log your breakfast!', time: '2 hours ago', icon: 'restaurant', bg: 'bg-[#fff8e1]', text: 'text-[#d48806]' },
+    { type: 'message', message: 'New message from Dr. Hasan regarding your meal plan', time: 'Yesterday', icon: 'chat', bg: 'bg-[#e5f6fd]', text: 'text-[#0288d1]' },
+    { type: 'program', message: 'Your new 4-Week Weight Loss Program is ready!', time: '2 days ago', icon: 'assignment', bg: 'bg-[#f3e8fd]', text: 'text-[#8e24aa]' }
 ];
 
 window.toggleClientNotifications = function(e) {

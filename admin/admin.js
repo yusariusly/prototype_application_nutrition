@@ -588,10 +588,10 @@ window.handleSavePractitionerProfile = function(e) {
 
 // Admin Notifications Dropdown
 const adminNotificationsData = [
-    { type: 'booking', message: 'New booking: Sarah — Deep Tissue Massage', time: '2 mins ago', icon: 'calendar_month', bg: 'bg-[#fff8e1]', text: 'text-[#d48806]' },
-    { type: 'confirmed', message: 'Reservation #R-012 confirmed by Siti', time: '18 mins ago', icon: 'check_circle', bg: 'bg-[#e6f4ea]', text: 'text-[#1e8e3e]' },
-    { type: 'cancelled', message: 'Booking cancelled — Room 3 now free', time: '1 hour ago', icon: 'cancel', bg: 'bg-[#fce8e6]', text: 'text-[#d93025]' },
-    { type: 'staff', message: 'New staff member added: Rina Dewi', time: 'Yesterday', icon: 'person_add', bg: 'bg-[#f1f3f4]', text: 'text-[#5f6368]' }
+    { type: 'booking', message: 'New Appointment Request: Sarah Jenkins for Video Consultation', time: '5 mins ago', icon: 'event', bg: 'bg-[#fff8e1]', text: 'text-[#d48806]' },
+    { type: 'progress', message: 'Mike Ross just logged his weekly weigh-in', time: '1 hour ago', icon: 'monitor_weight', bg: 'bg-[#e5f6fd]', text: 'text-[#0288d1]' },
+    { type: 'cancelled', message: 'Booking Cancelled: Emma Stone (Tomorrow 10:00 AM)', time: '3 hours ago', icon: 'cancel', bg: 'bg-[#fce8e6]', text: 'text-[#d93025]' },
+    { type: 'reminder', message: 'Upcoming Session in 30 mins: John Doe', time: 'Just now', icon: 'notifications_active', bg: 'bg-[#e6f4ea]', text: 'text-[#1e8e3e]' }
 ];
 
 window.toggleSpecialistNotifications = function(e) {
