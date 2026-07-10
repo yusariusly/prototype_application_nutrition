@@ -762,6 +762,13 @@
                 </div>
                 <button onclick="closeProgramDiscussionModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer"><span class="material-symbols-outlined text-[18px]">close</span></button>
             </div>
+            <!-- Client Selector Dropdown -->
+            <div id="discussion-client-select-container" class="hidden">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Select Client Thread</label>
+                <select id="discussion-client-select" onchange="changeDiscussionClient()" class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary mb-2 text-slate-800">
+                    <!-- Dynamically populated -->
+                </select>
+            </div>
             
             <!-- Chat history -->
             <div id="admin-program-chat-container" class="flex flex-col gap-3 max-h-[300px] min-h-[150px] overflow-y-auto pr-2 scroll-smooth bg-slate-50 p-3.5 rounded-xl border border-slate-200">

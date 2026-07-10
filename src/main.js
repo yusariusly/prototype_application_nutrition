@@ -882,18 +882,27 @@ window.renderProgramChat = function() {
         return;
     }
     
-    if (!program.chatHistory) {
-        program.chatHistory = [
-            {
-                sender: 'doctor',
-                senderName: program.creator || 'Dr. Hasan',
-                text: `Welcome to your customized nutrition program "${program.name}". Feel free to ask me any questions or request adjustments directly in this private chat thread!`,
-                time: '10:00 AM'
-            }
-        ];
+    const allProgramChats = JSON.parse(localStorage.getItem('nutriflow_program_chats')) || [];
+    const chatKey = `${progId}_${activeClient}`;
+    let chatEntry = allProgramChats.find(c => c.id === chatKey);
+    
+    if (!chatEntry) {
+        chatEntry = {
+            id: chatKey,
+            programId: progId,
+            clientName: activeClient,
+            chatHistory: [
+                {
+                    sender: 'doctor',
+                    senderName: program.creator || 'Dr. Hasan',
+                    text: `Welcome to your customized nutrition program "${program.name}". Feel free to ask me any questions or request adjustments directly in this private chat thread!`,
+                    time: '10:00 AM'
+                }
+            ]
+        };
     }
     
-    container.innerHTML = program.chatHistory.map(msg => {
+    container.innerHTML = chatEntry.chatHistory.map(msg => {
         const isDoc = msg.sender === 'doctor';
         const bubbleBg = isDoc ? 'bg-[#f1f5f9] text-slate-800 rounded-tl-none' : 'bg-primary text-white rounded-tr-none';
         const align = isDoc ? 'justify-start' : 'justify-end';
@@ -935,17 +944,37 @@ window.handleProgramChatSubmit = function(e) {
     const program = programs.find(p => p.id === progId);
     
     if (program) {
-        if (!program.chatHistory) program.chatHistory = [];
+        const allProgramChats = JSON.parse(localStorage.getItem('nutriflow_program_chats')) || [];
+        const chatKey = `${progId}_${activeClient}`;
+        let chatEntry = allProgramChats.find(c => c.id === chatKey);
+        
+        if (!chatEntry) {
+            chatEntry = {
+                id: chatKey,
+                programId: progId,
+                clientName: activeClient,
+                chatHistory: [
+                    {
+                        sender: 'doctor',
+                        senderName: program.creator || 'Dr. Hasan',
+                        text: `Welcome to your customized nutrition program "${program.name}". Feel free to ask me any questions or request adjustments directly in this private chat thread!`,
+                        time: '10:00 AM'
+                    }
+                ]
+            };
+            allProgramChats.push(chatEntry);
+        }
+        
         const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         
-        program.chatHistory.push({
+        chatEntry.chatHistory.push({
             sender: 'client',
             senderName: activeClient,
             text: val,
             time: timeNow
         });
         
-        localStorage.setItem('nutriflow_programs_draft', JSON.stringify(programs));
+        localStorage.setItem('nutriflow_program_chats', JSON.stringify(allProgramChats));
         input.value = '';
         renderProgramChat();
         
@@ -954,17 +983,16 @@ window.handleProgramChatSubmit = function(e) {
             const timeRep = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const replyText = `Thanks for your question! I have reviewed your comment about "${val}" and will get back to you with updates on your program details shortly.`;
             
-            const currentProgs = JSON.parse(localStorage.getItem('nutriflow_programs_draft')) || [];
-            const freshProg = currentProgs.find(p => p.id === progId);
-            if (freshProg) {
-                if (!freshProg.chatHistory) freshProg.chatHistory = [];
-                freshProg.chatHistory.push({
+            const currentChats = JSON.parse(localStorage.getItem('nutriflow_program_chats')) || [];
+            const freshChat = currentChats.find(c => c.id === chatKey);
+            if (freshChat) {
+                freshChat.chatHistory.push({
                     sender: 'doctor',
-                    senderName: freshProg.creator || 'Dr. Hasan',
+                    senderName: program.creator || 'Dr. Hasan',
                     text: replyText,
                     time: timeRep
                 });
-                localStorage.setItem('nutriflow_programs_draft', JSON.stringify(currentProgs));
+                localStorage.setItem('nutriflow_program_chats', JSON.stringify(currentChats));
             }
             renderProgramChat();
         }, 2000);

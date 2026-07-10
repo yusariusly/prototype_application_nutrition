@@ -1761,6 +1761,35 @@ window.openProgramDiscussion = function(programId) {
         titleEl.innerText = `Discussion: ${program.name}`;
     }
     
+    // Find active clients on this program
+    const myClients = state.clients.filter(c => c.activeProgramId === programId);
+    let clientNames = myClients.map(c => c.name);
+    
+    // Scan existing chats to add guest or historical users
+    const allProgramChats = JSON.parse(localStorage.getItem('nutriflow_program_chats')) || [];
+    allProgramChats.forEach(chat => {
+        if (chat.programId === programId && !clientNames.includes(chat.clientName)) {
+            clientNames.push(chat.clientName);
+        }
+    });
+    
+    if (clientNames.length === 0) {
+        clientNames = ['Guest User'];
+    }
+    
+    const select = document.getElementById('discussion-client-select');
+    if (select) {
+        select.innerHTML = clientNames.map(name => `<option value="${name}">${name}</option>`).join('');
+        state.activeDiscussionClientName = select.value;
+    } else {
+        state.activeDiscussionClientName = clientNames[0];
+    }
+    
+    const container = document.getElementById('discussion-client-select-container');
+    if (container) {
+        container.classList.remove('hidden');
+    }
+    
     const input = document.getElementById('admin-program-chat-input');
     if (input) input.value = '';
     
@@ -1771,6 +1800,14 @@ window.openProgramDiscussion = function(programId) {
     }
     
     window.renderAdminProgramChat();
+};
+
+window.changeDiscussionClient = function() {
+    const select = document.getElementById('discussion-client-select');
+    if (select) {
+        state.activeDiscussionClientName = select.value;
+        window.renderAdminProgramChat();
+    }
 };
 
 window.closeProgramDiscussionModal = function() {
@@ -1789,18 +1826,29 @@ window.renderAdminProgramChat = function() {
     const program = state.programs.find(p => p.id === progId);
     if (!program) return;
     
-    if (!program.chatHistory) {
-        program.chatHistory = [
-            {
-                sender: 'doctor',
-                senderName: program.creator || 'Dr. Hasan',
-                text: `Welcome to your customized nutrition program "${program.name}". Feel free to ask me any questions or request adjustments directly in this private chat thread!`,
-                time: '10:00 AM'
-            }
-        ];
+    const activeClient = state.activeDiscussionClientName || 'Guest User';
+    
+    const allProgramChats = JSON.parse(localStorage.getItem('nutriflow_program_chats')) || [];
+    const chatKey = `${progId}_${activeClient}`;
+    let chatEntry = allProgramChats.find(c => c.id === chatKey);
+    
+    if (!chatEntry) {
+        chatEntry = {
+            id: chatKey,
+            programId: progId,
+            clientName: activeClient,
+            chatHistory: [
+                {
+                    sender: 'doctor',
+                    senderName: program.creator || 'Dr. Hasan',
+                    text: `Welcome to your customized nutrition program "${program.name}". Feel free to ask me any questions or request adjustments directly in this private chat thread!`,
+                    time: '10:00 AM'
+                }
+            ]
+        };
     }
     
-    container.innerHTML = program.chatHistory.map(msg => {
+    container.innerHTML = chatEntry.chatHistory.map(msg => {
         const isDoc = msg.sender === 'doctor';
         const bubbleBg = isDoc ? 'bg-primary text-white rounded-tr-none' : 'bg-[#e2e8f0] text-slate-800 rounded-tl-none';
         const align = isDoc ? 'justify-end' : 'justify-start';
@@ -1830,22 +1878,44 @@ window.handleAdminProgramChatSubmit = function(e) {
     
     const progId = state.activeDiscussionProgramId;
     const program = state.programs.find(p => p.id === progId);
-    if (program) {
-        if (!program.chatHistory) program.chatHistory = [];
-        const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const specialist = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
-        
-        program.chatHistory.push({
-            sender: 'doctor',
-            senderName: specialist,
-            text: val,
-            time: timeNow
-        });
-        
-        saveAdminState();
-        input.value = '';
-        window.renderAdminProgramChat();
-        showToast('Reply sent successfully!', 'success');
+    if (!program) return;
+    
+    const activeClient = state.activeDiscussionClientName || 'Guest User';
+    
+    const allProgramChats = JSON.parse(localStorage.getItem('nutriflow_program_chats')) || [];
+    const chatKey = `${progId}_${activeClient}`;
+    let chatEntry = allProgramChats.find(c => c.id === chatKey);
+    
+    if (!chatEntry) {
+        chatEntry = {
+            id: chatKey,
+            programId: progId,
+            clientName: activeClient,
+            chatHistory: [
+                {
+                    sender: 'doctor',
+                    senderName: program.creator || 'Dr. Hasan',
+                    text: `Welcome to your customized nutrition program "${program.name}". Feel free to ask me any questions or request adjustments directly in this private chat thread!`,
+                    time: '10:00 AM'
+                }
+            ]
+        };
+        allProgramChats.push(chatEntry);
     }
+    
+    const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const specialist = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
+    
+    chatEntry.chatHistory.push({
+        sender: 'doctor',
+        senderName: specialist,
+        text: val,
+        time: timeNow
+    });
+    
+    localStorage.setItem('nutriflow_program_chats', JSON.stringify(allProgramChats));
+    input.value = '';
+    window.renderAdminProgramChat();
+    showToast('Reply sent successfully!', 'success');
 };
 
