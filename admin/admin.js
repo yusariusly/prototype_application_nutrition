@@ -855,8 +855,12 @@ window.handleCreateProgramSubmit = function(e) {
     state.programs.push(newProgram);
     saveAdminState();
     closeCreateProgramModal();
-    renderProgramsList();
-    showToast(`Program "${name}" created successfully!`, "success");
+    
+    // Automatically open the editor for this new program
+    state.editingProgramId = newProgram.id;
+    renderAdminMealBuilder();
+    
+    showToast(`Program "${name}" created successfully! Pick your meals below.`, "success");
 };
 
 window.setLibraryFilter = function(filter) {
