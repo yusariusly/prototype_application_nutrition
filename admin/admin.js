@@ -24,7 +24,6 @@ const state = {
     clientsPage: 0
 };
 
-let successTrendsChartInstance = null;
 
 // ==================== SESSION CHECK ====================
 function checkAdminSession() {
@@ -284,8 +283,6 @@ window.navigateTo = function(viewId) {
         renderAdminMealBuilder();
     } else if (viewId === 'admin-calendar') {
         renderAdminCalendar();
-    } else if (viewId === 'admin-reports') {
-        setTimeout(initAdminReportsCharts, 50);
     } else if (viewId === 'admin-profile') {
         loadSpecialistProfileDetails();
     }
@@ -1439,37 +1436,6 @@ window.setAdminCalendarToday = function() {
     showToast(`Navigated to ${curMonthName} ${curYear}.`, 'info');
 };
 
-// ==================== REPORTS ====================
-function initAdminReportsCharts() {
-    const ctxSuccess = document.getElementById('adminSuccessTrendsChartCanvas').getContext('2d');
-    if (successTrendsChartInstance) successTrendsChartInstance.destroy();
-    successTrendsChartInstance = new Chart(ctxSuccess, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'Compliance Rate (%)',
-                data: [55, 62, 60, 68, 75, 87],
-                borderColor: '#006a61',
-                backgroundColor: 'rgba(0, 106, 97, 0.05)',
-                borderWidth: 2,
-                pointBackgroundColor: '#006a61',
-                pointBorderColor: '#ffffff',
-                tension: 0.25,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { grid: { color: 'rgba(211, 228, 254, 0.4)' }, ticks: { color: '#6d7b6c', font: { size: 10 } } },
-                x: { grid: { display: false }, ticks: { color: '#6d7b6c', font: { size: 10 } } }
-            }
-        }
-    });
-}
 
 window.filterFoodCategory = function(cat) {
     state.adminSelectedFoodFilter = cat;

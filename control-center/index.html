@@ -66,6 +66,7 @@
             <a onclick="navigateToView('analytics')" id="link-analytics" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer">Analytics</a>
             <a onclick="navigateToView('nutritionists')" id="link-nutritionists" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer">Nutritionists</a>
             <a onclick="navigateToView('allocation')" id="link-allocation" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer">Client Allocation</a>
+            <a onclick="navigateToView('reports')" id="link-reports" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer">Reports</a>
         </div>
 
         <!-- Sign Out -->
@@ -204,6 +205,56 @@
                             <!-- Populated dynamically -->
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW 4: REPORTS ==================== -->
+        <section id="view-reports" class="view-section hidden flex flex-col gap-6">
+            <div class="bg-white border border-outline-variant/30 rounded-2xl p-6 shadow-sm flex flex-col gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">Reports & Analytics</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Overview of practice metrics.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-2">
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex justify-between items-center">Total Clients <span class="material-symbols-outlined text-primary text-[18px]">group</span></div>
+                        <div class="text-2xl font-extrabold text-slate-800 mt-2">142</div>
+                    </div>
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex justify-between items-center">Avg. Compliance <span class="material-symbols-outlined text-[#006a61] text-[18px]">verified</span></div>
+                        <div class="text-2xl font-extrabold text-slate-800 mt-2">87%</div>
+                    </div>
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex justify-between items-center">Revenue <span class="material-symbols-outlined text-amber-500 text-[18px]">payments</span></div>
+                        <div class="text-2xl font-extrabold text-slate-800 mt-2">$12k</div>
+                    </div>
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex justify-between items-center">Plan Completion <span class="material-symbols-outlined text-red-500 text-[18px]">assignment_turned_in</span></div>
+                        <div class="text-2xl font-extrabold text-slate-800 mt-2">92%</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-4">
+                    <div class="lg:col-span-8 bg-slate-50 rounded-xl p-5 border border-slate-200 shadow-sm flex flex-col gap-4">
+                        <h3 class="text-sm font-bold text-slate-800">Client Success Trends</h3>
+                        <div class="w-full relative h-64"><canvas id="adminSuccessTrendsChartCanvas"></canvas></div>
+                    </div>
+
+                    <div class="lg:col-span-4 bg-slate-50 rounded-xl p-5 border border-slate-200 shadow-sm flex flex-col gap-4">
+                        <h3 class="text-sm font-bold text-slate-800">Service Distribution</h3>
+                        <div class="space-y-4 mt-2">
+                            <div>
+                                <div class="flex justify-between text-xs font-semibold mb-1"><span>Weight Loss</span><span>45%</span></div>
+                                <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden"><div class="bg-primary h-full rounded-full" style="width: 45%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-semibold mb-1"><span>Sports Nutrition</span><span>25%</span></div>
+                                <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden"><div class="bg-[#006a61] h-full rounded-full" style="width: 25%"></div></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>

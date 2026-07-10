@@ -9,6 +9,8 @@ const state = {
     selectedClientForAllocation: null
 };
 
+let successTrendsChartInstance = null;
+
 // ==================== SESSION CHECK ====================
 function checkSuperAdminSession() {
     if (localStorage.getItem('nutriflow_superadmin_logged') !== 'true') {
@@ -67,7 +69,7 @@ window.navigateToView = function(viewName) {
     state.activeView = viewName;
 
     // Toggle active link styling
-    const links = ['analytics', 'nutritionists', 'allocation'];
+    const links = ['analytics', 'nutritionists', 'allocation', 'reports'];
     links.forEach(l => {
         const linkEl = document.getElementById(`link-${l}`);
         const viewEl = document.getElementById(`view-${l}`);
@@ -93,6 +95,8 @@ window.navigateToView = function(viewName) {
         renderNutritionistsTable();
     } else if (viewName === 'allocation') {
         renderAllocationTable();
+    } else if (viewName === 'reports') {
+        setTimeout(initAdminReportsCharts, 50);
     }
 };
 
@@ -390,3 +394,36 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSummaryStats();
     navigateToView('analytics');
 });
+
+// ==================== REPORTS CHART ====================
+function initAdminReportsCharts() {
+    const ctxSuccess = document.getElementById('adminSuccessTrendsChartCanvas').getContext('2d');
+    if (!ctxSuccess) return;
+    if (successTrendsChartInstance) successTrendsChartInstance.destroy();
+    successTrendsChartInstance = new Chart(ctxSuccess, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Compliance Rate (%)',
+                data: [55, 62, 60, 68, 75, 87],
+                borderColor: '#006a61',
+                backgroundColor: 'rgba(0, 106, 97, 0.05)',
+                borderWidth: 2,
+                pointBackgroundColor: '#006a61',
+                pointBorderColor: '#ffffff',
+                tension: 0.25,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { grid: { color: 'rgba(211, 228, 254, 0.4)' }, ticks: { color: '#6d7b6c', font: { size: 10 } } },
+                x: { grid: { display: false }, ticks: { color: '#6d7b6c', font: { size: 10 } } }
+            }
+        }
+    });
+}

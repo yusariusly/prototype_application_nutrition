@@ -109,7 +109,6 @@
             <a onclick="navigateTo('admin-clients')" id="link-admin-clients" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Clients</a>
             <a onclick="navigateTo('admin-meal-builder')" id="link-admin-meal-builder" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Programs</a>
             <a onclick="navigateTo('admin-calendar')" id="link-admin-calendar" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Calendar</a>
-            <a onclick="navigateTo('admin-reports')" id="link-admin-reports" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Reports</a>
             <a onclick="navigateTo('admin-profile')" id="link-admin-profile" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Profile</a>
         </div>
 
@@ -432,55 +431,7 @@
             </div>
         </section>
 
-        <!-- ==================== VIEW 4: ADMIN REPORTS ==================== -->
-        <section id="view-admin-reports" class="view-section hidden flex flex-col gap-gutter">
-            <div>
-                <h1 class="text-3xl font-bold tracking-tight text-on-surface">Reports & Analytics</h1>
-                <p class="text-body-md text-on-surface-variant mt-1">Overview of practice metrics.</p>
-            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-md">
-                <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-sm">
-                    <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider flex justify-between items-center">Total Clients <span class="material-symbols-outlined text-primary text-[18px]">group</span></div>
-                    <div class="text-3xl font-extrabold text-on-surface mt-3">142</div>
-                </div>
-                <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-sm">
-                    <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider flex justify-between items-center">Avg. Compliance <span class="material-symbols-outlined text-[#006a61] text-[18px]">verified</span></div>
-                    <div class="text-3xl font-extrabold text-on-surface mt-3">87%</div>
-                </div>
-                <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-sm">
-                    <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider flex justify-between items-center">Revenue <span class="material-symbols-outlined text-amber-500 text-[18px]">payments</span></div>
-                    <div class="text-3xl font-extrabold text-on-surface mt-3">$12k</div>
-                </div>
-                <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-sm">
-                    <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider flex justify-between items-center">Plan Completion <span class="material-symbols-outlined text-red-500 text-[18px]">assignment_turned_in</span></div>
-                    <div class="text-3xl font-extrabold text-on-surface mt-3">92%</div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
-                <div class="lg:col-span-8 bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-lg font-bold text-on-background">Client Success Trends</h3>
-                    </div>
-                    <div class="w-full relative h-64"><canvas id="adminSuccessTrendsChartCanvas"></canvas></div>
-                </div>
-
-                <div class="lg:col-span-4 bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
-                    <h3 class="text-lg font-bold text-on-background">Service Distribution</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <div class="flex justify-between text-xs font-semibold mb-1"><span>Weight Loss</span><span>45%</span></div>
-                            <div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden"><div class="bg-primary h-full rounded-full" style="width: 45%"></div></div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-xs font-semibold mb-1"><span>Sports Nutrition</span><span>25%</span></div>
-                            <div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden"><div class="bg-[#006a61] h-full rounded-full" style="width: 25%"></div></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
 
         <!-- ==================== VIEW 5: PRACTITIONER PROFILE ==================== -->
         <section id="view-admin-profile" class="view-section hidden flex flex-col gap-gutter">
@@ -556,10 +507,7 @@
             <span class="material-symbols-outlined text-[22px]">calendar_month</span>
             <span class="text-[9px] font-bold mt-0.5">Calendar</span>
         </button>
-        <button onclick="navigateTo('admin-reports')" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
-            <span class="material-symbols-outlined text-[22px]">analytics</span>
-            <span class="text-[9px] font-bold mt-0.5">Reports</span>
-        </button>
+
     </div>
 
     <!-- Footer -->
