@@ -1666,6 +1666,35 @@ window.setAdminCalendarToday = function() {
     showToast(`Navigated to ${curMonthName} ${curYear}.`, 'info');
 };
 
+window.switchAppointmentsTab = function(tabName) {
+    const tabs = ['calendar', 'upcoming', 'pending'];
+    
+    // Toggle active state on buttons
+    tabs.forEach(t => {
+        const btn = document.getElementById(`btn-tab-${t}`);
+        if (btn) {
+            if (t === tabName) {
+                btn.classList.add('bg-surface', 'shadow-sm', 'text-primary');
+                btn.classList.remove('text-on-surface-variant', 'border-transparent');
+            } else {
+                btn.classList.remove('bg-surface', 'shadow-sm', 'text-primary');
+                btn.classList.add('text-on-surface-variant', 'border-transparent');
+            }
+        }
+        
+        // Toggle visibility of content
+        const content = document.getElementById(`appointments-tab-${t}`);
+        if (content) {
+            if (t === tabName) {
+                content.classList.remove('hidden');
+                content.classList.add('flex');
+            } else {
+                content.classList.add('hidden');
+                content.classList.remove('flex');
+            }
+        }
+    });
+};
 
 window.filterFoodCategory = function(cat) {
     state.adminSelectedFoodFilter = cat;
