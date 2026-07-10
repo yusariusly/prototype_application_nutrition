@@ -736,8 +736,7 @@ function renderAdminClientsList() {
                     </svg>
                 </td>
                 <td class="p-4 pr-6 text-right space-x-1">
-                    <button onclick="handleAdminAction('${cli.name}', 'chat')" class="p-1 hover:text-primary transition-colors inline-block cursor-pointer" title="Send message"><span class="material-symbols-outlined text-[18px]">chat</span></button>
-                    <button onclick="handleAdminAction('${cli.name}', 'edit-diet')" class="p-1 hover:text-[#006a61] transition-colors inline-block cursor-pointer" title="Manage meal plans"><span class="material-symbols-outlined text-[18px]">restaurant_menu</span></button>
+                    <button onclick="openClientProgramDiscussion('${cli.activeProgramId}', '${cli.name}')" class="p-1 hover:text-primary transition-colors inline-block cursor-pointer" title="Send message"><span class="material-symbols-outlined text-[18px]">chat</span></button>
                 </td>
             </tr>
         `;
@@ -781,6 +780,17 @@ window.handleAdminAction = function(name, action) {
     } else if (action === 'chat') {
         openAdminChatModal(name);
     }
+};
+
+window.openClientProgramDiscussion = function(programId, clientName) {
+    if (!programId || programId === 'prog_placeholder') {
+        showToast('This client is not currently assigned to any active program.', 'info');
+        return;
+    }
+    // Navigate to Programs tab
+    navigateTo('admin-meal-builder');
+    // Open Discussion for this program
+    window.openProgramDiscussion(programId, clientName);
 };
 
 window.openAdminChatModal = function(name) {
@@ -2062,11 +2072,13 @@ window.openProgramDiscussionDirect = function() {
     }
 };
 
-window.openProgramDiscussion = function(programId) {
+window.openProgramDiscussion = function(programId, targetClientName = null) {
     state.activeDiscussionProgramId = programId;
     const program = state.programs.find(p => p.id === programId);
     if (!program) return;
     
+    // When opened from client list, ensure parent view is set correctly
+    // so the "Back" button goes back to list if not in editor mode
     if (!state.chatParentView) {
         state.chatParentView = 'programs-list-view';
     }
@@ -2087,7 +2099,15 @@ window.openProgramDiscussion = function(programId) {
         clientNames = ['Guest User'];
     }
     
-    state.activeDiscussionClientName = clientNames[0];
+    // If targetClientName is provided, add them to the list if not present, and select them
+    if (targetClientName) {
+        if (!clientNames.includes(targetClientName)) {
+            clientNames.unshift(targetClientName);
+        }
+        state.activeDiscussionClientName = targetClientName;
+    } else {
+        state.activeDiscussionClientName = clientNames[0];
+    }
     
     // Hide editor and list views, show discussion view
     const sidebar = document.getElementById('library-sidebar');
