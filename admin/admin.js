@@ -586,9 +586,68 @@ window.handleSavePractitionerProfile = function(e) {
     showToast('Practitioner Profile updated successfully!', 'success');
 };
 
-window.showSpecialistNotifications = function() {
-    showToast('No new practitioner alerts at this time.', 'info');
+// Admin Notifications Dropdown
+const adminNotificationsData = [
+    { type: 'booking', message: 'New booking: Sarah — Deep Tissue Massage', time: '2 mins ago', icon: 'calendar_month', bg: 'bg-[#fff8e1]', text: 'text-[#d48806]' },
+    { type: 'confirmed', message: 'Reservation #R-012 confirmed by Siti', time: '18 mins ago', icon: 'check_circle', bg: 'bg-[#e6f4ea]', text: 'text-[#1e8e3e]' },
+    { type: 'cancelled', message: 'Booking cancelled — Room 3 now free', time: '1 hour ago', icon: 'cancel', bg: 'bg-[#fce8e6]', text: 'text-[#d93025]' },
+    { type: 'staff', message: 'New staff member added: Rina Dewi', time: 'Yesterday', icon: 'person_add', bg: 'bg-[#f1f3f4]', text: 'text-[#5f6368]' }
+];
+
+window.toggleSpecialistNotifications = function(e) {
+    e.stopPropagation();
+    const dropdown = document.getElementById('admin-notifications-dropdown');
+    const isHidden = dropdown.classList.contains('hidden');
+    
+    if (isHidden) {
+        renderAdminNotifications();
+        dropdown.classList.remove('hidden');
+    } else {
+        dropdown.classList.add('hidden');
+    }
 };
+
+window.renderAdminNotifications = function() {
+    const list = document.getElementById('admin-notifications-list');
+    if (!list) return;
+    
+    if (adminNotificationsData.length === 0) {
+        list.innerHTML = '<div class="p-6 text-center text-sm text-on-surface-variant">No new notifications</div>';
+        return;
+    }
+    
+    list.innerHTML = adminNotificationsData.map(n => `
+        <div class="px-5 py-4 flex gap-4 hover:bg-surface-container transition-colors cursor-pointer items-start">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${n.bg} ${n.text}">
+                <span class="material-symbols-outlined text-[20px]">${n.icon}</span>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-[13px] font-medium text-on-background leading-snug">${n.message}</span>
+                <span class="text-[11px] text-on-surface-variant mt-1">${n.time}</span>
+            </div>
+        </div>
+    `).join('');
+};
+
+window.markAdminNotificationsRead = function() {
+    adminNotificationsData.length = 0; // clear array
+    renderAdminNotifications();
+    showToast('All notifications marked as read', 'success');
+    setTimeout(() => {
+        document.getElementById('admin-notifications-dropdown').classList.add('hidden');
+    }, 1000);
+};
+
+// Close dropdown on click outside
+document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('admin-notifications-dropdown');
+    const btn = document.getElementById('admin-notifications-btn');
+    if (dropdown && !dropdown.classList.contains('hidden')) {
+        if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
+            dropdown.classList.add('hidden');
+        }
+    }
+});
 
 function generateSparklinePath(trend) {
     if (!trend || trend.length < 2) return "M 0 15 L 100 15";

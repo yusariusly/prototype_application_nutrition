@@ -553,9 +553,68 @@ window.navigateTo = function(viewId) {
     }
 };
 
-window.showClientNotifications = function() {
-    showToast('All daily nutrient targets are perfectly updated.', 'info');
+// Client Notifications Dropdown
+const clientNotificationsData = [
+    { type: 'booking', message: 'New booking: Sarah — Deep Tissue Massage', time: '2 mins ago', icon: 'calendar_month', bg: 'bg-[#fff8e1]', text: 'text-[#d48806]' },
+    { type: 'confirmed', message: 'Reservation #R-012 confirmed by Siti', time: '18 mins ago', icon: 'check_circle', bg: 'bg-[#e6f4ea]', text: 'text-[#1e8e3e]' },
+    { type: 'cancelled', message: 'Booking cancelled — Room 3 now free', time: '1 hour ago', icon: 'cancel', bg: 'bg-[#fce8e6]', text: 'text-[#d93025]' },
+    { type: 'staff', message: 'New staff member added: Rina Dewi', time: 'Yesterday', icon: 'person_add', bg: 'bg-[#f1f3f4]', text: 'text-[#5f6368]' }
+];
+
+window.toggleClientNotifications = function(e) {
+    e.stopPropagation();
+    const dropdown = document.getElementById('client-notifications-dropdown');
+    const isHidden = dropdown.classList.contains('hidden');
+    
+    if (isHidden) {
+        renderClientNotifications();
+        dropdown.classList.remove('hidden');
+    } else {
+        dropdown.classList.add('hidden');
+    }
 };
+
+window.renderClientNotifications = function() {
+    const list = document.getElementById('client-notifications-list');
+    if (!list) return;
+    
+    if (clientNotificationsData.length === 0) {
+        list.innerHTML = '<div class="p-6 text-center text-sm text-on-surface-variant">No new notifications</div>';
+        return;
+    }
+    
+    list.innerHTML = clientNotificationsData.map(n => `
+        <div class="px-5 py-4 flex gap-4 hover:bg-surface-container transition-colors cursor-pointer items-start">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${n.bg} ${n.text}">
+                <span class="material-symbols-outlined text-[20px]">${n.icon}</span>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-[13px] font-medium text-on-background leading-snug">${n.message}</span>
+                <span class="text-[11px] text-on-surface-variant mt-1">${n.time}</span>
+            </div>
+        </div>
+    `).join('');
+};
+
+window.markClientNotificationsRead = function() {
+    clientNotificationsData.length = 0; // clear array
+    renderClientNotifications();
+    showToast('All notifications marked as read', 'success');
+    setTimeout(() => {
+        document.getElementById('client-notifications-dropdown').classList.add('hidden');
+    }, 1000);
+};
+
+// Close dropdown on click outside
+document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('client-notifications-dropdown');
+    const btn = document.getElementById('client-notifications-btn');
+    if (dropdown && !dropdown.classList.contains('hidden')) {
+        if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
+            dropdown.classList.add('hidden');
+        }
+    }
+});
 
 // ==================== DASHBOARD MEALS & KCAL ====================
 // ==================== DASHBOARD MEALS & KCAL ====================
