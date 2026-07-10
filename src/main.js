@@ -1317,6 +1317,10 @@ function renderAppointmentsView() {
     if (!list) return;
     
     const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
+    const clientDetails = clientsList.find(c => c.name === activeClient);
+    const assignedTherapist = clientDetails?.therapist || 'Dr. Hasan';
+
     const upcoming = state.appointments.filter(apt => 
         (apt.status === 'approved' || apt.status === 'pending') && 
         apt.clientName === activeClient
