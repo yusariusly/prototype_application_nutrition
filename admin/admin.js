@@ -379,6 +379,21 @@ window.showSpecialistNotifications = function() {
     showToast('No new practitioner alerts at this time.', 'info');
 };
 
+function generateSparklinePath(trend) {
+    if (!trend || trend.length < 2) return "M 0 15 L 100 15";
+    const minVal = Math.min(...trend);
+    const maxVal = Math.max(...trend);
+    const valRange = maxVal - minVal || 1;
+    
+    const points = trend.map((val, idx) => {
+        const x = (idx / (trend.length - 1)) * 100;
+        const y = 26 - ((val - minVal) / valRange) * 22;
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+    });
+    
+    return `M ${points.join(' L ')}`;
+}
+
 // ==================== CLIENTS LIST ====================
 function renderAdminClientsList() {
     const tbody = document.getElementById('admin-clients-table-body');
@@ -447,7 +462,7 @@ function renderAdminClientsList() {
                 </td>
                 <td class="p-4 w-28">
                     <svg class="w-full h-8" viewBox="0 0 100 30">
-                        <path d="M 0 25 Q 20 10, 40 20 T 80 5 T 100 15" fill="none" stroke="${cli.compliance > 80 ? '#006e2f' : '#9d4300'}" stroke-width="2"></path>
+                        <path d="${generateSparklinePath(cli.weightTrend)}" fill="none" stroke="${cli.compliance > 80 ? '#006e2f' : '#9d4300'}" stroke-width="2"></path>
                     </svg>
                 </td>
                 <td class="p-4 pr-6 text-right space-x-1">
