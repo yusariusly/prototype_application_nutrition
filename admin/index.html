@@ -109,6 +109,7 @@
             <a onclick="navigateTo('admin-clients')" id="link-admin-clients" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Clients</a>
             <a onclick="navigateTo('admin-meal-builder')" id="link-admin-meal-builder" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Programs</a>
             <a onclick="navigateTo('admin-calendar')" id="link-admin-calendar" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Calendar</a>
+            <a onclick="navigateTo('admin-reports')" id="link-admin-reports" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Reports</a>
             <a onclick="navigateTo('admin-profile')" id="link-admin-profile" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Profile</a>
         </div>
 
@@ -431,7 +432,56 @@
             </div>
         </section>
 
+        <!-- ==================== VIEW 4: SPECIALIST REPORTS ==================== -->
+        <section id="view-admin-reports" class="view-section hidden flex flex-col gap-gutter">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight text-on-surface">Client Analytics & Reports</h1>
+                    <p class="text-body-md text-on-surface-variant mt-1">Real-time performance, compliance, and diet tracking of your assigned clients.</p>
+                </div>
+            </div>
 
+            <!-- Stats grid -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-md">
+                <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-sm">
+                    <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider flex justify-between items-center">My Clients <span class="material-symbols-outlined text-primary text-[18px]">group</span></div>
+                    <div class="text-3xl font-extrabold text-on-surface mt-3" id="rep-my-clients-count">0</div>
+                </div>
+                <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-sm">
+                    <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider flex justify-between items-center">Avg. Compliance <span class="material-symbols-outlined text-[#006a61] text-[18px]">verified</span></div>
+                    <div class="text-3xl font-extrabold text-on-surface mt-3" id="rep-my-compliance">0%</div>
+                </div>
+                <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-sm">
+                    <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider flex justify-between items-center">Avg. Water Intake <span class="material-symbols-outlined text-blue-500 text-[18px]">water_drop</span></div>
+                    <div class="text-3xl font-extrabold text-on-surface mt-3" id="rep-my-water">0 glasses</div>
+                </div>
+                <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-sm">
+                    <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider flex justify-between items-center">Pending Sessions <span class="material-symbols-outlined text-amber-500 text-[18px]">pending_actions</span></div>
+                    <div class="text-3xl font-extrabold text-on-surface mt-3" id="rep-my-pending-sessions">0</div>
+                </div>
+            </div>
+
+            <!-- Client Performance Logs Table -->
+            <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
+                <h3 class="text-lg font-bold text-on-background">Client Tracking Dashboard</h3>
+                <div class="overflow-x-auto w-full font-sans">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-surface-container-low/30 border-b border-surface-variant/20 text-on-surface-variant/80 font-bold uppercase tracking-wider text-[10px]">
+                                <th class="p-4 pl-6">Client Name</th>
+                                <th class="p-4">Active Program</th>
+                                <th class="p-4 text-center">Calories Eaten Today</th>
+                                <th class="p-4 text-center">Water Logging</th>
+                                <th class="p-4">Compliance Rating</th>
+                                <th class="p-4 pr-6 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="specialist-reports-table-body" class="divide-y divide-surface-variant/20">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
         <!-- ==================== VIEW 5: PRACTITIONER PROFILE ==================== -->
         <section id="view-admin-profile" class="view-section hidden flex flex-col gap-gutter">
@@ -506,8 +556,10 @@
         <button onclick="navigateTo('admin-calendar')" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
             <span class="material-symbols-outlined text-[22px]">calendar_month</span>
             <span class="text-[9px] font-bold mt-0.5">Calendar</span>
+        <button onclick="navigateTo('admin-reports')" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
+            <span class="material-symbols-outlined text-[22px]">analytics</span>
+            <span class="text-[9px] font-bold mt-0.5">Reports</span>
         </button>
-
     </div>
 
     <!-- Footer -->
@@ -749,6 +801,26 @@
                 </div>
                 <button type="submit" class="w-full bg-primary hover:bg-[#005321] text-white font-bold text-xs py-2.5 rounded-lg transition-all shadow-sm cursor-pointer mt-2">Publish Program</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Client Food Diary Logs Modal -->
+    <div id="client-logs-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-surface max-w-md w-full rounded-2xl p-6 border border-slate-100 shadow-2xl flex flex-col gap-4 text-slate-850">
+            <div class="flex justify-between items-center border-b pb-2">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl">menu_book</span>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800" id="logs-modal-title">Client Meal Log</h3>
+                        <p class="text-[9px] text-slate-400 mt-0.5" id="logs-modal-subtitle">Today's tracking log for Sarah Jenkins</p>
+                    </div>
+                </div>
+                <button onclick="closeClientLogsModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer"><span class="material-symbols-outlined text-[18px]">close</span></button>
+            </div>
+            
+            <div class="space-y-3 max-h-[300px] overflow-y-auto pr-1 hide-scrollbar" id="logs-modal-content">
+                <!-- Check-in status items -->
+            </div>
         </div>
     </div>
 
