@@ -584,10 +584,9 @@ function updateKcalDisplay() {
         }
     });
     
-    let left = goal - consumed;
-    if (left < 0) left = 0;
-    
-    document.getElementById('kcal-left-value').innerText = left.toLocaleString();
+    document.getElementById('kcal-left-value').innerText = consumed.toLocaleString();
+    const labelEl = document.getElementById('kcal-left-label');
+    if (labelEl) labelEl.innerText = 'kcal eaten';
     document.getElementById('summary-consumed-kcal').innerText = `${consumed} kcal`;
     
     // Update dashboard daily summary targets
