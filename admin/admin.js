@@ -1013,7 +1013,10 @@ window.openCreateProgramModal = function() {
     const nameInput = document.getElementById('new-prog-name');
     const descInput = document.getElementById('new-prog-description');
     if (nameInput) nameInput.value = '';
-    if (descInput) descInput.value = '';
+    if (descInput) {
+        descInput.value = '';
+        descInput.style.height = 'auto';
+    }
 };
 
 window.closeCreateProgramModal = function() {

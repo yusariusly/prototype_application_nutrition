@@ -755,21 +755,24 @@
 
     <!-- Create Program Modal -->
     <div id="create-program-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="bg-surface max-w-sm w-full rounded-2xl p-6 border border-slate-100 shadow-2xl flex flex-col gap-4 text-slate-800">
-            <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="text-sm font-bold text-slate-800">Create New Nutrition Program</h3>
-                <button onclick="closeCreateProgramModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer"><span class="material-symbols-outlined text-[18px]">close</span></button>
+        <div class="bg-surface max-w-lg w-full rounded-2xl p-7 border border-slate-100 shadow-2xl flex flex-col gap-5 text-slate-800 animate-fade-in">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-base font-bold text-slate-800">Create New Nutrition Program</h3>
+                <button onclick="closeCreateProgramModal()" class="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"><span class="material-symbols-outlined text-[20px]">close</span></button>
             </div>
-            <form onsubmit="handleCreateProgramSubmit(event)" class="space-y-3">
+            <form onsubmit="handleCreateProgramSubmit(event)" class="space-y-4">
                 <div>
                     <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Program Name</label>
-                    <input type="text" id="new-prog-name" required placeholder="e.g. Keto Shred Protocol" class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary">
+                    <input type="text" id="new-prog-name" required placeholder="e.g. Keto Shred Protocol" class="w-full rounded-lg border-slate-200 text-sm px-3 py-2.5 bg-slate-50 focus:border-primary focus:ring-primary focus:bg-white transition-all">
                 </div>
                 <div>
                     <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Program Description</label>
-                    <textarea id="new-prog-description" required rows="3" placeholder="e.g. A 7-day low carb program designed for fast fat loss..." class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary"></textarea>
+                    <textarea id="new-prog-description" required rows="3" oninput="this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px';" placeholder="e.g. A 7-day low carb program designed for fast fat loss..." class="w-full rounded-lg border-slate-200 text-sm px-3 py-2.5 bg-slate-50 focus:border-primary focus:ring-primary focus:bg-white transition-all overflow-hidden resize-none"></textarea>
                 </div>
-                <button type="submit" class="w-full bg-primary hover:bg-[#005321] text-white font-bold text-xs py-2.5 rounded-lg transition-all shadow-sm cursor-pointer mt-2">Create Program</button>
+                <div class="flex justify-end gap-3 pt-3 border-t">
+                    <button type="button" onclick="closeCreateProgramModal()" class="border border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold text-xs px-5 py-2.5 rounded-xl transition-all cursor-pointer">Cancel</button>
+                    <button type="submit" class="bg-primary hover:bg-[#005321] text-white font-semibold text-xs px-6 py-2.5 rounded-xl shadow-md transition-all cursor-pointer">Create Program</button>
+                </div>
             </form>
         </div>
     </div>
