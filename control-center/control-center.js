@@ -244,9 +244,6 @@ function renderPatientsTable(data) {
                 </td>
                 <td class="px-6 py-4">
                     <div class="flex items-center justify-end gap-2">
-                        <button onclick="openAllocationModal('${c.name}')" class="text-tertiary hover:bg-tertiary/10 font-bold text-[10px] flex items-center gap-0.5 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer" title="Assign Specialist">
-                            <span class="material-symbols-outlined text-[14px]">swap_horiz</span> Assign
-                        </button>
                         <button onclick="openEditPatientModal('${c.id}')" class="text-primary hover:bg-primary/10 font-bold text-[10px] flex items-center gap-0.5 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer">
                             <span class="material-symbols-outlined text-[14px]">edit</span> Edit
                         </button>
