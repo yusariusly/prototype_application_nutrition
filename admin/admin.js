@@ -284,7 +284,7 @@ window.navigateTo = function(viewId) {
     } else if (viewId === 'admin-meal-builder') {
         renderAdminMealBuilder();
     } else if (viewId === 'admin-calendar') {
-        renderAdminCalendar();
+        renderAdminAppointmentsTable();
     } else if (viewId === 'admin-services') {
         loadSpecialistServices();
     } else if (viewId === 'admin-profile') {
@@ -1521,113 +1521,105 @@ window.previewWeeklyPlan = function() {
     window.open(previewUrl, '_blank');
 };
 
-// ==================== CALENDAR ====================
-function renderAdminCalendar() {
+// ==================== APPOINTMENTS TABLE ====================
+state.appointmentFilter = 'all';
+
+window.setAppointmentsFilter = function(filter) {
+    state.appointmentFilter = filter;
+    
+    // Update button styles
+    const filters = ['all', 'approved', 'pending', 'completed', 'cancelled'];
+    filters.forEach(f => {
+        const btn = document.getElementById(`filter-btn-${f}`);
+        if (!btn) return;
+        if (f === filter) {
+            btn.className = "px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-primary text-white shadow-sm border border-transparent";
+        } else {
+            btn.className = "px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-surface text-on-surface-variant hover:text-primary border border-outline-variant/40 hover:border-primary/50";
+        }
+    });
+
+    renderAdminAppointmentsTable();
+};
+
+window.renderAdminAppointmentsTable = function() {
     loadAdminState(); // sync fresh appointments from LocalStorage
     
-    const pendList = document.getElementById('admin-pending-requests-list');
-    if (!pendList) return;
+    const tbody = document.getElementById('appointments-table-body');
+    const footer = document.getElementById('appointments-table-footer');
+    if (!tbody) return;
+
+    const searchTerm = (document.getElementById('appointments-search')?.value || '').toLowerCase();
     
-    const pendings = state.appointments.filter(a => a.status === 'pending');
-    
-    if (pendings.length === 0) {
-        pendList.innerHTML = `<div class="text-xs text-on-surface-variant font-medium text-center py-4">No pending requests.</div>`;
-    } else {
-        pendList.innerHTML = pendings.map(apt => `
-            <div class="bg-surface-container-low p-4 rounded-xl border border-surface-variant/35 flex flex-col gap-2 relative">
-                <div>
-                    <h4 class="font-bold text-on-background text-xs leading-tight">${apt.clientName}</h4>
-                    <p class="text-[9px] text-on-surface-variant mt-0.5">${apt.serviceTitle}</p>
-                    <p class="text-[9px] text-[#006e2f] font-bold mt-1">${apt.date} • ${apt.time}</p>
-                </div>
-                <div class="flex gap-2 mt-1">
-                    <button onclick="approveAppointment('${apt.id}')" class="bg-primary hover:bg-[#005321] text-white font-bold text-[9px] px-2.5 py-1 rounded-lg">Accept</button>
-                    <button onclick="declineAppointment('${apt.id}')" class="border border-outline-variant/30 hover:bg-surface-container text-on-surface-variant font-bold text-[9px] px-2.5 py-1 rounded-lg">Decline</button>
-                </div>
-            </div>
-        `).join('');
+    let filtered = state.appointments.filter(apt => {
+        const matchSearch = apt.clientName.toLowerCase().includes(searchTerm) || apt.serviceTitle.toLowerCase().includes(searchTerm);
+        
+        let matchFilter = true;
+        if (state.appointmentFilter !== 'all') {
+            matchFilter = apt.status === state.appointmentFilter;
+        }
+        
+        return matchSearch && matchFilter;
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-on-surface-variant text-sm">No reservations found.</td></tr>`;
+        if (footer) footer.innerText = 'Showing 0 reservations';
+        return;
     }
 
-    const adminUpcomingList = document.getElementById('admin-upcoming-consultations-list');
-    if (adminUpcomingList) {
-        const upcomingApproved = state.appointments.filter(a => a.status === 'approved');
-        if (upcomingApproved.length === 0) {
-            adminUpcomingList.innerHTML = `<div class="text-xs text-on-surface-variant font-medium text-center py-4">No approved consultations.</div>`;
-        } else {
-            adminUpcomingList.innerHTML = upcomingApproved.map(apt => `
-                <div class="flex gap-3 pb-2 border-b border-surface-variant/20 items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-surface-container-high border text-[10px] font-extrabold flex items-center justify-center text-primary shrink-0">${apt.date.split('-').pop()}</div>
-                        <div class="min-w-0">
-                            <h4 class="font-bold text-on-background text-xs truncate leading-tight">${apt.clientName}</h4>
-                            <p class="text-[9px] text-on-surface-variant/80 truncate mt-0.5">${apt.serviceTitle} • ${apt.time}</p>
-                        </div>
-                    </div>
-                    ${apt.type === 'Video Call' || apt.type.toLowerCase().includes('virtual') || apt.type.toLowerCase().includes('video') ? `
-                        <button onclick="joinAdminVideoCall('${apt.id}')" class="bg-primary hover:bg-[#005321] text-white font-bold text-[9px] px-2 py-1 rounded shadow-sm transition-all active:scale-95 shrink-0 cursor-pointer">Join Call</button>
+    const getStatusStyle = (status) => {
+        if (status === 'approved' || status === 'confirmed' || status === 'completed') return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+        if (status === 'pending') return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        if (status === 'cancelled') return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-surface-container-high text-on-surface border-outline-variant/30';
+    };
+
+    const getStatusText = (status) => {
+        if (status === 'approved') return 'Confirmed';
+        return status.charAt(0).toUpperCase() + status.slice(1);
+    };
+
+    tbody.innerHTML = filtered.map(apt => `
+        <tr class="hover:bg-surface-container-lowest transition-colors">
+            <td class="px-6 py-4 font-mono text-[10px] text-on-surface-variant">#${apt.id.toUpperCase()}</td>
+            <td class="px-6 py-4 font-bold text-on-background">${apt.clientName}</td>
+            <td class="px-6 py-4 text-on-surface-variant">${apt.serviceTitle}</td>
+            <td class="px-6 py-4 text-on-surface-variant">${apt.therapist || 'Unknown'}</td>
+            <td class="px-6 py-4 text-on-surface-variant">${apt.date} • ${apt.time}</td>
+            <td class="px-6 py-4 text-on-surface-variant">${apt.duration}</td>
+            <td class="px-6 py-4 text-center">
+                <span class="px-2.5 py-1 rounded-full text-[9px] font-bold border ${getStatusStyle(apt.status)}">
+                    ${getStatusText(apt.status)}
+                </span>
+            </td>
+            <td class="px-6 py-4 text-right flex justify-end gap-2">
+                ${apt.status === 'pending' ? `
+                    <button onclick="approveAppointment('${apt.id}')" class="text-emerald-600 hover:bg-emerald-50 p-1.5 rounded-lg transition-colors" title="Approve">
+                        <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                    </button>
+                    <button onclick="declineAppointment('${apt.id}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="Decline">
+                        <span class="material-symbols-outlined text-[16px]">cancel</span>
+                    </button>
+                ` : `
+                    ${(apt.type === 'Video Call' || apt.type.toLowerCase().includes('virtual') || apt.type.toLowerCase().includes('video')) && apt.status === 'approved' ? `
+                        <button onclick="joinAdminVideoCall('${apt.id}')" class="text-primary hover:bg-primary/10 p-1.5 rounded-lg transition-colors" title="Join Video Call">
+                            <span class="material-symbols-outlined text-[16px]">videocam</span>
+                        </button>
                     ` : ''}
-                </div>
-            `).join('');
-        }
-    }
+                    <button onclick="editAppointment('${apt.id}')" class="text-on-surface-variant hover:text-primary hover:bg-surface-container p-1.5 rounded-lg transition-colors" title="Edit">
+                        <span class="material-symbols-outlined text-[16px]">edit</span>
+                    </button>
+                    <button onclick="deleteAppointment('${apt.id}')" class="text-on-surface-variant hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="Delete">
+                        <span class="material-symbols-outlined text-[16px]">delete</span>
+                    </button>
+                `}
+            </td>
+        </tr>
+    `).join('');
 
-    const monthGrid = document.getElementById('admin-calendar-month-grid');
-    if (!monthGrid) return;
-    
-    const todayDate = new Date();
-    const curYear = todayDate.getFullYear();
-    const curMonth = todayDate.getMonth();
-    const curMonthName = todayDate.toLocaleString('default', { month: 'long' });
-    document.getElementById('admin-calendar-title').innerText = `${curMonthName} ${curYear}`;
-
-    // First day index of current month
-    const firstDayIndex = new Date(curYear, curMonth, 1).getDay();
-    const totalDays = new Date(curYear, curMonth + 1, 0).getDate();
-    const prevTotalDays = new Date(curYear, curMonth, 0).getDate();
-
-    let gridHtml = '';
-
-    // Pad previous month days
-    for (let i = firstDayIndex - 1; i >= 0; i--) {
-        const prevDay = prevTotalDays - i;
-        gridHtml += `<div class="p-2 border border-surface-variant/10 text-outline-variant/20 bg-surface-container-low/25 text-[10px]">${prevDay}</div>`;
-    }
-
-    // Current month days
-    const todayDayNum = todayDate.getDate();
-    for (let day = 1; day <= totalDays; day++) {
-        const dateStr = `${curYear}-${(curMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-        const dayApts = state.appointments.filter(a => a.date === dateStr);
-        let cellClass = 'p-2 border border-surface-variant/10 text-[10px] font-bold flex flex-col justify-between items-start ';
-        if (day === todayDayNum) {
-            cellClass += 'bg-[#006e2f]/5 ring-1 ring-primary';
-        } else {
-            cellClass += 'hover:bg-surface-container-low/20';
-        }
-
-        let aptsHtml = dayApts.map(a => `
-            <div class="w-full bg-primary/10 text-primary text-[8px] font-bold p-1 rounded mt-1 truncate" title="${a.clientName}">
-                ${a.time} - ${a.clientName.split(' ')[0]}
-            </div>
-        `).join('');
-
-        gridHtml += `
-            <div class="${cellClass}">
-                <span class="${day === todayDayNum ? 'text-primary' : 'text-on-surface-variant'}">${day}</span>
-                <div class="w-full overflow-hidden max-h-[70px]">${aptsHtml}</div>
-            </div>
-        `;
-    }
-
-    // Pad next month days
-    const totalCellsUsed = firstDayIndex + totalDays;
-    const remainingCells = (7 - (totalCellsUsed % 7)) % 7;
-    for (let day = 1; day <= remainingCells; day++) {
-        gridHtml += `<div class="p-2 border border-surface-variant/10 text-outline-variant/20 bg-surface-container-low/25 text-[10px]">${day}</div>`;
-    }
-
-    monthGrid.innerHTML = gridHtml;
-}
+    if (footer) footer.innerText = `Showing ${filtered.length} reservation${filtered.length !== 1 ? 's' : ''}`;
+};
 
 window.approveAppointment = function(id) {
     const apt = state.appointments.find(a => a.id === id);
@@ -1635,7 +1627,7 @@ window.approveAppointment = function(id) {
         apt.status = 'approved';
         saveAdminState();
         showToast(`Approved session for ${apt.clientName}!`, 'success');
-        renderAdminCalendar();
+        renderAdminAppointmentsTable();
     }
 };
 
@@ -1643,7 +1635,20 @@ window.declineAppointment = function(id) {
     state.appointments = state.appointments.filter(a => a.id !== id);
     saveAdminState();
     showToast('Declined request.');
-    renderAdminCalendar();
+    renderAdminAppointmentsTable();
+};
+
+window.editAppointment = function(id) {
+    showToast('Edit appointment functionality not available in this prototype.', 'info');
+};
+
+window.deleteAppointment = function(id) {
+    if (confirm('Are you sure you want to delete this appointment?')) {
+        state.appointments = state.appointments.filter(a => a.id !== id);
+        saveAdminState();
+        showToast('Appointment deleted.', 'success');
+        renderAdminAppointmentsTable();
+    }
 };
 
 window.joinAdminVideoCall = function(aptId) {
@@ -1654,46 +1659,6 @@ window.joinAdminVideoCall = function(aptId) {
     setTimeout(() => {
         window.location.href = `../telehealth.html?practitioner=${encodeURIComponent(apt.therapist)}&role=admin&client=${encodeURIComponent(apt.clientName)}`;
     }, 850);
-};
-
-window.changeAdminCalendarMonth = function(dir) {
-    showToast('Multi-month calendar paging disabled in this prototype.', 'info');
-};
-window.setAdminCalendarToday = function() {
-    const todayDate = new Date();
-    const curMonthName = todayDate.toLocaleString('default', { month: 'long' });
-    const curYear = todayDate.getFullYear();
-    showToast(`Navigated to ${curMonthName} ${curYear}.`, 'info');
-};
-
-window.switchAppointmentsTab = function(tabName) {
-    const tabs = ['calendar', 'upcoming', 'pending'];
-    
-    // Toggle active state on buttons
-    tabs.forEach(t => {
-        const btn = document.getElementById(`btn-tab-${t}`);
-        if (btn) {
-            if (t === tabName) {
-                btn.classList.add('bg-surface', 'shadow-sm', 'text-primary');
-                btn.classList.remove('text-on-surface-variant', 'border-transparent');
-            } else {
-                btn.classList.remove('bg-surface', 'shadow-sm', 'text-primary');
-                btn.classList.add('text-on-surface-variant', 'border-transparent');
-            }
-        }
-        
-        // Toggle visibility of content
-        const content = document.getElementById(`appointments-tab-${t}`);
-        if (content) {
-            if (t === tabName) {
-                content.classList.remove('hidden');
-                content.classList.add('flex');
-            } else {
-                content.classList.add('hidden');
-                content.classList.remove('flex');
-            }
-        }
-    });
 };
 
 window.filterFoodCategory = function(cat) {
