@@ -339,6 +339,61 @@
                         <!-- Populated dynamically via JS showing protein, carbs, fats, kcal progress -->
                     </div>
                 </div>
+
+                <!-- SUB-VIEW C: Dedicated Program Discussion Page -->
+                <div id="program-discussion-view" class="hidden flex flex-col gap-4 w-full">
+                    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-6">
+                        <!-- Page Header -->
+                        <div class="flex items-center justify-between border-b border-surface-variant/20 pb-4">
+                            <div class="flex items-center gap-3">
+                                <button onclick="exitProgramDiscussion()" class="text-primary font-bold text-xs flex items-center gap-1 hover:underline cursor-pointer bg-transparent border-0">
+                                    <span class="material-symbols-outlined text-xs">arrow_back</span> Back
+                                </button>
+                                <span class="h-5 w-px bg-slate-300"></span>
+                                <div>
+                                    <h2 class="text-xl font-bold text-on-background flex items-center gap-2" id="discussion-page-title">
+                                        <span class="material-symbols-outlined text-primary text-xl">forum</span> Program Discussion
+                                    </h2>
+                                    <p class="text-xs text-on-surface-variant mt-1" id="discussion-page-subtitle">Private conversation channel between you and the clients assigned to this program.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Split Content -->
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[500px]">
+                            <!-- Left: Clients Sidebar List -->
+                            <div class="lg:col-span-4 border-r border-outline-variant/20 pr-4 flex flex-col gap-3">
+                                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Recipients</h3>
+                                <div id="discussion-page-clients-list" class="flex flex-col gap-2 overflow-y-auto max-h-[450px]">
+                                    <!-- Populated dynamically with client list items -->
+                                </div>
+                            </div>
+
+                            <!-- Right: Chat Box Main -->
+                            <div class="lg:col-span-8 flex flex-col justify-between bg-slate-50 border border-slate-200 rounded-2xl p-4 min-h-[450px]">
+                                <div class="flex flex-col flex-grow">
+                                    <div class="border-b pb-2 mb-3">
+                                        <h4 class="text-xs font-bold text-slate-800" id="discussion-chat-with-label">Chatting with Guest User</h4>
+                                        <p class="text-[9px] text-slate-400">All responses are private and visible only to this client.</p>
+                                    </div>
+                                    
+                                    <!-- Messages feed container -->
+                                    <div id="admin-page-chat-container" class="flex flex-col gap-3 overflow-y-auto pr-2 scroll-smooth flex-grow max-h-[350px] min-h-[300px]">
+                                        <!-- Dynamic messages populate here -->
+                                    </div>
+                                </div>
+
+                                <!-- Input field form -->
+                                <form onsubmit="handleAdminPageChatSubmit(event)" class="flex gap-2 items-center border-t pt-3 mt-3">
+                                    <input type="text" id="admin-page-chat-input" placeholder="Type a reply to the client..." required class="flex-1 rounded-xl border-slate-200 text-xs px-4 py-3 bg-white focus:border-primary focus:ring-primary text-slate-800">
+                                    <button type="submit" class="bg-primary hover:bg-[#005321] text-white p-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center cursor-pointer">
+                                        <span class="material-symbols-outlined text-[18px]">send</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
         </section>
@@ -745,42 +800,6 @@
                     </div>
                 </div>
                 <button type="submit" class="w-full bg-primary hover:bg-[#005321] text-white font-bold text-xs py-2.5 rounded-lg transition-all shadow-sm cursor-pointer mt-2">Publish Program</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Program Discussion Modal -->
-    <div id="program-discussion-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="bg-surface max-w-md w-full rounded-2xl p-6 border border-slate-100 shadow-2xl flex flex-col gap-4 text-slate-800">
-            <div class="flex justify-between items-center border-b pb-2">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary text-xl">forum</span>
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-800" id="discussion-modal-title">Program Discussion</h3>
-                        <p class="text-[9px] text-slate-400 mt-0.5">Private channel between you and the client</p>
-                    </div>
-                </div>
-                <button onclick="closeProgramDiscussionModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer"><span class="material-symbols-outlined text-[18px]">close</span></button>
-            </div>
-            <!-- Client Selector Dropdown -->
-            <div id="discussion-client-select-container" class="hidden">
-                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Select Client Thread</label>
-                <select id="discussion-client-select" onchange="changeDiscussionClient()" class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary mb-2 text-slate-800">
-                    <!-- Dynamically populated -->
-                </select>
-            </div>
-            
-            <!-- Chat history -->
-            <div id="admin-program-chat-container" class="flex flex-col gap-3 max-h-[300px] min-h-[150px] overflow-y-auto pr-2 scroll-smooth bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                <!-- Dynamically populated messages -->
-            </div>
-            
-            <!-- Chat input -->
-            <form onsubmit="handleAdminProgramChatSubmit(event)" class="flex gap-2 items-center">
-                <input type="text" id="admin-program-chat-input" placeholder="Type a reply to the client..." required class="flex-1 rounded-lg border-slate-200 text-xs px-3 py-2.5 bg-slate-50 focus:border-primary focus:ring-primary text-slate-800">
-                <button type="submit" class="bg-primary hover:bg-[#005321] text-white p-2.5 rounded-lg shadow-sm transition-all active:scale-95 flex items-center justify-center cursor-pointer">
-                    <span class="material-symbols-outlined text-[18px]">send</span>
-                </button>
             </form>
         </div>
     </div>

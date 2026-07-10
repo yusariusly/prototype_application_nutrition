@@ -1760,6 +1760,7 @@ window.previewWeeklyPlan = function() {
 };
 
 window.openProgramDiscussionDirect = function() {
+    state.chatParentView = 'program-editor-view';
     const progId = state.editingProgramId;
     if (progId) {
         window.openProgramDiscussion(progId);
@@ -1771,9 +1772,8 @@ window.openProgramDiscussion = function(programId) {
     const program = state.programs.find(p => p.id === programId);
     if (!program) return;
     
-    const titleEl = document.getElementById('discussion-modal-title');
-    if (titleEl) {
-        titleEl.innerText = `Discussion: ${program.name}`;
+    if (!state.chatParentView) {
+        state.chatParentView = 'programs-list-view';
     }
     
     // Find active clients on this program
@@ -1792,49 +1792,108 @@ window.openProgramDiscussion = function(programId) {
         clientNames = ['Guest User'];
     }
     
-    const select = document.getElementById('discussion-client-select');
-    if (select) {
-        select.innerHTML = clientNames.map(name => `<option value="${name}">${name}</option>`).join('');
-        state.activeDiscussionClientName = select.value;
-    } else {
-        state.activeDiscussionClientName = clientNames[0];
+    state.activeDiscussionClientName = clientNames[0];
+    
+    // Hide editor and list views, show discussion view
+    const sidebar = document.getElementById('library-sidebar');
+    const mainContent = document.getElementById('meal-builder-main-content');
+    const listView = document.getElementById('programs-list-view');
+    const editorView = document.getElementById('program-editor-view');
+    const discView = document.getElementById('program-discussion-view');
+    
+    if (sidebar) sidebar.classList.add('hidden');
+    if (mainContent) mainContent.className = 'lg:col-span-12 flex flex-col gap-4 transition-all';
+    
+    if (listView) listView.classList.add('hidden');
+    if (editorView) editorView.classList.add('hidden');
+    if (discView) discView.classList.remove('hidden');
+    
+    const titleEl = document.getElementById('discussion-page-title');
+    if (titleEl) {
+        titleEl.innerHTML = `<span class="material-symbols-outlined text-primary text-xl">forum</span> Discussion: ${program.name}`;
     }
     
-    const container = document.getElementById('discussion-client-select-container');
-    if (container) {
-        container.classList.remove('hidden');
-    }
-    
-    const input = document.getElementById('admin-program-chat-input');
-    if (input) input.value = '';
-    
-    const modal = document.getElementById('program-discussion-modal');
-    if (modal) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
-    
+    window.renderDiscussionClientsList(clientNames);
     window.renderAdminProgramChat();
 };
 
-window.changeDiscussionClient = function() {
-    const select = document.getElementById('discussion-client-select');
-    if (select) {
-        state.activeDiscussionClientName = select.value;
-        window.renderAdminProgramChat();
+window.renderDiscussionClientsList = function(clientNames) {
+    const clientsListContainer = document.getElementById('discussion-page-clients-list');
+    if (!clientsListContainer) return;
+    
+    // Re-fetch client list if not passed
+    if (!clientNames) {
+        const progId = state.activeDiscussionProgramId;
+        const myClients = state.clients.filter(c => c.activeProgramId === progId);
+        clientNames = myClients.map(c => c.name);
+        
+        const allProgramChats = JSON.parse(localStorage.getItem('nutriflow_program_chats')) || [];
+        allProgramChats.forEach(chat => {
+            if (chat.programId === progId && !clientNames.includes(chat.clientName)) {
+                clientNames.push(chat.clientName);
+            }
+        });
+        if (clientNames.length === 0) clientNames = ['Guest User'];
     }
+    
+    clientsListContainer.innerHTML = clientNames.map(name => {
+        const isActive = name === state.activeDiscussionClientName;
+        const activeBg = isActive ? 'bg-primary/10 border-primary text-primary' : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700';
+        const initials = name.split(' ').map(s => s[0]).join('').substring(0, 2).toUpperCase();
+        return `
+            <div onclick="selectDiscussionClient('${name}')" class="flex items-center gap-3 p-3 border rounded-xl cursor-pointer transition-all shadow-sm ${activeBg}">
+                <div class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-extrabold text-[11px]">${initials}</div>
+                <div class="flex-grow min-w-0">
+                    <p class="text-xs font-bold truncate leading-tight">${name}</p>
+                    <p class="text-[8px] text-slate-400 mt-0.5 uppercase tracking-wider">Client Thread</p>
+                </div>
+            </div>
+        `;
+    }).join('');
 };
 
-window.closeProgramDiscussionModal = function() {
-    const modal = document.getElementById('program-discussion-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+window.selectDiscussionClient = function(clientName) {
+    state.activeDiscussionClientName = clientName;
+    window.renderDiscussionClientsList();
+    window.renderAdminProgramChat();
+};
+
+window.exitProgramDiscussion = function() {
+    const discView = document.getElementById('program-discussion-view');
+    if (discView) discView.classList.add('hidden');
+    
+    const parentView = state.chatParentView || 'programs-list-view';
+    state.chatParentView = null;
+    
+    if (parentView === 'program-editor-view') {
+        const editorView = document.getElementById('program-editor-view');
+        if (editorView) editorView.classList.remove('hidden');
+        
+        const sidebar = document.getElementById('library-sidebar');
+        if (sidebar) {
+            sidebar.classList.remove('hidden');
+            sidebar.classList.add('flex');
+        }
+        const mainContent = document.getElementById('meal-builder-main-content');
+        if (mainContent) {
+            mainContent.className = 'lg:col-span-9 flex flex-col gap-4 transition-all';
+        }
+    } else {
+        const listView = document.getElementById('programs-list-view');
+        if (listView) listView.classList.remove('hidden');
+        
+        const sidebar = document.getElementById('library-sidebar');
+        if (sidebar) sidebar.classList.add('hidden');
+        
+        const mainContent = document.getElementById('meal-builder-main-content');
+        if (mainContent) {
+            mainContent.className = 'lg:col-span-12 flex flex-col gap-4 transition-all';
+        }
     }
 };
 
 window.renderAdminProgramChat = function() {
-    const container = document.getElementById('admin-program-chat-container');
+    const container = document.getElementById('admin-page-chat-container');
     if (!container) return;
     
     const progId = state.activeDiscussionProgramId;
@@ -1842,6 +1901,11 @@ window.renderAdminProgramChat = function() {
     if (!program) return;
     
     const activeClient = state.activeDiscussionClientName || 'Guest User';
+    
+    const label = document.getElementById('discussion-chat-with-label');
+    if (label) {
+        label.innerText = `Chatting with: ${activeClient}`;
+    }
     
     const allProgramChats = JSON.parse(localStorage.getItem('nutriflow_program_chats')) || [];
     const chatKey = `${progId}_${activeClient}`;
@@ -1883,9 +1947,9 @@ window.renderAdminProgramChat = function() {
     container.scrollTop = container.scrollHeight;
 };
 
-window.handleAdminProgramChatSubmit = function(e) {
+window.handleAdminPageChatSubmit = function(e) {
     e.preventDefault();
-    const input = document.getElementById('admin-program-chat-input');
+    const input = document.getElementById('admin-page-chat-input');
     if (!input) return;
     
     const val = input.value.trim();
