@@ -76,9 +76,6 @@
             <a onclick="navigateToView('allocation')" id="link-allocation" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer gap-1 whitespace-nowrap">
                 <span class="material-symbols-outlined text-[15px]">swap_horiz</span> Allocation
             </a>
-            <a onclick="navigateToView('reports')" id="link-reports" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer gap-1 whitespace-nowrap">
-                <span class="material-symbols-outlined text-[15px]">bar_chart</span> Reports
-            </a>
         </div>
 
         <!-- Sign Out -->
@@ -132,16 +129,18 @@
             </div>
         </div>
 
-        <!-- ==================== VIEW 1: ANALYTICS ==================== -->
+        <!-- ==================== VIEW 1: ANALYTICS & REPORTS (MERGED) ==================== -->
         <section id="view-analytics" class="view-section animate-fade-in flex flex-col gap-6">
             <div>
-                <h2 class="text-2xl font-bold text-on-background">Overview & Analytics</h2>
-                <p class="text-xs text-on-surface-variant mt-0.5">Platform-wide performance and growth metrics.</p>
+                <h2 class="text-2xl font-bold text-on-background">Analytics & Reports</h2>
+                <p class="text-xs text-on-surface-variant mt-0.5">Platform-wide performance, growth metrics, and practice overview.</p>
             </div>
+
+            <!-- Growth Charts Row -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="bg-surface border border-outline-variant/30 rounded-2xl p-6 shadow-sm flex flex-col gap-3">
                     <h3 class="font-bold text-on-background text-sm flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary text-lg">show_chart</span> Client Registrations & Bookings Trend
+                        <span class="material-symbols-outlined text-primary text-lg">show_chart</span> Patient Registrations & Bookings Trend
                     </h3>
                     <div class="h-64 w-full"><canvas id="chart-growth-bookings"></canvas></div>
                 </div>
@@ -150,6 +149,59 @@
                         <span class="material-symbols-outlined text-primary text-lg">donut_large</span> Patient Goal Distribution
                     </h3>
                     <div class="h-64 w-full flex justify-center"><canvas id="chart-goals" class="max-w-[240px]"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Practice Metrics Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+                <div class="bg-surface p-5 rounded-2xl border border-outline-variant/30 shadow-sm">
+                    <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider flex justify-between items-center">Total Patients <span class="material-symbols-outlined text-primary text-[18px]" style="font-variation-settings: 'FILL' 1;">group</span></div>
+                    <div class="text-2xl font-extrabold text-on-background mt-2" id="report-total-patients">—</div>
+                </div>
+                <div class="bg-surface p-5 rounded-2xl border border-outline-variant/30 shadow-sm">
+                    <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider flex justify-between items-center">Avg. Compliance <span class="material-symbols-outlined text-secondary text-[18px]" style="font-variation-settings: 'FILL' 1;">verified</span></div>
+                    <div class="text-2xl font-extrabold text-on-background mt-2" id="report-avg-compliance">—</div>
+                </div>
+                <div class="bg-surface p-5 rounded-2xl border border-outline-variant/30 shadow-sm">
+                    <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider flex justify-between items-center">Revenue <span class="material-symbols-outlined text-tertiary text-[18px]" style="font-variation-settings: 'FILL' 1;">payments</span></div>
+                    <div class="text-2xl font-extrabold text-on-background mt-2">$12k</div>
+                </div>
+                <div class="bg-surface p-5 rounded-2xl border border-outline-variant/30 shadow-sm">
+                    <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider flex justify-between items-center">Plan Completion <span class="material-symbols-outlined text-emerald-600 text-[18px]" style="font-variation-settings: 'FILL' 1;">assignment_turned_in</span></div>
+                    <div class="text-2xl font-extrabold text-on-background mt-2">92%</div>
+                </div>
+            </div>
+
+            <!-- Compliance Trend & Service Distribution -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-8 bg-surface rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
+                    <h3 class="text-sm font-bold text-on-background flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary text-lg">trending_up</span> Patient Compliance Trends
+                    </h3>
+                    <div class="w-full relative h-64"><canvas id="adminSuccessTrendsChartCanvas"></canvas></div>
+                </div>
+                <div class="lg:col-span-4 bg-surface rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
+                    <h3 class="text-sm font-bold text-on-background flex items-center gap-2">
+                        <span class="material-symbols-outlined text-tertiary text-lg">pie_chart</span> Service Distribution
+                    </h3>
+                    <div class="space-y-4 mt-1">
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1.5"><span class="text-on-surface-variant">Weight Loss</span><span class="text-primary font-bold">45%</span></div>
+                            <div class="w-full bg-outline-variant/30 h-2 rounded-full overflow-hidden"><div class="bg-primary h-full rounded-full" style="width: 45%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1.5"><span class="text-on-surface-variant">Sports Nutrition</span><span class="text-secondary font-bold">25%</span></div>
+                            <div class="w-full bg-outline-variant/30 h-2 rounded-full overflow-hidden"><div class="bg-secondary h-full rounded-full" style="width: 25%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1.5"><span class="text-on-surface-variant">Therapeutic</span><span class="text-tertiary font-bold">20%</span></div>
+                            <div class="w-full bg-outline-variant/30 h-2 rounded-full overflow-hidden"><div class="bg-tertiary h-full rounded-full" style="width: 20%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1.5"><span class="text-on-surface-variant">Pediatric</span><span class="text-emerald-600 font-bold">10%</span></div>
+                            <div class="w-full bg-outline-variant/30 h-2 rounded-full overflow-hidden"><div class="bg-emerald-500 h-full rounded-full" style="width: 10%"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -255,61 +307,8 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
         </section>
-
-        <!-- ==================== VIEW 5: REPORTS ==================== -->
-        <section id="view-reports" class="view-section hidden animate-fade-in flex flex-col gap-6">
-            <div>
-                <h2 class="text-2xl font-bold text-on-background">Reports & Analytics</h2>
-                <p class="text-xs text-on-surface-variant mt-0.5">Overview of practice metrics and performance.</p>
-            </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
-                <div class="bg-surface p-5 rounded-2xl border border-outline-variant/30 shadow-sm">
-                    <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider flex justify-between items-center">Total Patients <span class="material-symbols-outlined text-primary text-[18px]" style="font-variation-settings: 'FILL' 1;">group</span></div>
-                    <div class="text-2xl font-extrabold text-on-background mt-2">142</div>
-                </div>
-                <div class="bg-surface p-5 rounded-2xl border border-outline-variant/30 shadow-sm">
-                    <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider flex justify-between items-center">Avg. Compliance <span class="material-symbols-outlined text-secondary text-[18px]" style="font-variation-settings: 'FILL' 1;">verified</span></div>
-                    <div class="text-2xl font-extrabold text-on-background mt-2">87%</div>
-                </div>
-                <div class="bg-surface p-5 rounded-2xl border border-outline-variant/30 shadow-sm">
-                    <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider flex justify-between items-center">Revenue <span class="material-symbols-outlined text-tertiary text-[18px]" style="font-variation-settings: 'FILL' 1;">payments</span></div>
-                    <div class="text-2xl font-extrabold text-on-background mt-2">$12k</div>
-                </div>
-                <div class="bg-surface p-5 rounded-2xl border border-outline-variant/30 shadow-sm">
-                    <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider flex justify-between items-center">Plan Completion <span class="material-symbols-outlined text-emerald-600 text-[18px]" style="font-variation-settings: 'FILL' 1;">assignment_turned_in</span></div>
-                    <div class="text-2xl font-extrabold text-on-background mt-2">92%</div>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div class="lg:col-span-8 bg-surface rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
-                    <h3 class="text-sm font-bold text-on-background">Patient Compliance Trends</h3>
-                    <div class="w-full relative h-64"><canvas id="adminSuccessTrendsChartCanvas"></canvas></div>
-                </div>
-                <div class="lg:col-span-4 bg-surface rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
-                    <h3 class="text-sm font-bold text-on-background">Service Distribution</h3>
-                    <div class="space-y-4 mt-2">
-                        <div>
-                            <div class="flex justify-between text-xs font-semibold mb-1.5"><span class="text-on-surface-variant">Weight Loss</span><span class="text-primary font-bold">45%</span></div>
-                            <div class="w-full bg-outline-variant/30 h-2 rounded-full overflow-hidden"><div class="bg-primary h-full rounded-full" style="width: 45%"></div></div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-xs font-semibold mb-1.5"><span class="text-on-surface-variant">Sports Nutrition</span><span class="text-secondary font-bold">25%</span></div>
-                            <div class="w-full bg-outline-variant/30 h-2 rounded-full overflow-hidden"><div class="bg-secondary h-full rounded-full" style="width: 25%"></div></div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-xs font-semibold mb-1.5"><span class="text-on-surface-variant">Therapeutic</span><span class="text-tertiary font-bold">20%</span></div>
-                            <div class="w-full bg-outline-variant/30 h-2 rounded-full overflow-hidden"><div class="bg-tertiary h-full rounded-full" style="width: 20%"></div></div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-xs font-semibold mb-1.5"><span class="text-on-surface-variant">Pediatric</span><span class="text-emerald-600 font-bold">10%</span></div>
-                            <div class="w-full bg-outline-variant/30 h-2 rounded-full overflow-hidden"><div class="bg-emerald-500 h-full rounded-full" style="width: 10%"></div></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+        </div>
     </main>
 
     <!-- ==================== MODAL: ADD/EDIT PATIENT ==================== -->

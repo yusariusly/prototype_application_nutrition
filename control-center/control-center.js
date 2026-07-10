@@ -80,7 +80,7 @@ function saveState() {
 window.navigateToView = function(viewName) {
     state.activeView = viewName;
 
-    const links = ['analytics', 'patients', 'nutritionists', 'allocation', 'reports'];
+    const links = ['analytics', 'patients', 'nutritionists', 'allocation'];
     links.forEach(l => {
         const linkEl = document.getElementById(`link-${l}`);
         const viewEl = document.getElementById(`view-${l}`);
@@ -92,7 +92,6 @@ window.navigateToView = function(viewName) {
     else if (viewName === 'patients') renderPatientsTable();
     else if (viewName === 'nutritionists') renderNutritionistsTable();
     else if (viewName === 'allocation') renderAllocationTable();
-    else if (viewName === 'reports') setTimeout(initAdminReportsCharts, 50);
 };
 
 // ==================== SUMMARY STATS ====================
@@ -108,9 +107,23 @@ function updateSummaryStats() {
 
     if (avgComplianceEl && state.clients.length > 0) {
         const totalComp = state.clients.reduce((acc, c) => acc + (c.compliance || 0), 0);
-        avgComplianceEl.innerText = `${(totalComp / state.clients.length).toFixed(1)}%`;
+        const avg = (totalComp / state.clients.length).toFixed(1);
+        avgComplianceEl.innerText = `${avg}%`;
     } else if (avgComplianceEl) {
         avgComplianceEl.innerText = '—';
+    }
+
+    // Also update the practice metric cards inside the merged analytics view
+    const reportTotal = document.getElementById('report-total-patients');
+    const reportComp = document.getElementById('report-avg-compliance');
+    if (reportTotal) reportTotal.innerText = state.clients.length;
+    if (reportComp) {
+        if (state.clients.length > 0) {
+            const totalComp = state.clients.reduce((acc, c) => acc + (c.compliance || 0), 0);
+            reportComp.innerText = `${(totalComp / state.clients.length).toFixed(1)}%`;
+        } else {
+            reportComp.innerText = '—';
+        }
     }
 }
 
@@ -175,6 +188,9 @@ function renderAnalyticsCharts() {
             }
         });
     }
+
+    // Also render the compliance trends chart (part of merged analytics view)
+    setTimeout(initAdminReportsCharts, 50);
 }
 
 // ==================== PATIENTS TABLE ====================
