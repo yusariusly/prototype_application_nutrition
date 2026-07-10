@@ -955,29 +955,35 @@ window.renderProgramsList = function() {
         }
         
         return `
-            <div class="bg-surface-container-lowest border border-outline-variant/30 hover:border-primary/40 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all hover:scale-[1.02] flex flex-col justify-between min-h-[190px]">
-                <div class="space-y-2">
-                    <div class="flex justify-end items-start">
-                        <button onclick="deleteProgram('${p.id}')" class="text-outline-variant hover:text-red-500 cursor-pointer" title="Delete Program">
+            <div class="bg-surface-container-lowest border border-outline-variant/30 hover:border-primary/40 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all hover:scale-[1.01] flex flex-col justify-between min-h-[200px]">
+                <div class="space-y-3">
+                    <div class="flex justify-between items-start gap-4">
+                        <h3 class="font-bold text-on-background text-sm leading-snug line-clamp-1">${p.name}</h3>
+                        <button onclick="deleteProgram('${p.id}')" class="text-outline-variant hover:text-red-500 cursor-pointer shrink-0 mt-0.5" title="Delete Program">
                             <span class="material-symbols-outlined text-[18px]">delete</span>
                         </button>
                     </div>
-                    <div>
-                        <h3 class="font-bold text-on-background text-sm leading-tight line-clamp-1">${p.name}</h3>
-                        <p class="text-[10px] text-on-surface-variant mt-1.5 leading-relaxed line-clamp-2">${p.description}</p>
-                    </div>
+                    <p class="text-xs text-on-surface-variant leading-relaxed line-clamp-3">${p.description}</p>
                 </div>
                 
-                <div class="border-t border-surface-variant/20 pt-4 mt-4 flex justify-between items-center gap-2">
+                <div class="border-t border-outline-variant/20 pt-4 mt-5 flex justify-between items-center gap-2">
                     <div class="flex flex-col">
-                        <span class="text-[8px] text-on-surface-variant font-bold uppercase tracking-wider">Scheduled Meals</span>
+                        <span class="text-[9px] text-on-surface-variant font-bold uppercase tracking-wider">Scheduled Meals</span>
                         <span class="text-xs font-extrabold text-primary">${totalMeals} meals</span>
                     </div>
-                    <div class="flex gap-1.5">
-                        <button onclick="editProgramPlan('${p.id}')" class="bg-[#dbeafe] hover:bg-[#bfdbfe] text-[#1e3a8a] font-bold text-[10px] px-3 py-2 rounded-lg transition-all cursor-pointer">Edit Plan</button>
-                        <button onclick="shareProgramLink('${p.id}')" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-[10px] px-2.5 py-2 rounded-lg transition-all cursor-pointer" title="Share Program"><span class="material-symbols-outlined text-[14px]">share</span></button>
-                        <button onclick="openProgramDiscussion('${p.id}')" class="bg-sky-50 border border-sky-200 text-sky-700 hover:bg-sky-100 font-bold text-[10px] px-2.5 py-2 rounded-lg transition-all cursor-pointer" title="Program Discussion"><span class="material-symbols-outlined text-[14px]">forum</span></button>
-                        <button onclick="openPublishProgramDialog('${p.id}')" class="bg-primary hover:bg-[#005321] text-white font-bold text-[10px] px-3 py-2 rounded-lg transition-all cursor-pointer">Publish</button>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="editProgramPlan('${p.id}')" class="bg-primary/10 hover:bg-primary/20 text-primary font-bold text-[10px] px-3 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">edit</span> Edit Plan
+                        </button>
+                        <button onclick="shareProgramLink('${p.id}')" class="bg-surface hover:bg-slate-50 border border-outline-variant/40 text-on-surface-variant font-bold p-1.5 rounded-xl transition-all cursor-pointer flex items-center justify-center" title="Share Program">
+                            <span class="material-symbols-outlined text-[15px]">share</span>
+                        </button>
+                        <button onclick="openProgramDiscussion('${p.id}')" class="bg-surface hover:bg-slate-50 border border-outline-variant/40 text-on-surface-variant font-bold p-1.5 rounded-xl transition-all cursor-pointer flex items-center justify-center" title="Program Discussion">
+                            <span class="material-symbols-outlined text-[15px]">forum</span>
+                        </button>
+                        <button onclick="openPublishProgramDialog('${p.id}')" class="bg-primary hover:bg-[#005321] text-white font-bold text-[10px] px-3 py-2 rounded-xl transition-all shadow-sm cursor-pointer flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">send</span> Publish
+                        </button>
                     </div>
                 </div>
             </div>
