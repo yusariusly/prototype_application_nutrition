@@ -64,17 +64,14 @@
 
         <!-- Links (center) -->
         <div class="hidden md:flex justify-center gap-0 h-full items-center overflow-hidden">
-            <a onclick="navigateToView('analytics')" id="link-analytics" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer gap-1 whitespace-nowrap">
-                <span class="material-symbols-outlined text-[15px]">analytics</span> Analytics
+            <a onclick="navigateToView('analytics')" id="link-analytics" class="nav-link h-full flex items-center text-primary font-bold border-b-2 border-primary text-xs px-3 cursor-pointer gap-1 whitespace-nowrap">
+                <span class="material-symbols-outlined text-[15px]">insights</span> Analytics
             </a>
             <a onclick="navigateToView('patients')" id="link-patients" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer gap-1 whitespace-nowrap">
-                <span class="material-symbols-outlined text-[15px]">groups</span> Patients
+                <span class="material-symbols-outlined text-[15px]">group</span> Patients
             </a>
             <a onclick="navigateToView('nutritionists')" id="link-nutritionists" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer gap-1 whitespace-nowrap">
-                <span class="material-symbols-outlined text-[15px]">support_agent</span> Specialists
-            </a>
-            <a onclick="navigateToView('allocation')" id="link-allocation" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer gap-1 whitespace-nowrap">
-                <span class="material-symbols-outlined text-[15px]">swap_horiz</span> Allocation
+                <span class="material-symbols-outlined text-[15px]">badge</span> Specialists
             </a>
         </div>
 
@@ -284,30 +281,6 @@
             </div>
         </section>
 
-        <!-- ==================== VIEW 4: CLIENT ALLOCATION ==================== -->
-        <section id="view-allocation" class="view-section hidden animate-fade-in flex flex-col gap-6">
-            <div class="bg-surface border border-outline-variant/30 rounded-2xl shadow-sm overflow-hidden">
-                <div class="px-6 py-5 border-b border-outline-variant/30">
-                    <h2 class="text-xl font-bold text-on-background">Practitioner Allocation</h2>
-                    <p class="text-xs text-on-surface-variant mt-0.5">Assign specialists to manage individual patient progress.</p>
-                </div>
-                <div class="overflow-x-auto w-full">
-                    <table class="w-full text-left border-collapse text-xs">
-                        <thead>
-                            <tr class="bg-surface-container-low border-b border-outline-variant/30 text-on-surface-variant font-bold uppercase tracking-wider text-[10px]">
-                                <th class="px-6 py-3.5">Patient</th>
-                                <th class="px-6 py-3.5">Goal</th>
-                                <th class="px-6 py-3.5">Assigned Specialist</th>
-                                <th class="px-6 py-3.5 text-center">Compliance</th>
-                                <th class="px-6 py-3.5 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="allocation-table-body" class="divide-y divide-outline-variant/20">
-                            <!-- Populated dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-        </section>
         </div>
     </main>
 

@@ -80,7 +80,7 @@ function saveState() {
 window.navigateToView = function(viewName) {
     state.activeView = viewName;
 
-    const links = ['analytics', 'patients', 'nutritionists', 'allocation'];
+    const links = ['analytics', 'patients', 'nutritionists'];
     links.forEach(l => {
         const linkEl = document.getElementById(`link-${l}`);
         const viewEl = document.getElementById(`view-${l}`);
@@ -91,7 +91,6 @@ window.navigateToView = function(viewName) {
     if (viewName === 'analytics') renderAnalyticsCharts();
     else if (viewName === 'patients') renderPatientsTable();
     else if (viewName === 'nutritionists') renderNutritionistsTable();
-    else if (viewName === 'allocation') renderAllocationTable();
 };
 
 // ==================== SUMMARY STATS ====================
@@ -245,6 +244,9 @@ function renderPatientsTable(data) {
                 </td>
                 <td class="px-6 py-4">
                     <div class="flex items-center justify-end gap-2">
+                        <button onclick="openAllocationModal('${c.name}')" class="text-tertiary hover:bg-tertiary/10 font-bold text-[10px] flex items-center gap-0.5 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer" title="Assign Specialist">
+                            <span class="material-symbols-outlined text-[14px]">swap_horiz</span> Assign
+                        </button>
                         <button onclick="openEditPatientModal('${c.id}')" class="text-primary hover:bg-primary/10 font-bold text-[10px] flex items-center gap-0.5 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer">
                             <span class="material-symbols-outlined text-[14px]">edit</span> Edit
                         </button>
@@ -467,47 +469,7 @@ window.deleteNutritionist = function(id) {
     }
 };
 
-// ==================== ALLOCATION TABLE ====================
-function renderAllocationTable() {
-    const tbody = document.getElementById('allocation-table-body');
-    if (!tbody) return;
 
-    if (state.clients.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-on-surface-variant text-xs">No patients registered yet.</td></tr>`;
-        return;
-    }
-
-    tbody.innerHTML = state.clients.map(c => {
-        const compColor = c.compliance >= 80 ? 'text-emerald-700 bg-emerald-50' : c.compliance >= 60 ? 'text-amber-700 bg-amber-50' : 'text-red-700 bg-red-50';
-        return `
-            <tr class="hover:bg-surface-container-low transition-colors">
-                <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-secondary/10 text-secondary font-bold text-[11px] flex items-center justify-center shrink-0">${c.avatar || 'P'}</div>
-                        <span class="font-semibold text-on-background text-xs">${c.name}</span>
-                    </div>
-                </td>
-                <td class="px-6 py-4 text-on-surface-variant text-xs">${c.goal}</td>
-                <td class="px-6 py-4">
-                    ${c.therapist
-                        ? `<span class="bg-primary/8 text-primary font-semibold text-xs px-2.5 py-1 rounded-lg flex items-center gap-1 w-fit">
-                                <span class="material-symbols-outlined text-[12px]">support_agent</span>${c.therapist}
-                           </span>`
-                        : `<span class="text-on-surface-variant text-xs italic">Not assigned</span>`}
-                </td>
-                <td class="px-6 py-4 text-center">
-                    <span class="font-bold text-xs px-2.5 py-1 rounded-full ${compColor}">${c.compliance ?? '—'}%</span>
-                </td>
-                <td class="px-6 py-4">
-                    <div class="flex justify-end">
-                        <button onclick="openAllocationModal('${c.name}')" class="text-primary hover:bg-primary/10 font-bold text-[10px] flex items-center gap-0.5 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer">
-                            <span class="material-symbols-outlined text-[14px]">sync_alt</span> Change
-                        </button>
-                    </div>
-                </td>
-            </tr>`;
-    }).join('');
-}
 
 window.openAllocationModal = function(clientName) {
     state.selectedClientForAllocation = clientName;
@@ -534,7 +496,7 @@ window.saveAllocationChange = function() {
         client.therapist = expert || null;
         saveState();
         closeEditAllocationModal();
-        renderAllocationTable();
+        renderPatientsTable();
         showToast(`Assigned "${expert || 'none'}" to ${state.selectedClientForAllocation}!`, 'success');
     }
 };
