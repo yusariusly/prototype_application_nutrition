@@ -710,19 +710,27 @@ function renderAdminClientsList() {
 
     tbody.innerHTML = pageItems.map(cli => {
         return `
-            <tr class="hover:bg-surface-container-low/30 transition-colors">
-                <td class="p-4 pl-6">
+            <tr class="flex flex-col lg:table-row bg-surface-container-lowest border border-outline-variant/30 lg:border-0 rounded-2xl p-4 lg:p-0 gap-2 mb-4 lg:mb-0 hover:bg-surface-container-low/30 transition-colors">
+                <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 pl-0 lg:pl-6 text-left">
+                    <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Client</span>
                     <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">${cli.avatar}</div>
-                        <div>
+                        <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">${cli.avatar}</div>
+                        <div class="text-left">
                             <div class="font-bold text-on-background">${cli.name}</div>
                             <div class="text-[10px] text-on-surface-variant/80">${cli.email}</div>
                         </div>
                     </div>
                 </td>
-                <td class="p-4"><span class="bg-[#e5eeff] text-[#006a61] px-2 py-0.5 rounded text-[10px] font-semibold">${cli.goal}</span></td>
-                <td class="p-4 text-on-surface-variant">${cli.lastCheckIn}</td>
-                <td class="p-4">
+                <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 text-left">
+                    <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Goal</span>
+                    <span class="bg-[#e5eeff] text-[#006a61] px-2 py-0.5 rounded text-[10px] font-semibold">${cli.goal}</span>
+                </td>
+                <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 text-on-surface-variant text-right lg:text-left">
+                    <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Last Check-In</span>
+                    <span>${cli.lastCheckIn}</span>
+                </td>
+                <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 text-left">
+                    <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Compliance</span>
                     <div class="flex items-center gap-1.5 font-bold">
                         <div class="w-16 bg-surface-variant h-1.5 rounded-full overflow-hidden">
                             <div class="bg-primary h-full" style="width: ${cli.compliance}%"></div>
@@ -730,13 +738,17 @@ function renderAdminClientsList() {
                         <span>${cli.compliance}%</span>
                     </div>
                 </td>
-                <td class="p-4 w-28">
-                    <svg class="w-full h-8" viewBox="0 0 100 30">
+                <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 w-auto lg:w-28 text-left">
+                    <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Weight Progress</span>
+                    <svg class="w-24 lg:w-full h-8" viewBox="0 0 100 30">
                         <path d="${generateSparklinePath(cli.weightTrend)}" fill="none" stroke="${cli.compliance > 80 ? '#006e2f' : '#9d4300'}" stroke-width="2"></path>
                     </svg>
                 </td>
-                <td class="p-4 pr-6 text-right space-x-1">
-                    <button onclick="openClientProgramDiscussion('${cli.activeProgramId}', '${cli.name}')" class="p-1 hover:text-primary transition-colors inline-block cursor-pointer" title="Send message"><span class="material-symbols-outlined text-[18px]">chat</span></button>
+                <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 pr-0 lg:pr-6 text-right">
+                    <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Actions</span>
+                    <button onclick="openClientProgramDiscussion('${cli.activeProgramId}', '${cli.name}')" class="p-2 hover:bg-surface-container hover:text-primary rounded-full transition-colors inline-block cursor-pointer" title="Send message">
+                        <span class="material-symbols-outlined text-[18px]">chat</span>
+                    </button>
                 </td>
             </tr>
         `;
@@ -1653,39 +1665,61 @@ window.renderAdminAppointmentsTable = function() {
     };
 
     tbody.innerHTML = filtered.map(apt => `
-        <tr class="hover:bg-surface-container-lowest transition-colors">
-            <td class="px-6 py-4 font-mono text-[10px] text-on-surface-variant">#${apt.id.toUpperCase()}</td>
-            <td class="px-6 py-4 font-bold text-on-background">${apt.clientName}</td>
-            <td class="px-6 py-4 text-on-surface-variant">${apt.serviceTitle}</td>
-            <td class="px-6 py-4 text-on-surface-variant">${apt.therapist || 'Unknown'}</td>
-            <td class="px-6 py-4 text-on-surface-variant">${apt.date} • ${apt.time}</td>
-            <td class="px-6 py-4 text-on-surface-variant">${apt.duration}</td>
-            <td class="px-6 py-4 text-center">
+        <tr class="flex flex-col lg:table-row bg-surface-container-lowest border border-outline-variant/30 lg:border-0 rounded-2xl p-4 lg:p-0 gap-2 mb-4 lg:mb-0 hover:bg-surface-container-low/30 transition-colors">
+            <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 pl-0 lg:pl-6 text-[10px] text-on-surface-variant font-mono">
+                <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Appt ID</span>
+                <span>#${apt.id.toUpperCase()}</span>
+            </td>
+            <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 font-bold text-on-background">
+                <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Patient</span>
+                <span>${apt.clientName}</span>
+            </td>
+            <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 text-on-surface-variant">
+                <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Service</span>
+                <span>${apt.serviceTitle}</span>
+            </td>
+            <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 text-on-surface-variant">
+                <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Therapist</span>
+                <span>${apt.therapist || 'Unknown'}</span>
+            </td>
+            <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 text-on-surface-variant">
+                <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Date & Time</span>
+                <span>${apt.date} • ${apt.time}</span>
+            </td>
+            <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 text-on-surface-variant">
+                <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Duration</span>
+                <span>${apt.duration}</span>
+            </td>
+            <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 text-center">
+                <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Status</span>
                 <span class="px-2.5 py-1 rounded-full text-[9px] font-bold border ${getStatusStyle(apt.status)}">
                     ${getStatusText(apt.status)}
                 </span>
             </td>
-            <td class="px-6 py-4 text-right flex justify-end gap-2">
-                ${apt.status === 'pending' ? `
-                    <button onclick="approveAppointment('${apt.id}')" class="text-emerald-600 hover:bg-emerald-50 p-1.5 rounded-lg transition-colors" title="Approve">
-                        <span class="material-symbols-outlined text-[16px]">check_circle</span>
-                    </button>
-                    <button onclick="declineAppointment('${apt.id}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="Decline">
-                        <span class="material-symbols-outlined text-[16px]">cancel</span>
-                    </button>
-                ` : `
-                    ${(apt.type === 'Video Call' || apt.type.toLowerCase().includes('virtual') || apt.type.toLowerCase().includes('video')) && apt.status === 'approved' ? `
-                        <button onclick="joinAdminVideoCall('${apt.id}')" class="text-primary hover:bg-primary/10 p-1.5 rounded-lg transition-colors" title="Join Video Call">
-                            <span class="material-symbols-outlined text-[16px]">videocam</span>
+            <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 pr-0 lg:pr-6 text-right">
+                <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Actions</span>
+                <div class="flex items-center justify-end gap-1">
+                    ${apt.status === 'pending' ? `
+                        <button onclick="approveAppointment('${apt.id}')" class="text-emerald-600 hover:bg-emerald-50 p-1.5 rounded-lg transition-colors" title="Approve">
+                            <span class="material-symbols-outlined text-[16px]">check_circle</span>
                         </button>
-                    ` : ''}
-                    <button onclick="editAppointment('${apt.id}')" class="text-on-surface-variant hover:text-primary hover:bg-surface-container p-1.5 rounded-lg transition-colors" title="Edit">
-                        <span class="material-symbols-outlined text-[16px]">edit</span>
-                    </button>
-                    <button onclick="deleteAppointment('${apt.id}')" class="text-on-surface-variant hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="Delete">
-                        <span class="material-symbols-outlined text-[16px]">delete</span>
-                    </button>
-                `}
+                        <button onclick="declineAppointment('${apt.id}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="Decline">
+                            <span class="material-symbols-outlined text-[16px]">cancel</span>
+                        </button>
+                    ` : `
+                        ${(apt.type === 'Video Call' || apt.type.toLowerCase().includes('virtual') || apt.type.toLowerCase().includes('video')) && apt.status === 'approved' ? `
+                            <button onclick="joinAdminVideoCall('${apt.id}')" class="text-primary hover:bg-primary/10 p-1.5 rounded-lg transition-colors" title="Join Video Call">
+                                <span class="material-symbols-outlined text-[16px]">videocam</span>
+                            </button>
+                        ` : ''}
+                        <button onclick="editAppointment('${apt.id}')" class="text-on-surface-variant hover:text-primary hover:bg-surface-container p-1.5 rounded-lg transition-colors" title="Edit">
+                            <span class="material-symbols-outlined text-[16px]">edit</span>
+                        </button>
+                        <button onclick="deleteAppointment('${apt.id}')" class="text-on-surface-variant hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="Delete">
+                            <span class="material-symbols-outlined text-[16px]">delete</span>
+                        </button>
+                    `}
+                </div>
             </td>
         </tr>
     `).join('');
