@@ -35,6 +35,11 @@
     </script>
     <style>
         body { font-family: 'Inter', sans-serif; }
+        .nav-link {
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+        }
         .nav-link.active {
             color: #006e2f;
             border-bottom: 2.5px solid #006e2f;
@@ -64,9 +69,9 @@
 
         <!-- Links (center) -->
         <div class="hidden md:flex justify-center gap-4 h-full items-center overflow-hidden">
-            <a onclick="navigateToView('analytics')" id="link-analytics" class="nav-link active h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer">Analytics</a>
-            <a onclick="navigateToView('patients')" id="link-patients" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer">Patients</a>
-            <a onclick="navigateToView('nutritionists')" id="link-nutritionists" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer">Specialists</a>
+            <a onclick="navigateToView('analytics')" id="link-analytics" class="nav-link active h-full flex items-center text-on-surface-variant hover:text-primary transition-colors px-3 cursor-pointer">Analytics</a>
+            <a onclick="navigateToView('patients')" id="link-patients" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary transition-colors px-3 cursor-pointer">Patients</a>
+            <a onclick="navigateToView('nutritionists')" id="link-nutritionists" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary transition-colors px-3 cursor-pointer">Specialists</a>
         </div>
 
         <!-- Sign Out -->
