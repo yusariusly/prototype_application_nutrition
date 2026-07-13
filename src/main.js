@@ -16,8 +16,11 @@ const state = {
     bookingFlow: {
         step: 1,
         selectedServiceId: null,
+        selectedSpecialist: null,
+        selectedMethod: null,
         selectedDate: null,
-        selectedSlot: null
+        selectedSlot: null,
+        uploadedFile: null
     },
     profileStats: {
         weightHistory: [
@@ -2102,17 +2105,21 @@ function renderBookingWizard() {
             if (step === 1) line.style.width = '0%';
             if (step === 2) line.style.width = '33%';
             if (step === 3) line.style.width = '66%';
-            if (step === 4) line.style.width = '100%';
+            if (step >= 4) line.style.width = '100%';
         }
     }
-
+    
     document.querySelectorAll('.booking-step-container').forEach(c => c.classList.add('hidden'));
     document.getElementById(`booking-step-${step}`).classList.remove('hidden');
 
     if (step === 1) {
         renderBookingStep1();
     } else if (step === 2) {
-        renderBookingStep2();
+        // Step 2 is Method selection (just active cards highlight handled by selectBookingMethod)
+    } else if (step === 3) {
+        renderBookingStep3();
+    } else if (step === 4) {
+        renderBookingStep4();
     }
 }
 
@@ -2120,124 +2127,108 @@ function renderBookingStep1() {
     const grid = document.getElementById('booking-services-grid');
     if (!grid) return;
     
-    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
-    const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
-    const clientDetails = clientsList.find(c => c.name === activeClient);
-    const assignedTherapist = clientDetails?.therapist || 'Dr. Hasan';
+    const services = [
+        { id: 'initial-consultation', title: 'Initial Consultation', duration: '60 min', price: 150, description: 'A comprehensive deep dive into your medical history, habits, and goals to build your plan.', type: 'Virtual or In-Person', image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=200' },
+        { id: 'follow-up', title: 'Follow-up Session', duration: '30 min', price: 75, description: 'A check-in to review progress, adjust macros, and troubleshoot plan challenges.', type: 'Virtual Only', image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200' },
+        { id: 'body-scan', title: 'Body Composition Scan', duration: '15 min', price: 50, description: 'In-office scan measuring fat, muscle mass distribution, visceral fat, and water levels.', type: 'In-Person Only', image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200' }
+    ];
     
-    const key = `nutriflow_services_${assignedTherapist}`;
-    let therapistServices = JSON.parse(localStorage.getItem(key));
+    const specialists = [
+        { id: 'hasan', name: 'Dr. Hasan', role: 'Clinical Nutritionist', avatar: 'DH' },
+        { id: 'amanda', name: 'Amanda', role: 'Sports Dietitian', avatar: 'AM' },
+        { id: 'jenkins', name: 'Dr. Sarah Jenkins', role: 'Dietetic Coach', avatar: 'SJ' }
+    ];
     
-    if (!therapistServices || therapistServices.length === 0) {
-        if (assignedTherapist.includes('Hasan')) {
-            therapistServices = [
-                {
-                    id: 'srv-hasan-1',
-                    title: 'Weight Loss Consultation',
-                    description: 'A dedicated session focusing on weight loss strategies, body composition targets, and custom macro ratios.',
-                    duration: '60 min',
-                    type: 'Virtual or In-Person',
-                    price: 150,
-                    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDI0OL4dSef_9_KtBWKJ_8d0de_3jKJ307lRmzwECWHykwC2Sh_-p2uUnTh-2y0Yyj2x5txHJ1-_Z9u3YVyIFYjVwQFMkm0ufr1Envl8PlT8JyiHkOB-hHpJszVsfgn9wthQZBcxDIFw3emAo4TPjLWJ43YEqFZsYmGT0kh9do_2JTuvnjgBOOrtceFxVxH_JZX7krm4i7Rjsz16LRwnXm93LXDXh78J5Agw0JsZToFhkL6qU3xrqPBtQ'
-                },
-                {
-                    id: 'srv-hasan-2',
-                    title: 'Weekly Meal Review',
-                    description: 'A 30-minute check-in to adjust your weekly calorie limits, recipes, and raw ingredients in your active program.',
-                    duration: '30 min',
-                    type: 'Virtual Only',
-                    price: 75,
-                    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBGsbf12JBu1YUhQl78vA1aGmjNYjjGnyb8cmgHlmCOxHKWee0ybL9-1rqta2RUKAJJewh6CU3PkcStb675EhEkzaWohu52Oj7rEOvZZt5-KwE8CSpbidQcEI59WkIrdFAd1LKLAv1EB0t69XGbzUv3jpNPAxWeFPSO8fipEBXZWlqqzxB9GQ2cJzZSc6G7cGZVRlaCrNQ79-yv4AL_kM2EKJba8qTKqFux18RVXNHQHkGLV2pI17tZjw'
-                }
-            ];
-        } else if (assignedTherapist.includes('Amanda')) {
-            therapistServices = [
-                {
-                    id: 'srv-amanda-1',
-                    title: 'Sports Performance Nutrition',
-                    description: 'Optimize your energy levels, muscle protein synthesis, and sports supplements to match your training cycles.',
-                    duration: '60 min',
-                    type: 'Virtual or In-Person',
-                    price: 160,
-                    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDI0OL4dSef_9_KtBWKJ_8d0de_3jKJ307lRmzwECWHykwC2Sh_-p2uUnTh-2y0Yyj2x5txHJ1-_Z9u3YVyIFYjVwQFMkm0ufr1Envl8PlT8JyiHkOB-hHpJszVsfgn9wthQZBcxDIFw3emAo4TPjLWJ43YEqFZsYmGT0kh9do_2JTuvnjgBOOrtceFxVxH_JZX7krm4i7Rjsz16LRwnXm93LXDXh78J5Agw0JsZToFhkL6qU3xrqPBtQ'
-                }
-            ];
-        } else {
-            therapistServices = [
-                {
-                    id: 'initial-consultation',
-                    title: 'Initial Consultation',
-                    description: 'A comprehensive 60-minute deep dive into your medical history, habits, and goals to build your plan.',
-                    duration: '60 min',
-                    type: 'Virtual or In-Person',
-                    price: 150,
-                    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDI0OL4dSef_9_KtBWKJ_8d0de_3jKJ307lRmzwECWHykwC2Sh_-p2uUnTh-2y0Yyj2x5txHJ1-_Z9u3YVyIFYjVwQFMkm0ufr1Envl8PlT8JyiHkOB-hHpJszVsfgn9wthQZBcxDIFw3emAo4TPjLWJ43YEqFZsYmGT0kh9do_2JTuvnjgBOOrtceFxVxH_JZX7krm4i7Rjsz16LRwnXm93LXDXh78J5Agw0JsZToFhkL6qU3xrqPBtQ'
-                },
-                {
-                    id: 'follow-up',
-                    title: 'Follow-up Session',
-                    description: 'A 30-minute check-in to review progress, adjust macros, and troubleshoot plan challenges.',
-                    duration: '30 min',
-                    type: 'Virtual Only',
-                    price: 75,
-                    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBGsbf12JBu1YUhQl78vA1aGmjNYjjGnyb8cmgHlmCOxHKWee0ybL9-1rqta2RUKAJJewh6CU3PkcStb675EhEkzaWohu52Oj7rEOvZZt5-KwE8CSpbidQcEI59WkIrdFAd1LKLAv1EB0t69XGbzUv3jpNPAxWeFPSO8fipEBXZWlqqzxB9GQ2cJzZSc6G7cGZVRlaCrNQ79-yv4AL_kM2EKJba8qTKqFux18RVXNHQHkGLV2pI17tZjw'
-                }
-            ];
-        }
-        localStorage.setItem(key, JSON.stringify(therapistServices));
-    }
+    state.currentTherapistServices = services;
     
-    state.currentTherapistServices = therapistServices;
-    
-    grid.innerHTML = therapistServices.map(srv => {
+    grid.innerHTML = services.map(srv => {
         const isSelected = state.bookingFlow.selectedServiceId === srv.id;
         
         return `
-            <div onclick="selectBookingService('${srv.id}')" class="service-card glass-card rounded-2xl overflow-hidden cursor-pointer flex flex-col h-full bg-white relative group border ${isSelected ? 'border-primary ring-2 ring-primary bg-surface' : 'border-outline-variant/30 hover:border-primary/50'}">
+            <div onclick="selectBookingService('${srv.id}')" class="service-card rounded-2xl overflow-hidden cursor-pointer flex flex-col h-full bg-white relative group border ${isSelected ? 'border-primary ring-2 ring-primary bg-surface' : 'border-outline-variant/30 hover:border-primary/50'}">
                 <div class="absolute top-3 right-3 z-10 ${isSelected ? 'opacity-100' : 'opacity-0'} group-hover:opacity-100 transition-opacity">
                     <span class="material-symbols-outlined text-primary bg-white rounded-full p-1 shadow-sm">check_circle</span>
                 </div>
-                <div class="h-40 w-full relative overflow-hidden">
-                    <img class="w-full h-full object-cover" src="${srv.image || 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=200'}" alt="${srv.title}">
+                <div class="h-32 w-full relative overflow-hidden shrink-0">
+                    <img class="w-full h-full object-cover animate-fade-in" src="${srv.image}" alt="${srv.title}">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                    ${srv.popular ? `<span class="absolute bottom-3 left-3 bg-primary text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">Most Popular</span>` : ''}
-                    ${srv.tag ? `<span class="absolute bottom-3 left-3 bg-secondary text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">${srv.tag}</span>` : ''}
                 </div>
-                <div class="p-5 flex flex-col flex-grow">
-                    <h3 class="font-bold text-on-surface text-lg leading-tight mb-2">${srv.title}</h3>
-                    <p class="text-xs text-on-surface-variant flex-grow line-clamp-3 leading-relaxed mb-4">${srv.description}</p>
+                <div class="p-4 flex flex-col flex-grow text-left">
+                    <h3 class="font-bold text-on-surface text-sm leading-tight mb-1">${srv.title}</h3>
+                    <p class="text-[10px] text-on-surface-variant flex-grow line-clamp-2 leading-relaxed mb-3">${srv.description}</p>
                     
-                    <div class="flex items-center gap-3 text-xs text-on-surface-variant font-medium mb-4">
-                        <div class="flex items-center gap-1"><span class="material-symbols-outlined text-secondary text-[16px]">schedule</span><span>${srv.duration}</span></div>
+                    <div class="flex items-center gap-3 text-[10px] text-on-surface-variant font-medium mb-3">
+                        <div class="flex items-center gap-1"><span class="material-symbols-outlined text-secondary text-[14px]">schedule</span><span>${srv.duration}</span></div>
                         <span>•</span>
-                        <div class="flex items-center gap-1"><span class="material-symbols-outlined text-secondary text-[16px]">videocam</span><span>${srv.type}</span></div>
-                    </div>
-                    
-                    <div class="flex items-center justify-between border-t border-outline-variant/20 pt-3 mt-auto">
-                        <span class="text-lg font-extrabold text-on-surface">$${srv.price}</span>
-                        <button class="text-primary font-bold text-xs flex items-center gap-1 group-hover:underline">
-                            ${isSelected ? 'Selected' : 'Select'} <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-                        </button>
+                        <div class="flex items-center gap-1"><span class="material-symbols-outlined text-secondary text-[14px]">payments</span><span>$${srv.price}</span></div>
                     </div>
                 </div>
             </div>
         `;
     }).join('');
+    
+    const specGrid = document.getElementById('booking-specialists-grid');
+    if (specGrid) {
+        specGrid.innerHTML = specialists.map(spec => {
+            const isSelected = state.bookingFlow.selectedSpecialist === spec.name;
+            
+            return `
+                <div onclick="selectBookingSpecialist('${spec.name}')" class="rounded-2xl p-4 cursor-pointer flex flex-col items-center text-center gap-2 border bg-surface hover:border-primary/50 transition-all ${isSelected ? 'border-primary ring-2 ring-primary bg-surface' : 'border-outline-variant/30'}">
+                    <div class="w-10 h-10 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center border border-primary/20 shrink-0">
+                        ${spec.avatar}
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-xs text-on-background leading-tight">${spec.name}</h4>
+                        <p class="text-[9px] text-on-surface-variant font-semibold mt-1">${spec.role}</p>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
 
     const nextBtn = document.getElementById('booking-next-btn-1');
-    if (state.bookingFlow.selectedServiceId) {
-        nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        nextBtn.disabled = false;
-        nextBtn.onclick = () => advanceBookingStep(2);
-    } else {
-        nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
-        nextBtn.disabled = true;
+    if (nextBtn) {
+        if (state.bookingFlow.selectedServiceId && state.bookingFlow.selectedSpecialist) {
+            nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            nextBtn.disabled = false;
+        } else {
+            nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            nextBtn.disabled = true;
+        }
     }
 }
 
 window.selectBookingService = function(srvId) {
     state.bookingFlow.selectedServiceId = srvId;
     renderBookingStep1();
+};
+
+window.selectBookingSpecialist = function(name) {
+    state.bookingFlow.selectedSpecialist = name;
+    renderBookingStep1();
+};
+
+window.selectBookingMethod = function(method) {
+    state.bookingFlow.selectedMethod = method;
+    
+    document.querySelectorAll('.method-card').forEach(card => {
+        card.className = 'method-card bg-surface border border-outline-variant/30 rounded-2xl p-5 cursor-pointer hover:border-primary/50 transition-all flex flex-col gap-3 relative group';
+        const indicator = card.querySelector('.check-indicator');
+        if (indicator) indicator.classList.add('opacity-0');
+    });
+    
+    const activeCard = document.getElementById(`method-card-${method}`);
+    if (activeCard) {
+        activeCard.className = 'method-card bg-surface border border-primary ring-2 ring-primary rounded-2xl p-5 cursor-pointer transition-all flex flex-col gap-3 relative group';
+        const indicator = activeCard.querySelector('.check-indicator');
+        if (indicator) indicator.classList.remove('opacity-0');
+    }
+    
+    const nextBtn = document.getElementById('booking-next-btn-2');
+    if (nextBtn) {
+        nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        nextBtn.disabled = false;
+    }
 };
 
 window.advanceBookingStep = function(stepNum) {
@@ -2250,19 +2241,15 @@ window.goBackToBookingStep = function(stepNum) {
     renderBookingWizard();
 };
 
-function renderBookingStep2() {
+function renderBookingStep3() {
     const srv = (state.currentTherapistServices || []).find(s => s.id === state.bookingFlow.selectedServiceId);
     if (!srv) return;
     
-    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
-    const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
-    const clientDetails = clientsList.find(c => c.name === activeClient);
-    const assignedTherapist = clientDetails?.therapist || 'Dr. Hasan';
-    
     document.getElementById('booking-summary-service-img').src = srv.image;
     document.getElementById('booking-summary-service-title').innerText = srv.title;
-    document.getElementById('booking-summary-service-duration').innerText = `${srv.duration} Duration`;
-    document.getElementById('booking-summary-service-therapist').innerText = assignedTherapist;
+    document.getElementById('booking-summary-service-duration').innerText = srv.duration;
+    document.getElementById('booking-summary-service-therapist').innerText = state.bookingFlow.selectedSpecialist;
+    document.getElementById('booking-summary-service-method').innerText = `${state.bookingFlow.selectedMethod} Consultation`;
     document.getElementById('booking-summary-service-cost').innerText = `$${srv.price}.00`;
 
     const grid = document.getElementById('booking-calendar-grid');
@@ -2274,20 +2261,16 @@ function renderBookingStep2() {
     const curMonthName = todayDate.toLocaleString('default', { month: 'long' });
     document.getElementById('calendar-month-year').innerText = `${curMonthName} ${curYear}`;
     
-    // First day index of current month
     const firstDayIndex = new Date(curYear, curMonth, 1).getDay();
     const totalDays = new Date(curYear, curMonth + 1, 0).getDate();
     const prevTotalDays = new Date(curYear, curMonth, 0).getDate();
     
     let daysHtml = '';
-    
-    // Pad previous month days
     for (let i = firstDayIndex - 1; i >= 0; i--) {
         const prevDay = prevTotalDays - i;
         daysHtml += `<div class="p-3 text-center text-xs font-semibold text-outline-variant/30">${prevDay}</div>`;
     }
     
-    // Current month days
     const todayDayNum = todayDate.getDate();
     for (let day = 1; day <= totalDays; day++) {
         const dateStr = `${curYear}-${(curMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
@@ -2305,7 +2288,6 @@ function renderBookingStep2() {
         daysHtml += `<div ${isPast ? '' : `onclick="selectBookingDate('${dateStr}')"`} class="${cellClass}">${day}</div>`;
     }
     
-    // Pad next month days
     const totalCellsUsed = firstDayIndex + totalDays;
     const remainingCells = (7 - (totalCellsUsed % 7)) % 7;
     for (let day = 1; day <= remainingCells; day++) {
@@ -2315,18 +2297,7 @@ function renderBookingStep2() {
 
     const morningContainer = document.getElementById('booking-morning-slots');
     const afternoonContainer = document.getElementById('booking-afternoon-slots');
-    const dateIndicator = document.getElementById('selected-date-indicator');
     
-    if (!state.bookingFlow.selectedDate) {
-        dateIndicator.innerText = "Please select a date from the calendar";
-        morningContainer.innerHTML = '';
-        afternoonContainer.innerHTML = '';
-        return;
-    }
-
-    const formattedDate = new Date(state.bookingFlow.selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-    dateIndicator.innerText = formattedDate;
-
     const morningSlots = ["08:00 AM", "09:00 AM", "09:30 AM", "10:30 AM"];
     const afternoonSlots = ["01:00 PM", "02:30 PM", "04:00 PM", "04:30 PM"];
 
@@ -2347,7 +2318,7 @@ function renderBookingStep2() {
     morningContainer.innerHTML = buildSlotHtml(morningSlots);
     afternoonContainer.innerHTML = buildSlotHtml(afternoonSlots);
 
-    const nextBtn = document.getElementById('booking-next-btn-2');
+    const nextBtn = document.getElementById('booking-next-btn-3');
     if (state.bookingFlow.selectedDate && state.bookingFlow.selectedSlot) {
         nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         nextBtn.disabled = false;
@@ -2360,12 +2331,54 @@ function renderBookingStep2() {
 window.selectBookingDate = function(dateStr) {
     state.bookingFlow.selectedDate = dateStr;
     state.bookingFlow.selectedSlot = null;
-    renderBookingStep2();
+    renderBookingStep3();
 };
 
 window.selectBookingSlot = function(slot) {
     state.bookingFlow.selectedSlot = slot;
-    renderBookingStep2();
+    renderBookingStep3();
+};
+
+function renderBookingStep4() {
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const nameInput = document.getElementById('details-name');
+    const emailInput = document.getElementById('details-email');
+    if (nameInput && !nameInput.value) nameInput.value = activeClient;
+    if (emailInput && !emailInput.value) {
+        emailInput.value = activeClient.toLowerCase().replace(' ', '.') + '@email.com';
+    }
+}
+
+window.handleBookingFileSelected = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (file.size > 2 * 1024 * 1024) {
+        showToast('File size exceeds the 2MB limit.', 'error');
+        e.target.value = '';
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        state.bookingFlow.uploadedFile = {
+            name: file.name,
+            size: file.size,
+            dataUrl: evt.target.result
+        };
+        
+        const dropzone = document.getElementById('booking-dropzone');
+        const statusText = document.getElementById('booking-upload-status-text');
+        const infoText = document.getElementById('booking-upload-info-text');
+        
+        if (dropzone && statusText && infoText) {
+            dropzone.className = 'border-2 border-dashed border-emerald-500 rounded-xl p-5 text-center bg-emerald-50/50 transition-all cursor-pointer flex flex-col items-center gap-2';
+            statusText.innerHTML = `<span class="text-emerald-700 font-bold">Successfully Selected:</span> ${file.name}`;
+            infoText.innerHTML = `<span class="text-emerald-600 font-semibold">${(file.size / 1024).toFixed(1)} KB</span> • Click to change file`;
+        }
+        showToast('Document uploaded successfully!', 'success');
+    };
+    reader.readAsDataURL(file);
 };
 
 window.handleDetailsSubmit = function(e) {
@@ -2373,40 +2386,41 @@ window.handleDetailsSubmit = function(e) {
     
     const name = document.getElementById('details-name').value;
     const email = document.getElementById('details-email').value;
-    const goal = document.getElementById('details-goal').value;
+    const phone = document.getElementById('details-phone').value;
+    const concerns = document.getElementById('details-concerns').value;
     
     const srv = (state.currentTherapistServices || []).find(s => s.id === state.bookingFlow.selectedServiceId);
-    
-    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
-    const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
-    const clientDetails = clientsList.find(c => c.name === activeClient);
-    const assignedTherapist = clientDetails?.therapist || 'Dr. Hasan';
+    if (!srv) return;
     
     const newApt = {
         id: `apt-${Math.random().toString(36).substr(2, 9)}`,
         clientName: name,
         clientEmail: email,
+        clientPhone: phone,
         serviceId: srv.id,
         serviceTitle: srv.title,
         price: srv.price,
         duration: srv.duration,
-        therapist: assignedTherapist,
+        therapist: state.bookingFlow.selectedSpecialist,
         date: state.bookingFlow.selectedDate,
         time: state.bookingFlow.selectedSlot,
         status: 'pending',
-        type: srv.type
+        type: state.bookingFlow.selectedMethod,
+        concerns: concerns,
+        uploadedFile: state.bookingFlow.uploadedFile
     };
     
     state.appointments.push(newApt);
-    saveState(); // push to localStorage so Admin calendar can read it!
+    saveState();
 
     document.getElementById('success-service-title').innerText = srv.title;
     document.getElementById('success-date').innerText = new Date(state.bookingFlow.selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
     document.getElementById('success-time').innerText = state.bookingFlow.selectedSlot;
-    document.getElementById('success-practitioner').innerText = assignedTherapist;
+    document.getElementById('success-practitioner').innerText = state.bookingFlow.selectedSpecialist;
+    document.getElementById('success-method').innerText = `${state.bookingFlow.selectedMethod} Session`;
     document.getElementById('success-price').innerText = `$${srv.price}.00`;
 
-    advanceBookingStep(4);
+    advanceBookingStep(5);
     showToast('Your booking request has been submitted!', 'success');
 };
 
@@ -2414,8 +2428,11 @@ window.resetBookingWizardStateAndExit = function() {
     state.bookingFlow = {
         step: 1,
         selectedServiceId: null,
+        selectedSpecialist: null,
+        selectedMethod: null,
         selectedDate: null,
-        selectedSlot: null
+        selectedSlot: null,
+        uploadedFile: null
     };
     navigateTo('appointments');
 };
