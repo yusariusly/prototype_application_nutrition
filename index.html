@@ -130,10 +130,10 @@
                 </div>
             </div>
 
-            <div onclick="navigateTo('profile')" class="w-9 h-9 rounded-full overflow-hidden border border-outline-variant/30 shrink-0 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
+            <div id="navbar-profile-avatar" onclick="navigateTo('profile')" class="w-9 h-9 rounded-full overflow-hidden border border-outline-variant/30 shrink-0 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
                 <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACuxsdo8Z-Nl17WpH629BzA84HKeMAyR84ojL8M6_ChXIeE9bfCQBqPmwchAEQCT5lb5-2KDHD93QDQg2UUdEQJkacYZlIHcwjcLYGeVjP7qLy_IRIllE38Uzqf1QNJbaoVbJfU2d1xOmwzdumNrQrQWfgE1Jg6plIvgmlVhhKJnXCrpg0WjqXVw9AETngufeSZQaB8jSUc6wuYHyns96XH7QXmKMQDUc4xTIRPxACmKNRWwizJIHaSw" alt="Profile">
             </div>
-            <button onclick="handleClientSignOut()" class="hidden md:flex border border-[#ba1a1a]/30 hover:bg-red-55 text-[#ba1a1a] px-3 py-1.5 rounded-full font-bold text-xs transition-all items-center gap-1 cursor-pointer">
+            <button id="navbar-logout-btn" onclick="handleClientSignOut()" class="hidden md:flex border border-[#ba1a1a]/30 hover:bg-red-55 text-[#ba1a1a] px-3 py-1.5 rounded-full font-bold text-xs transition-all items-center gap-1 cursor-pointer">
                 <span class="material-symbols-outlined text-[16px]">logout</span> Log Out
             </button>
         </div>
@@ -615,13 +615,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Mobile Log Out Button -->
-            <div class="md:hidden mt-4 mb-2">
-                <button onclick="handleClientSignOut()" class="w-full border border-[#ba1a1a]/30 bg-surface-container hover:bg-red-50 text-[#ba1a1a] py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm">
-                    <span class="material-symbols-outlined text-[20px]">logout</span> Log Out
-                </button>
             </div>
         </section>
     </main>

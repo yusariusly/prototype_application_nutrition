@@ -537,6 +537,19 @@ window.navigateTo = function(viewId) {
         activeLink.className = 'nav-link h-full flex items-center text-primary font-bold border-b-2 border-primary font-label-md text-label-md px-3 cursor-pointer';
     }
 
+    // Toggle navbar profile avatar and logout button visibility based on active view
+    const avatarEl = document.getElementById('navbar-profile-avatar');
+    const logoutBtnEl = document.getElementById('navbar-logout-btn');
+    if (avatarEl && logoutBtnEl) {
+        if (viewId === 'profile') {
+            avatarEl.classList.add('hidden');
+            logoutBtnEl.className = 'flex border border-[#ba1a1a]/30 hover:bg-red-55 text-[#ba1a1a] px-3 py-1.5 rounded-full font-bold text-xs transition-all items-center gap-1 cursor-pointer';
+        } else {
+            avatarEl.classList.remove('hidden');
+            logoutBtnEl.className = 'hidden md:flex border border-[#ba1a1a]/30 hover:bg-red-55 text-[#ba1a1a] px-3 py-1.5 rounded-full font-bold text-xs transition-all items-center gap-1 cursor-pointer';
+        }
+    }
+
     if (viewId === 'dashboard') {
         renderDashboardMeals();
         updateKcalDisplay();
