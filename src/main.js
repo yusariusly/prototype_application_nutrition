@@ -2079,6 +2079,17 @@ window.toggleHistoryItem = function(itemId) {
 // ==================== CLIENT BOOKING WIZARD ====================
 function renderBookingWizard() {
     const step = state.bookingFlow.step;
+    
+    const stepperContainer = document.getElementById('booking-stepper-container');
+    const wizardHeader = document.getElementById('booking-wizard-header');
+    if (step === 5) {
+        if (stepperContainer) stepperContainer.classList.add('hidden');
+        if (wizardHeader) wizardHeader.classList.add('hidden');
+    } else {
+        if (stepperContainer) stepperContainer.classList.remove('hidden');
+        if (wizardHeader) wizardHeader.classList.remove('hidden');
+    }
+
     for (let i = 1; i <= 4; i++) {
         const node = document.getElementById(`step-node-${i}`);
         if (!node) continue;
