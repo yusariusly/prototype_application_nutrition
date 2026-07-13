@@ -622,33 +622,46 @@
         </section>
 
         <!-- ==================== VIEW 6: DEDICATED CHAT VIEW ==================== -->
-        <section id="view-chat" class="view-section hidden flex flex-col gap-gutter">
-            <div class="flex items-center gap-3">
-                <button onclick="navigateTo('meal-plans')" class="p-2 hover:bg-surface-container-low rounded-full transition-colors active:scale-95 text-on-surface-variant flex items-center justify-center border border-outline-variant/20 bg-surface">
-                    <span class="material-symbols-outlined text-base">arrow_back</span>
-                </button>
-                <div>
-                    <h1 class="text-3xl font-bold tracking-tight text-on-surface">Consultation Chat</h1>
-                    <p class="text-body-md text-on-surface-variant mt-1">Direct communication channel with your specialist.</p>
-                </div>
-            </div>
-
-            <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 shadow-sm flex flex-col gap-4 mt-2">
-                <div class="flex items-center gap-3 border-b border-surface-variant/20 pb-4">
-                    <span class="material-symbols-outlined text-primary text-2xl">forum</span>
-                    <div>
-                        <h2 class="font-bold text-on-background text-sm">Program Discussion</h2>
-                        <p class="text-[10px] text-on-surface-variant leading-relaxed">Ask your practitioner any questions about your menu recommendations and adjustments.</p>
+        <section id="view-chat" class="view-section hidden flex-col h-[calc(100vh-180px)] md:h-[calc(100vh-160px)] w-full">
+            <!-- Chat App Window -->
+            <div class="flex flex-col flex-grow min-h-0 bg-surface rounded-2xl border border-outline-variant/35 shadow-sm overflow-hidden">
+                <!-- Chat Window Header -->
+                <div class="flex items-center justify-between px-4 py-3 bg-surface border-b border-outline-variant/30 shrink-0">
+                    <div class="flex items-center gap-3">
+                        <button onclick="navigateTo('meal-plans')" class="p-2 hover:bg-surface-container-low rounded-full transition-colors active:scale-95 text-on-surface-variant flex items-center justify-center">
+                            <span class="material-symbols-outlined text-lg">arrow_back</span>
+                        </button>
+                        <!-- Specialist Avatar & Status -->
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center border border-outline-variant/30" id="chat-page-specialist-avatar">
+                                DH
+                            </div>
+                            <div class="text-left">
+                                <h2 class="font-bold text-xs text-on-background leading-none" id="chat-page-specialist-name">Dr. Hasan</h2>
+                                <span class="text-[9px] text-primary font-bold block mt-1 flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span> Online
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Action Icons -->
+                    <div class="flex items-center gap-2 text-on-surface-variant">
+                        <button onclick="showToast('Starting video consultation session...', 'info')" class="p-2 hover:bg-surface-container-low rounded-full transition-colors active:scale-95 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-base">videocam</span>
+                        </button>
+                        <button onclick="showToast('Calling specialist...', 'info')" class="p-2 hover:bg-surface-container-low rounded-full transition-colors active:scale-95 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-base">call</span>
+                        </button>
                     </div>
                 </div>
                 
-                <!-- Chat History Container -->
-                <div id="program-chat-container" class="flex flex-col gap-4 max-h-[450px] overflow-y-auto pr-2 min-h-[250px] scroll-smooth">
+                <!-- Message List (Takes all remaining height) -->
+                <div id="program-chat-container" class="flex-grow overflow-y-auto px-4 py-5 flex flex-col gap-4 bg-slate-50/50 scroll-smooth">
                     <!-- Dynamic chat messages go here -->
                 </div>
                 
-                <!-- File Attachment Preview Container -->
-                <div id="program-chat-file-preview" class="hidden flex items-center justify-between gap-3 p-3 rounded-xl bg-surface border border-outline-variant/30 text-slate-800 mt-2 max-w-sm">
+                <!-- File Preview (If any selected) -->
+                <div id="program-chat-file-preview" class="hidden flex items-center justify-between gap-3 p-3 bg-surface border-t border-outline-variant/30 text-slate-800 shrink-0">
                     <div class="flex items-center gap-2 min-w-0">
                         <span class="material-symbols-outlined text-primary text-xl" id="preview-file-icon">description</span>
                         <div class="text-left min-w-0">
@@ -661,22 +674,22 @@
                     </button>
                 </div>
                 
-                <!-- Chat Input Form -->
-                <form onsubmit="handleProgramChatSubmit(event)" class="flex gap-2 items-center mt-2">
-                    <!-- Hidden File Input -->
-                    <input type="file" id="program-chat-file" class="hidden" onchange="handleProgramChatFileSelected(event)">
-                    
-                    <!-- Paperclip Attachment Trigger Button -->
-                    <button type="button" onclick="document.getElementById('program-chat-file').click()" class="bg-surface hover:bg-surface-container text-on-surface-variant p-3 rounded-xl border border-outline-variant/30 transition-all active:scale-95 flex items-center justify-center cursor-pointer" title="Attach file or image">
-                        <span class="material-symbols-outlined text-[18px]">attach_file</span>
-                    </button>
-                    
-                    <input type="text" id="program-chat-input" placeholder="Type a message..." class="flex-1 bg-surface-container-low border border-outline-variant/30 text-xs px-4 py-3 rounded-xl focus:outline-none focus:border-primary/50 text-slate-800 transition-all">
-                    
-                    <button type="submit" class="bg-primary hover:bg-[#005321] text-white p-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center cursor-pointer">
-                        <span class="material-symbols-outlined text-[18px]">send</span>
-                    </button>
-                </form>
+                <!-- Chat Footer Input Area -->
+                <div class="p-3 bg-surface border-t border-outline-variant/30 shrink-0">
+                    <form onsubmit="handleProgramChatSubmit(event)" class="flex gap-2 items-center">
+                        <input type="file" id="program-chat-file" class="hidden" onchange="handleProgramChatFileSelected(event)">
+                        
+                        <button type="button" onclick="document.getElementById('program-chat-file').click()" class="bg-surface-container-low hover:bg-surface-container text-on-surface-variant p-3 rounded-full border border-outline-variant/30 transition-all active:scale-95 flex items-center justify-center cursor-pointer" title="Attach file or image">
+                            <span class="material-symbols-outlined text-base">attach_file</span>
+                        </button>
+                        
+                        <input type="text" id="program-chat-input" placeholder="Type a message..." class="flex-1 bg-surface-container-low border border-outline-variant/30 text-xs px-4 py-3 rounded-full focus:outline-none focus:border-primary/50 text-slate-800 transition-all">
+                        
+                        <button type="submit" class="bg-primary hover:bg-[#005321] text-white p-3 rounded-full shadow-md transition-all active:scale-95 flex items-center justify-center cursor-pointer">
+                            <span class="material-symbols-outlined text-base">send</span>
+                        </button>
+                    </form>
+                </div>
             </div>
         </section>
     </main>

@@ -567,6 +567,16 @@ window.navigateTo = function(viewId) {
         loadState();
         renderProgramChat();
     }
+    
+    // Hide footer on chat view to make it feel like a full-screen app
+    const footerEl = document.querySelector('footer');
+    if (footerEl) {
+        if (viewId === 'chat') {
+            footerEl.classList.add('hidden');
+        } else {
+            footerEl.classList.remove('hidden');
+        }
+    }
 };
 
 // Client Notifications Dropdown
@@ -1077,6 +1087,15 @@ window.renderProgramChat = function() {
     if (!program) {
         container.innerHTML = `<div class="text-[10px] text-on-surface-variant font-medium text-center py-6">No program discussion thread available.</div>`;
         return;
+    }
+
+    // Sync header details dynamically
+    const specNameEl = document.getElementById('chat-page-specialist-name');
+    const specAvatarEl = document.getElementById('chat-page-specialist-avatar');
+    if (specNameEl && specAvatarEl) {
+        const therapistName = clientDetails?.therapist || program.creator || 'Dr. Hasan';
+        specNameEl.innerText = therapistName;
+        specAvatarEl.innerText = therapistName.split(' ').map(s => s[0]).join('').substring(0, 2).toUpperCase();
     }
     
     const allProgramChats = JSON.parse(localStorage.getItem('nutriflow_program_chats')) || [];
