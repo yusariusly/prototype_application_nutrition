@@ -2562,3 +2562,53 @@ window.handleAdminPageChatSubmit = function(e) {
     showToast('Reply sent successfully!', 'success');
 };
 
+window.openProgramChatSelectionModal = function() {
+    const modal = document.getElementById('program-chat-selection-modal');
+    if (!modal) return;
+    
+    const listContainer = document.getElementById('chat-selection-programs-list');
+    if (listContainer) {
+        if (state.programs.length === 0) {
+            listContainer.innerHTML = `
+                <div class="text-center py-6 text-xs text-on-surface-variant font-semibold">
+                    No active programs found. Create a program first!
+                </div>
+            `;
+        } else {
+            listContainer.innerHTML = state.programs.map(p => {
+                const activeClientsCount = state.clients.filter(c => c.activeProgramId === p.id).length;
+                return `
+                    <div onclick="selectProgramForChat('${p.id}')" class="flex items-center justify-between p-3 border border-outline-variant/30 rounded-xl hover:border-primary/40 hover:bg-primary/5 transition-all cursor-pointer shadow-sm group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[20px] text-primary">assignment</span>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-xs font-bold text-on-background group-hover:text-primary transition-colors leading-snug">${p.name}</p>
+                                <p class="text-[9px] text-on-surface-variant/80 mt-0.5 font-medium">${activeClientsCount} active client${activeClientsCount !== 1 ? 's' : ''}</p>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[18px]">chevron_right</span>
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+};
+
+window.closeProgramChatSelectionModal = function() {
+    const modal = document.getElementById('program-chat-selection-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+window.selectProgramForChat = function(programId) {
+    window.closeProgramChatSelectionModal();
+    window.openProgramDiscussion(programId);
+};
+

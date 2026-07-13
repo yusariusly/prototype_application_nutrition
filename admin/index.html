@@ -119,6 +119,7 @@
             <a onclick="navigateTo('admin-meal-builder')" id="link-admin-meal-builder" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Programs</a>
             <a onclick="navigateTo('admin-calendar')" id="link-admin-calendar" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Appointments</a>
             <a onclick="navigateTo('admin-services')" id="link-admin-services" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Services</a>
+            <a onclick="openProgramChatSelectionModal()" id="link-admin-chats" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Chats</a>
             <a onclick="navigateTo('admin-profile')" id="link-admin-profile" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Profile</a>
         </div>
 
@@ -595,6 +596,10 @@
             <span class="material-symbols-outlined text-[22px]">assignment</span>
             <span class="text-[9px] font-bold mt-0.5">Programs</span>
         </button>
+        <button onclick="openProgramChatSelectionModal()" id="mobile-link-admin-chats" class="mobile-nav-link flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
+            <span class="material-symbols-outlined text-[22px]">forum</span>
+            <span class="text-[9px] font-bold mt-0.5">Chats</span>
+        </button>
         <button onclick="navigateTo('admin-calendar')" id="mobile-link-admin-calendar" class="mobile-nav-link flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
             <span class="material-symbols-outlined text-[22px]">calendar_month</span>
             <span class="text-[9px] font-bold mt-0.5">Appointments</span>
@@ -901,6 +906,23 @@
                     <button type="submit" class="bg-primary hover:bg-[#005321] text-white font-semibold text-xs px-6 py-2.5 rounded-xl shadow-md transition-all cursor-pointer">Save Service</button>
                 </div>
             </form>
+        </div>
+    </div>
+    
+    <!-- Program Chat Selection Modal -->
+    <div id="program-chat-selection-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-surface max-w-md w-full rounded-2xl p-6 border border-slate-100 shadow-2xl flex flex-col gap-4 text-slate-800 animate-fade-in">
+            <div class="flex justify-between items-center border-b pb-3">
+                <div>
+                    <h3 class="text-base font-bold text-slate-800">Select Program Chat</h3>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Select a program to view its private discussion channel</p>
+                </div>
+                <button onclick="closeProgramChatSelectionModal()" class="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"><span class="material-symbols-outlined text-[20px]">close</span></button>
+            </div>
+            
+            <div id="chat-selection-programs-list" class="flex flex-col gap-2 overflow-y-auto max-h-[350px] py-1">
+                <!-- Program list items will be injected here via JS -->
+            </div>
         </div>
     </div>
 
