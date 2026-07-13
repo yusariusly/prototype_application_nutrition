@@ -568,13 +568,43 @@ window.navigateTo = function(viewId) {
         renderProgramChat();
     }
     
-    // Hide footer on chat view to make it feel like a full-screen app
+    // Hide footer, navbar, bottom nav, and expand container for chat view to look like native WhatsApp/Instagram
     const footerEl = document.querySelector('footer');
-    if (footerEl) {
-        if (viewId === 'chat') {
-            footerEl.classList.add('hidden');
-        } else {
-            footerEl.classList.remove('hidden');
+    const navbarEl = document.getElementById('client-navbar');
+    const mobileNavEl = document.getElementById('mobile-bottom-nav');
+    const mainContainerEl = document.getElementById('client-main-container');
+    
+    if (viewId === 'chat') {
+        if (footerEl) footerEl.classList.add('hidden');
+        if (navbarEl) navbarEl.classList.add('hidden');
+        if (mobileNavEl) mobileNavEl.classList.add('hidden');
+        if (mainContainerEl) {
+            mainContainerEl.className = 'flex-grow w-full h-screen relative flex flex-col p-0 m-0 max-w-full';
+        }
+        const chatSection = document.getElementById('view-chat');
+        if (chatSection) {
+            chatSection.className = 'view-section flex flex-col h-screen w-full p-0 m-0';
+        }
+        const chatWindow = chatSection?.querySelector('.flex-grow');
+        if (chatWindow) {
+            chatWindow.classList.remove('rounded-2xl', 'border', 'shadow-sm');
+            chatWindow.classList.add('border-0', 'rounded-none');
+        }
+    } else {
+        if (footerEl) footerEl.classList.remove('hidden');
+        if (navbarEl) navbarEl.classList.remove('hidden');
+        if (mobileNavEl) mobileNavEl.classList.remove('hidden');
+        if (mainContainerEl) {
+            mainContainerEl.className = 'flex-grow w-full max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-lg relative';
+        }
+        const chatSection = document.getElementById('view-chat');
+        if (chatSection) {
+            chatSection.className = 'view-section hidden flex-col h-[calc(100vh-180px)] md:h-[calc(100vh-160px)] w-full';
+        }
+        const chatWindow = chatSection?.querySelector('.flex-grow');
+        if (chatWindow) {
+            chatWindow.classList.add('rounded-2xl', 'border', 'shadow-sm');
+            chatWindow.classList.remove('border-0', 'rounded-none');
         }
     }
 };
