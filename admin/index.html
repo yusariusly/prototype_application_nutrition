@@ -435,17 +435,19 @@
                 </div>
 
                 <!-- Filters & Search -->
-                <div class="px-6 py-4 border-b border-outline-variant/20 bg-surface-container-low flex flex-col sm:flex-row gap-4 justify-between items-center overflow-hidden">
-                    <div class="flex flex-row overflow-x-auto whitespace-nowrap scrollbar-none py-1 gap-2 w-full sm:w-auto -mx-6 px-6 sm:mx-0 sm:px-0" id="appointments-filter-buttons">
-                        <button onclick="setAppointmentsFilter('all')" id="filter-btn-all" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-primary text-white shadow-sm border border-transparent shrink-0">All</button>
-                        <button onclick="setAppointmentsFilter('approved')" id="filter-btn-approved" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-surface text-on-surface-variant hover:text-primary border border-outline-variant/40 hover:border-primary/50">Confirmed</button>
-                        <button onclick="setAppointmentsFilter('pending')" id="filter-btn-pending" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-surface text-on-surface-variant hover:text-primary border border-outline-variant/40 hover:border-primary/50">Pending</button>
-                        <button onclick="setAppointmentsFilter('completed')" id="filter-btn-completed" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-surface text-on-surface-variant hover:text-primary border border-outline-variant/40 hover:border-primary/50">Completed</button>
-                        <button onclick="setAppointmentsFilter('cancelled')" id="filter-btn-cancelled" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-surface text-on-surface-variant hover:text-primary border border-outline-variant/40 hover:border-primary/50">Cancelled</button>
+                <div class="px-6 py-4 border-b border-outline-variant/20 bg-surface-container-low flex flex-col sm:flex-row gap-4 justify-between items-center">
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <select id="appointments-filter-status" onchange="setAppointmentsFilter(this.value)" class="w-full sm:w-48 text-xs bg-surface border border-outline-variant/30 rounded-xl px-3 py-2.5 text-on-surface-variant font-semibold focus:ring-primary focus:border-primary">
+                            <option value="all">All Statuses</option>
+                            <option value="approved">Confirmed</option>
+                            <option value="pending">Pending</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
                     </div>
                     <div class="relative w-full sm:w-64">
                         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span>
-                        <input type="text" id="appointments-search" oninput="renderAdminAppointmentsTable()" placeholder="Search patient..." class="w-full bg-surface border border-outline-variant/40 text-xs pl-9 pr-3 py-2 rounded-xl focus:border-primary focus:ring-primary transition-all">
+                        <input type="text" id="appointments-search" oninput="renderAdminAppointmentsTable()" placeholder="Search patient..." class="w-full bg-surface border border-outline-variant/40 text-xs pl-9 pr-3 py-2.5 rounded-xl focus:border-primary focus:ring-primary transition-all">
                     </div>
                 </div>
 

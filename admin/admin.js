@@ -1702,17 +1702,11 @@ state.appointmentFilter = 'all';
 window.setAppointmentsFilter = function(filter) {
     state.appointmentFilter = filter;
     
-    // Update button styles
-    const filters = ['all', 'approved', 'pending', 'completed', 'cancelled'];
-    filters.forEach(f => {
-        const btn = document.getElementById(`filter-btn-${f}`);
-        if (!btn) return;
-        if (f === filter) {
-            btn.className = "px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-primary text-white shadow-sm border border-transparent shrink-0";
-        } else {
-            btn.className = "px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-surface text-on-surface-variant hover:text-primary border border-outline-variant/40 hover:border-primary/50 shrink-0";
-        }
-    });
+    // Sync select dropdown if changed programmatically
+    const select = document.getElementById('appointments-filter-status');
+    if (select && select.value !== filter) {
+        select.value = filter;
+    }
 
     renderAdminAppointmentsTable();
 };
