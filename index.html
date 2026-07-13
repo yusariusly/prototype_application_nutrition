@@ -651,34 +651,9 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
-                <div class="lg:col-span-8 flex flex-col gap-gutter">
-                    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
-                        <div class="flex justify-between items-center">
-                            <h2 class="text-lg font-bold text-on-background">Weight Trend</h2>
-                            <select id="weight-trend-range" onchange="updateWeightTrendChart()" class="text-xs bg-surface border border-outline-variant/30 rounded-lg px-2 py-1 font-semibold text-on-surface-variant">
-                                <option value="1w">1 Week</option>
-                                <option value="1m">1 Month</option>
-                                <option value="3m" selected>3 Months</option>
-                            </select>
-                        </div>
-                        <div class="w-full relative h-64"><canvas id="weightTrendChartCanvas"></canvas></div>
-                    </div>
-
-                    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
-                        <div class="flex justify-between items-center">
-                            <h2 class="text-lg font-bold text-on-background">Body Measurements (Inches)</h2>
-                            <select id="measurements-range" onchange="updateMeasurementsChart()" class="text-xs bg-surface border border-outline-variant/30 rounded-lg px-2 py-1 font-semibold text-on-surface-variant">
-                                <option value="1w">1 Week</option>
-                                <option value="1m">1 Month</option>
-                                <option value="3m" selected>3 Months</option>
-                            </select>
-                        </div>
-                        <div class="w-full relative h-64"><canvas id="bodyMeasurementsChartCanvas"></canvas></div>
-                    </div>
-                </div>
-
-                <div class="lg:col-span-4 flex flex-col gap-gutter">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+                <!-- Log Today's Stats Card (Shown on top on mobile, stacked on the right on desktop) -->
+                <div class="lg:col-span-4 order-1 lg:order-2 lg:col-start-9 lg:row-start-1 flex flex-col gap-gutter">
                     <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
                         <h3 class="text-lg font-bold text-on-background">Log Today's Stats</h3>
                         <form id="stats-log-form" onsubmit="handleStatsLogSubmit(event)" class="space-y-4">
@@ -703,7 +678,47 @@
                             <button type="submit" id="stats-submit-btn" class="w-full bg-[#006e2f] hover:bg-[#005321] text-white font-bold text-sm py-2.5 rounded-lg transition-all shadow-sm cursor-pointer">Save Entry</button>
                         </form>
                     </div>
+                </div>
 
+                <!-- Charts Wrapper (Shown below Log Stats on mobile, on the left on desktop) -->
+                <div class="lg:col-span-8 order-2 lg:order-1 lg:col-start-1 lg:row-start-1 lg:row-span-2 flex flex-col gap-gutter">
+                    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-lg font-bold text-on-background">Weight Trend</h2>
+                            <div class="flex items-center gap-2">
+                                <select id="weight-trend-range" onchange="updateWeightTrendChart()" class="text-xs bg-surface border border-outline-variant/30 rounded-lg px-2 py-1 font-semibold text-on-surface-variant">
+                                    <option value="1w">1 Week</option>
+                                    <option value="1m">1 Month</option>
+                                    <option value="3m" selected>3 Months</option>
+                                </select>
+                                <button onclick="openChartZoomModal('weight')" class="p-1.5 hover:bg-surface-container-low rounded-lg border border-outline-variant/30 text-on-surface-variant transition-colors flex items-center justify-center cursor-pointer active:scale-95" title="Zoom In Chart">
+                                    <span class="material-symbols-outlined text-[16px]">zoom_in</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="w-full relative h-64"><canvas id="weightTrendChartCanvas"></canvas></div>
+                    </div>
+
+                    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-lg font-bold text-on-background">Body Measurements (Inches)</h2>
+                            <div class="flex items-center gap-2">
+                                <select id="measurements-range" onchange="updateMeasurementsChart()" class="text-xs bg-surface border border-outline-variant/30 rounded-lg px-2 py-1 font-semibold text-on-surface-variant">
+                                    <option value="1w">1 Week</option>
+                                    <option value="1m">1 Month</option>
+                                    <option value="3m" selected>3 Months</option>
+                                </select>
+                                <button onclick="openChartZoomModal('measurements')" class="p-1.5 hover:bg-surface-container-low rounded-lg border border-outline-variant/30 text-on-surface-variant transition-colors flex items-center justify-center cursor-pointer active:scale-95" title="Zoom In Chart">
+                                    <span class="material-symbols-outlined text-[16px]">zoom_in</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="w-full relative h-64"><canvas id="bodyMeasurementsChartCanvas"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- Achievements Card (Shown below Charts on mobile, bottom right on desktop) -->
+                <div class="lg:col-span-4 order-3 lg:order-3 lg:col-start-9 lg:row-start-2 flex flex-col gap-gutter">
                     <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
                         <h3 class="text-lg font-bold text-on-background">Achievements</h3>
                         <div class="space-y-3">
