@@ -2255,9 +2255,11 @@ window.openProgramDiscussion = function(programId, targetClientName = null) {
             clientNames.unshift(targetClientName);
         }
         state.activeDiscussionClientName = targetClientName;
+        state.chatSidebarMode = 'clients';
         state.mobileViewingThread = true;
     } else {
         state.activeDiscussionClientName = clientNames[0];
+        state.chatSidebarMode = 'clients';
         state.mobileViewingThread = false;
     }
     
@@ -2280,20 +2282,61 @@ window.openProgramDiscussion = function(programId, targetClientName = null) {
         titleEl.innerHTML = `<span class="material-symbols-outlined text-primary text-xl">forum</span> Discussion: ${program.name}`;
     }
     
-    window.renderDiscussionClientsList(clientNames);
+    window.renderDiscussionSidebar();
     window.renderAdminProgramChat();
     window.updateMobileDiscussionUI();
 };
 
-window.renderDiscussionClientsList = function(clientNames) {
-    const clientsListContainer = document.getElementById('discussion-page-clients-list');
-    if (!clientsListContainer) return;
+window.renderDiscussionSidebar = function() {
+    const titleEl = document.getElementById('sidebar-list-title');
+    const navEl = document.getElementById('sidebar-header-nav');
+    const listContainer = document.getElementById('discussion-page-clients-list');
+    if (!listContainer || !titleEl || !navEl) return;
     
-    // Re-fetch client list if not passed
-    if (!clientNames) {
+    if (state.chatSidebarMode === 'programs') {
+        // Programs list mode
+        navEl.innerHTML = '';
+        titleEl.innerText = 'Programs';
+        
+        if (state.programs.length === 0) {
+            listContainer.innerHTML = `
+                <div class="text-center py-6 text-xs text-on-surface-variant font-semibold">
+                    No active programs found.
+                </div>
+            `;
+        } else {
+            listContainer.innerHTML = state.programs.map(p => {
+                const isActive = p.id === state.activeDiscussionProgramId;
+                const activeBg = isActive ? 'bg-primary/10 border-primary text-primary' : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700';
+                const activeClientsCount = state.clients.filter(c => c.activeProgramId === p.id).length;
+                return `
+                    <div onclick="selectProgramForDiscussionChat('${p.id}')" class="flex items-center justify-between p-3 border rounded-xl cursor-pointer transition-all shadow-sm ${activeBg}">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-extrabold text-[11px] shrink-0">
+                                <span class="material-symbols-outlined text-base">assignment</span>
+                            </div>
+                            <div class="text-left min-w-0">
+                                <p class="text-xs font-bold truncate leading-tight">${p.name}</p>
+                                <p class="text-[8px] text-slate-400 mt-0.5 uppercase tracking-wider">${activeClientsCount} active client${activeClientsCount !== 1 ? 's' : ''}</p>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined text-slate-400 text-base">chevron_right</span>
+                    </div>
+                `;
+            }).join('');
+        }
+    } else {
+        // Clients list mode
+        navEl.innerHTML = `
+            <button onclick="goBackToSidebarPrograms()" class="text-primary font-bold text-[10px] flex items-center gap-0.5 hover:underline cursor-pointer bg-transparent border-0 self-start p-0">
+                <span class="material-symbols-outlined text-xs">arrow_back</span> Back to Programs
+            </button>
+        `;
+        titleEl.innerText = 'Recipients';
+        
         const progId = state.activeDiscussionProgramId;
         const myClients = state.clients.filter(c => c.activeProgramId === progId);
-        clientNames = myClients.map(c => c.name);
+        let clientNames = myClients.map(c => c.name);
         
         const allProgramChats = JSON.parse(localStorage.getItem('nutriflow_program_chats')) || [];
         allProgramChats.forEach(chat => {
@@ -2302,22 +2345,22 @@ window.renderDiscussionClientsList = function(clientNames) {
             }
         });
         if (clientNames.length === 0) clientNames = ['Guest User'];
-    }
-    
-    clientsListContainer.innerHTML = clientNames.map(name => {
-        const isActive = name === state.activeDiscussionClientName;
-        const activeBg = isActive ? 'bg-primary/10 border-primary text-primary' : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700';
-        const initials = name.split(' ').map(s => s[0]).join('').substring(0, 2).toUpperCase();
-        return `
-            <div onclick="selectDiscussionClient('${name}')" class="flex items-center gap-3 p-3 border rounded-xl cursor-pointer transition-all shadow-sm ${activeBg}">
-                <div class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-extrabold text-[11px]">${initials}</div>
-                <div class="flex-grow min-w-0">
-                    <p class="text-xs font-bold truncate leading-tight">${name}</p>
-                    <p class="text-[8px] text-slate-400 mt-0.5 uppercase tracking-wider">Client Thread</p>
+        
+        listContainer.innerHTML = clientNames.map(name => {
+            const isActive = name === state.activeDiscussionClientName;
+            const activeBg = isActive ? 'bg-primary/10 border-primary text-primary' : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700';
+            const initials = name.split(' ').map(s => s[0]).join('').substring(0, 2).toUpperCase();
+            return `
+                <div onclick="selectDiscussionClient('${name}')" class="flex items-center gap-3 p-3 border rounded-xl cursor-pointer transition-all shadow-sm ${activeBg}">
+                    <div class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-extrabold text-[11px] shrink-0">${initials}</div>
+                    <div class="flex-grow min-w-0">
+                        <p class="text-xs font-bold truncate leading-tight">${name}</p>
+                        <p class="text-[8px] text-slate-400 mt-0.5 uppercase tracking-wider">Client Thread</p>
+                    </div>
                 </div>
-            </div>
-        `;
-    }).join('');
+            `;
+        }).join('');
+    }
 };
 
 window.selectDiscussionClient = function(clientName) {
@@ -2426,7 +2469,35 @@ window.exitProgramDiscussion = function() {
 
 window.renderAdminProgramChat = function() {
     const container = document.getElementById('admin-page-chat-container');
-    if (!container) return;
+    const chatPanel = document.getElementById('discussion-chat-panel');
+    if (!container || !chatPanel) return;
+    
+    if (state.chatSidebarMode === 'programs') {
+        container.innerHTML = `
+            <div class="flex flex-col items-center justify-center h-full text-center p-6 text-on-surface-variant my-auto">
+                <span class="material-symbols-outlined text-5xl text-primary/30 mb-3">forum</span>
+                <h4 class="text-sm font-bold text-on-background">Select a Program</h4>
+                <p class="text-xs mt-1">Choose a program from the list on the left to start chatting with active clients.</p>
+            </div>
+        `;
+        
+        const input = document.getElementById('admin-page-chat-input');
+        const sendBtn = chatPanel.querySelector('button[type="submit"]');
+        if (input) input.disabled = true;
+        if (sendBtn) sendBtn.disabled = true;
+        
+        const label = document.getElementById('discussion-chat-with-label');
+        if (label) label.innerText = 'No Active Conversation';
+        
+        const avatar = document.getElementById('chat-page-client-avatar');
+        if (avatar) avatar.innerText = '--';
+        return;
+    }
+    
+    const input = document.getElementById('admin-page-chat-input');
+    const sendBtn = chatPanel.querySelector('button[type="submit"]');
+    if (input) input.disabled = false;
+    if (sendBtn) sendBtn.disabled = false;
     
     const progId = state.activeDiscussionProgramId;
     const program = state.programs.find(p => p.id === progId);
@@ -2563,65 +2634,73 @@ window.handleAdminPageChatSubmit = function(e) {
 };
 
 window.openProgramChatSelectionModal = function() {
-    const modal = document.getElementById('program-chat-selection-modal');
-    if (!modal) return;
+    state.chatSidebarMode = 'programs';
+    state.activeDiscussionProgramId = null;
+    state.activeDiscussionClientName = null;
+    state.mobileViewingThread = false;
     
-    const listContainer = document.getElementById('chat-selection-programs-list');
-    if (listContainer) {
-        if (state.programs.length === 0) {
-            listContainer.innerHTML = `
-                <div class="text-center py-6 text-xs text-on-surface-variant font-semibold">
-                    No active programs found. Create a program first!
-                </div>
-            `;
-        } else {
-            listContainer.innerHTML = state.programs.map(p => {
-                const activeClientsCount = state.clients.filter(c => c.activeProgramId === p.id).length;
-                return `
-                    <div onclick="selectProgramForChat('${p.id}')" class="flex items-center justify-between p-4 border border-outline-variant/30 rounded-2xl hover:border-primary/40 hover:bg-primary/[0.015] hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98] transition-all cursor-pointer shadow-sm group bg-white">
-                        <div class="flex items-center gap-3.5">
-                            <!-- Styled Icon with Chat motif -->
-                            <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center transition-all group-hover:scale-105">
-                                <span class="material-symbols-outlined text-[22px] font-medium text-primary">chat_bubble</span>
-                            </div>
-                            <div class="text-left">
-                                <p class="text-sm font-extrabold text-on-background group-hover:text-primary transition-colors leading-snug">${p.name}</p>
-                                <!-- Dynamic status pill badge for client counts -->
-                                <div class="mt-1 flex items-center gap-1.5">
-                                    ${activeClientsCount > 0 ? `
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200/40">
-                                            <span class="w-1 h-1 rounded-full bg-emerald-600 animate-pulse"></span>
-                                            ${activeClientsCount} active client${activeClientsCount !== 1 ? 's' : ''}
-                                        </span>
-                                    ` : `
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-50 text-slate-400 border border-outline-variant/30">
-                                            No active clients
-                                        </span>
-                                    `}
-                                </div>
-                            </div>
-                        </div>
-                        <span class="material-symbols-outlined text-on-surface-variant/70 group-hover:text-primary group-hover:translate-x-1 transition-all text-[20px]">chevron_right</span>
-                    </div>
-                `;
-            }).join('');
-        }
+    if (!state.chatParentView) {
+        state.chatParentView = 'programs-list-view';
     }
     
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-};
-
-window.closeProgramChatSelectionModal = function() {
-    const modal = document.getElementById('program-chat-selection-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+    const sidebar = document.getElementById('library-sidebar');
+    const mainContent = document.getElementById('meal-builder-main-content');
+    const listView = document.getElementById('programs-list-view');
+    const editorView = document.getElementById('program-editor-view');
+    const discView = document.getElementById('program-discussion-view');
+    
+    if (sidebar) sidebar.classList.add('hidden');
+    if (mainContent) mainContent.className = 'lg:col-span-12 flex flex-col gap-4 transition-all';
+    
+    if (listView) listView.classList.add('hidden');
+    if (editorView) editorView.classList.add('hidden');
+    if (discView) discView.classList.remove('hidden');
+    
+    const titleEl = document.getElementById('discussion-page-title');
+    if (titleEl) {
+        titleEl.innerHTML = `<span class="material-symbols-outlined text-primary text-xl">forum</span> Program Discussions`;
     }
+    
+    window.renderDiscussionSidebar();
+    window.renderAdminProgramChat();
+    window.updateMobileDiscussionUI();
 };
 
-window.selectProgramForChat = function(programId) {
-    window.closeProgramChatSelectionModal();
-    window.openProgramDiscussion(programId);
+window.selectProgramForDiscussionChat = function(programId) {
+    state.activeDiscussionProgramId = programId;
+    state.chatSidebarMode = 'clients';
+    
+    const myClients = state.clients.filter(c => c.activeProgramId === programId);
+    if (myClients.length > 0) {
+        state.activeDiscussionClientName = myClients[0].name;
+    } else {
+        state.activeDiscussionClientName = 'Guest User';
+    }
+    
+    const program = state.programs.find(p => p.id === programId);
+    const titleEl = document.getElementById('discussion-page-title');
+    if (titleEl && program) {
+        titleEl.innerHTML = `<span class="material-symbols-outlined text-primary text-xl">forum</span> Discussion: ${program.name}`;
+    }
+    
+    state.mobileViewingThread = false;
+    
+    window.renderDiscussionSidebar();
+    window.renderAdminProgramChat();
+    window.updateMobileDiscussionUI();
+};
+
+window.goBackToSidebarPrograms = function() {
+    state.chatSidebarMode = 'programs';
+    state.mobileViewingThread = false;
+    
+    const titleEl = document.getElementById('discussion-page-title');
+    if (titleEl) {
+        titleEl.innerHTML = `<span class="material-symbols-outlined text-primary text-xl">forum</span> Program Discussions`;
+    }
+    
+    window.renderDiscussionSidebar();
+    window.renderAdminProgramChat();
+    window.updateMobileDiscussionUI();
 };
 

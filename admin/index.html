@@ -391,11 +391,12 @@
 
                         <!-- Main Split Content -->
                         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-220px)] lg:h-[550px]">
-                            <!-- Left: Clients Sidebar List -->
+                            <!-- Left: Clients/Programs Sidebar List -->
                             <div id="discussion-sidebar-panel" class="lg:col-span-4 border-r border-outline-variant/20 lg:pr-4 flex flex-col gap-3 h-full">
-                                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Recipients</h3>
+                                <div id="sidebar-header-nav" class="flex flex-col gap-2"></div>
+                                <h3 id="sidebar-list-title" class="text-xs font-bold text-slate-500 uppercase tracking-wider">Recipients</h3>
                                 <div id="discussion-page-clients-list" class="flex flex-col gap-2 overflow-y-auto flex-grow">
-                                    <!-- Populated dynamically with client list items -->
+                                    <!-- Populated dynamically with client or program list items -->
                                 </div>
                             </div>
 
@@ -909,29 +910,7 @@
         </div>
     </div>
     
-    <!-- Program Chat Selection Modal -->
-    <div id="program-chat-selection-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="bg-surface max-w-md w-full rounded-2xl p-7 border border-outline-variant/30 shadow-2xl flex flex-col gap-5 text-on-surface animate-fade-in">
-            <div class="flex justify-between items-start border-b border-outline-variant/15 pb-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-[22px]">forum</span>
-                    </div>
-                    <div class="text-left">
-                        <h3 class="text-base font-black text-on-background">Select Program Chat</h3>
-                        <p class="text-[10px] text-on-surface-variant mt-0.5">Select a program to open its discussion thread.</p>
-                    </div>
-                </div>
-                <button onclick="closeProgramChatSelectionModal()" class="text-on-surface-variant/70 hover:text-on-background hover:bg-surface-container-high p-1.5 rounded-full transition-colors cursor-pointer flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[20px]">close</span>
-                </button>
-            </div>
-            
-            <div id="chat-selection-programs-list" class="flex flex-col gap-3 overflow-y-auto max-h-[380px] py-1 pr-1 scroll-smooth">
-                <!-- Program list items will be injected here via JS -->
-            </div>
-        </div>
-    </div>
+
 
 
     <!-- Admin dashboard logic -->
