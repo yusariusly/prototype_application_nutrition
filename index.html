@@ -636,7 +636,14 @@
                     </div>
 
                     <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
-                        <h2 class="text-lg font-bold text-on-background">Body Measurements (Inches)</h2>
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-lg font-bold text-on-background">Body Measurements (Inches)</h2>
+                            <select id="measurements-range" onchange="updateMeasurementsChart()" class="text-xs bg-surface border border-outline-variant/30 rounded-lg px-2 py-1 font-semibold text-on-surface-variant">
+                                <option value="1w">1 Week</option>
+                                <option value="1m">1 Month</option>
+                                <option value="3m" selected>3 Months</option>
+                            </select>
+                        </div>
                         <div class="w-full relative h-64"><canvas id="bodyMeasurementsChartCanvas"></canvas></div>
                     </div>
                 </div>

@@ -182,6 +182,42 @@ function getOrGenerateWeightHistory() {
     return history;
 }
 
+function getOrGenerateMeasurementsHistory() {
+    let stored = localStorage.getItem('nutriflow_measurements_history');
+    if (stored) {
+        try {
+            const parsed = JSON.parse(stored);
+            if (parsed.length > 0 && parsed[0].date) {
+                return parsed;
+            }
+        } catch(e) {}
+    }
+    
+    const history = [];
+    const today = new Date();
+    
+    for (let i = 90; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(today.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        const progressRatio = (90 - i) / 90; 
+        
+        const waistBaseline = 34.0 - (4.0 * progressRatio);
+        const waistVal = waistBaseline + (Math.sin(progressRatio * 10) * 0.3) + (Math.random() * 0.2 - 0.1);
+        
+        const hipBaseline = 40.0 - (4.0 * progressRatio);
+        const hipVal = hipBaseline + (Math.sin(progressRatio * 10) * 0.3) + (Math.random() * 0.2 - 0.1);
+        
+        history.push({
+            date: dateStr,
+            waist: parseFloat(waistVal.toFixed(1)),
+            hip: parseFloat(hipVal.toFixed(1))
+        });
+    }
+    localStorage.setItem('nutriflow_measurements_history', JSON.stringify(history));
+    return history;
+}
+
 // ==================== STATE SYNC WITH LOCALSTORAGE ====================
 function loadState() {
     if (localStorage.getItem('nutriflow_water_glasses')) {
@@ -194,9 +230,7 @@ function loadState() {
         state.loggedMeals = JSON.parse(localStorage.getItem('nutriflow_logged_meals'));
     }
     state.profileStats.weightHistory = getOrGenerateWeightHistory();
-    if (localStorage.getItem('nutriflow_measurements_history')) {
-        state.profileStats.bodyMeasurements = JSON.parse(localStorage.getItem('nutriflow_measurements_history'));
-    }
+    state.profileStats.bodyMeasurements = getOrGenerateMeasurementsHistory();
 
     if (localStorage.getItem('nutriflow_logged_status')) {
         state.loggedStatus = JSON.parse(localStorage.getItem('nutriflow_logged_status'));
@@ -2533,35 +2567,97 @@ function checkStatsLoggedToday() {
 function initProfileCharts() {
     checkStatsLoggedToday();
     updateWeightTrendChart();
+    updateMeasurementsChart();
+}
 
-    const ctxMeas = document.getElementById('bodyMeasurementsChartCanvas').getContext('2d');
-    const measLabels = state.profileStats.bodyMeasurements.map(d => d.label);
-    const waists = state.profileStats.bodyMeasurements.map(d => d.waist);
-    const hips = state.profileStats.bodyMeasurements.map(d => d.hip);
+window.updateMeasurementsChart = function() {
+    const canvas = document.getElementById('bodyMeasurementsChartCanvas');
+    if (!canvas) return;
+    const ctxMeas = canvas.getContext('2d');
+    
+    const range = document.getElementById('measurements-range')?.value || '3m';
+    const history = state.profileStats.bodyMeasurements || [];
+    
+    const sorted = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    let filtered = [];
+    if (range === '1w') {
+        filtered = sorted.slice(-7);
+    } else if (range === '1m') {
+        filtered = sorted.slice(-30);
+    } else {
+        filtered = sorted.slice(-90);
+    }
+    
+    const labels = filtered.map(d => {
+        const dateObj = new Date(d.date);
+        return dateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+    });
+    const waists = filtered.map(d => d.waist);
+    const hips = filtered.map(d => d.hip);
 
     if (measurementsChartInstance) measurementsChartInstance.destroy();
+    
+    const numPoints = waists.length;
+    const pointRadius = numPoints > 15 ? 0 : 4; 
+    const maxTicks = numPoints > 30 ? 6 : (numPoints > 7 ? 8 : 7);
+    
     measurementsChartInstance = new Chart(ctxMeas, {
-        type: 'bar',
+        type: 'line',
         data: {
-            labels: measLabels,
+            labels: labels,
             datasets: [
-                { label: 'Waist (in)', data: waists, backgroundColor: '#006e2f', borderRadius: 6 },
-                { label: 'Hip (in)', data: hips, backgroundColor: '#006a61', borderRadius: 6 }
+                {
+                    label: 'Waist (in)',
+                    data: waists,
+                    borderColor: '#006e2f',
+                    backgroundColor: 'rgba(0, 110, 47, 0.02)',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#006e2f',
+                    pointBorderColor: '#ffffff',
+                    pointRadius: pointRadius,
+                    pointHoverRadius: 6,
+                    tension: 0.2,
+                    fill: true
+                },
+                {
+                    label: 'Hip (in)',
+                    data: hips,
+                    borderColor: '#006a61',
+                    backgroundColor: 'rgba(0, 106, 97, 0.02)',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#006a61',
+                    pointBorderColor: '#ffffff',
+                    pointRadius: pointRadius,
+                    pointHoverRadius: 6,
+                    tension: 0.2,
+                    fill: true
+                }
             ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { position: 'bottom', labels: { color: '#0b1c30', font: { size: 11 } } }
+                legend: { position: 'bottom', labels: { color: '#0b1c30', font: { size: 10 } } }
             },
             scales: {
-                y: { grid: { color: 'rgba(211, 228, 254, 0.4)' }, ticks: { color: '#6d7b6c', font: { size: 10 } } },
-                x: { grid: { display: false }, ticks: { color: '#6d7b6c', font: { size: 10 } } }
+                y: { 
+                    grid: { color: 'rgba(211, 228, 254, 0.4)' }, 
+                    ticks: { color: '#6d7b6c', font: { size: 10 } } 
+                },
+                x: { 
+                    grid: { display: false }, 
+                    ticks: { 
+                        color: '#6d7b6c', 
+                        font: { size: 10 },
+                        maxTicksLimit: maxTicks
+                    } 
+                }
             }
         }
     });
-}
+};
 
 window.updateWeightTrendChart = function() {
     const canvas = document.getElementById('weightTrendChartCanvas');
@@ -2650,16 +2746,13 @@ window.handleStatsLogSubmit = function(e) {
     const dateStr = date.toISOString().split('T')[0];
     
     state.profileStats.weightHistory.push({ date: dateStr, weight: weightVal });
-    
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const currentMonth = monthNames[date.getMonth()];
-    const labelStr = `${currentMonth} ${date.getDate()}`;
-    state.profileStats.bodyMeasurements.push({ label: labelStr, waist: waistVal, hip: hipVal });
+    state.profileStats.bodyMeasurements.push({ date: dateStr, waist: waistVal, hip: hipVal });
     
     localStorage.setItem('nutriflow_last_logged_date', date.toDateString());
     saveState();
     
     updateWeightTrendChart();
+    updateMeasurementsChart();
     showToast('Saved health stats entry successfully!', 'success');
 };
 
