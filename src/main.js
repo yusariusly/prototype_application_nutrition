@@ -684,8 +684,18 @@ function renderDashboardMeals() {
     
     const today = 'Wed';
     const clientName = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
-    const clientPlan = state.clientMealPlans[clientName][today] || [];
+    const clientPlan = state.clientMealPlans[clientName]?.[today] || [];
     const slots = ['Breakfast', 'Lunch', 'Snack', 'Dinner'];
+    
+    // Find first unlogged planned slot to auto-open on mobile
+    let autoOpenSlot = slots.find(slotName => {
+        const isLogged = state.loggedStatus[clientName]?.[today]?.[slotName] === true;
+        const mealExists = clientPlan.some(m => m.type.toLowerCase() === slotName.toLowerCase());
+        return mealExists && !isLogged;
+    });
+    if (!autoOpenSlot) {
+        autoOpenSlot = slots.find(slotName => clientPlan.some(m => m.type.toLowerCase() === slotName.toLowerCase())) || 'Breakfast';
+    }
     
     grid.innerHTML = slots.map(slotName => {
         const meal = clientPlan.find(m => m.type.toLowerCase() === slotName.toLowerCase());
@@ -710,11 +720,9 @@ function renderDashboardMeals() {
         const cPct = ((meal.c || 0) / totalMacros) * 100;
         const fPct = ((meal.f || 0) / totalMacros) * 100;
 
-        // Visual styles based on log status (grayscale if not eaten yet)
         const imageStyle = isLogged ? 'filter: none;' : 'filter: grayscale(100%) contrast(85%) opacity(70%);';
         const cardBgClass = isLogged ? 'bg-white border-primary/25' : 'bg-slate-50/70 border-slate-200';
         
-        // Log button styling
         const btnHtml = isLogged 
             ? `<button onclick="event.stopPropagation(); toggleLogMeal('${today}', '${slotName}')" class="bg-red-600 hover:bg-red-700 text-white rounded-full p-1 border border-outline-variant/35 shadow-md flex items-center justify-center cursor-pointer transition-transform active:scale-90" title="Unlog meal">
                    <span class="material-symbols-outlined text-[10px] font-bold">close</span>
@@ -723,58 +731,129 @@ function renderDashboardMeals() {
                    <span class="material-symbols-outlined text-[12px] font-bold">check_circle</span> Log Eat
                </button>`;
 
+        const isOpen = slotName === autoOpenSlot;
+        const bodyClass = isOpen ? 'block' : 'hidden';
+
         if (meal.image) {
             return `
-                <div onclick="navigateTo('meal-plans')" class="${cardBgClass} border rounded-2xl overflow-hidden flex flex-col shadow-sm relative group cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all">
-                    <div class="h-28 w-full relative overflow-hidden">
-                        <img class="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300 pointer-events-none select-none" style="${imageStyle}" src="${meal.image}" alt="${meal.title}">
-                        <span class="absolute top-2.5 left-2.5 bg-white/95 text-slate-700 font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm z-10">${slotName}</span>
+                <div class="dashboard-meal-accordion-item border rounded-2xl overflow-hidden shadow-sm relative group ${cardBgClass} transition-all duration-300" data-slot="${slotName}">
+                    <!-- Mobile Accordion Header -->
+                    <div onclick="toggleMealAccordion('${slotName}')" class="flex md:hidden items-center justify-between p-4 cursor-pointer select-none bg-white">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
+                                <span class="material-symbols-outlined text-base">${slotName === 'Breakfast' ? 'sunny' : slotName === 'Lunch' ? 'wb_sunny' : slotName === 'Snack' ? 'cookie' : 'nights_stay'}</span>
+                            </div>
+                            <div class="text-left">
+                                <span class="block text-[8px] uppercase tracking-wider text-slate-400 font-bold leading-none">${slotName}</span>
+                                <span class="font-bold text-xs text-slate-800 line-clamp-1 mt-1">${meal.title}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-slate-500">${meal.calories} kcal</span>
+                            ${isLogged ? '<span class="material-symbols-outlined text-primary text-base">check_circle</span>' : ''}
+                            <span class="material-symbols-outlined text-slate-400 text-base accordion-chevron transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}">expand_more</span>
+                        </div>
                     </div>
-                    <div class="p-3 flex flex-col gap-2">
-                        <div class="flex justify-between items-center gap-2">
-                            <span class="font-bold text-xs text-slate-800 line-clamp-1 group-hover:text-primary transition-colors">${meal.title}</span>
-                            <span class="text-xs font-bold text-slate-500 shrink-0">${meal.calories} kcal</span>
-                        </div>
-                        <div class="w-full h-1.5 rounded-full overflow-hidden flex bg-slate-100">
-                            <div class="bg-[#006e2f]" style="width: ${cPct}%"></div>
-                            <div class="bg-[#006a61]" style="width: ${pPct}%"></div>
-                            <div class="bg-[#9d4300]" style="width: ${fPct}%"></div>
-                        </div>
-                        <div class="flex justify-between text-[9px] text-slate-400 font-bold mb-1">
-                            <span>${meal.c || 0}G C</span>
-                            <span>${meal.p || 0}G P</span>
-                            <span>${meal.f || 0}G F</span>
-                        </div>
-                        <!-- Log Button (Below the macro bar & stats) -->
-                        <div class="pt-2 border-t border-slate-100 flex justify-end">
-                            ${btnHtml}
+                    
+                    <!-- Accordion Body / Desktop Card -->
+                    <div class="accordion-body ${bodyClass} md:block border-t border-slate-100 md:border-t-0">
+                        <div onclick="navigateTo('meal-plans')" class="flex flex-col cursor-pointer">
+                            <div class="h-28 w-full relative overflow-hidden">
+                                <img class="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300 pointer-events-none select-none" style="${imageStyle}" src="${meal.image}" alt="${meal.title}">
+                                <span class="absolute top-2.5 left-2.5 bg-white/95 text-slate-700 font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm z-10">${slotName}</span>
+                            </div>
+                            <div class="p-3 flex flex-col gap-2 bg-white">
+                                <div class="flex justify-between items-center gap-2">
+                                    <span class="font-bold text-xs text-slate-800 line-clamp-1 group-hover:text-primary transition-colors">${meal.title}</span>
+                                    <span class="text-xs font-bold text-slate-500 shrink-0">${meal.calories} kcal</span>
+                                </div>
+                                <div class="w-full h-1.5 rounded-full overflow-hidden flex bg-slate-100">
+                                    <div class="bg-[#006e2f]" style="width: ${cPct}%"></div>
+                                    <div class="bg-[#006a61]" style="width: ${pPct}%"></div>
+                                    <div class="bg-[#9d4300]" style="width: ${fPct}%"></div>
+                                </div>
+                                <div class="flex justify-between text-[9px] text-slate-400 font-bold mb-1">
+                                    <span>${meal.c || 0}G C</span>
+                                    <span>${meal.p || 0}G P</span>
+                                    <span>${meal.f || 0}G F</span>
+                                </div>
+                                <div class="pt-2 border-t border-slate-100 flex justify-end">
+                                    ${btnHtml}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             `;
         } else {
-            // Compact style card
             return `
-                <div onclick="navigateTo('meal-plans')" class="${cardBgClass} border rounded-2xl p-4 flex flex-col gap-3 shadow-sm relative group cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all min-h-[90px]">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-[#f0fdf4] text-[#006e2f] flex items-center justify-center shrink-0" style="${imageStyle}">
-                            <span class="material-symbols-outlined text-lg">eco</span>
+                <div class="dashboard-meal-accordion-item border rounded-2xl overflow-hidden shadow-sm relative group ${cardBgClass} transition-all duration-300" data-slot="${slotName}">
+                    <!-- Mobile Accordion Header -->
+                    <div onclick="toggleMealAccordion('${slotName}')" class="flex md:hidden items-center justify-between p-4 cursor-pointer select-none bg-white">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
+                                <span class="material-symbols-outlined text-base">${slotName === 'Breakfast' ? 'sunny' : slotName === 'Lunch' ? 'wb_sunny' : slotName === 'Snack' ? 'cookie' : 'nights_stay'}</span>
+                            </div>
+                            <div class="text-left">
+                                <span class="block text-[8px] uppercase tracking-wider text-slate-400 font-bold leading-none">${slotName}</span>
+                                <span class="font-bold text-xs text-slate-800 line-clamp-1 mt-1">${meal.title}</span>
+                            </div>
                         </div>
-                        <div>
-                            <span class="block text-[9px] uppercase tracking-wider text-slate-400 font-bold">${slotName}</span>
-                            <span class="font-bold text-xs text-slate-800 line-clamp-1 group-hover:text-primary transition-colors">${meal.title}</span>
-                            <span class="text-[9px] font-bold text-slate-400 block mt-0.5">${meal.calories} kcal</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-slate-500">${meal.calories} kcal</span>
+                            ${isLogged ? '<span class="material-symbols-outlined text-primary text-base">check_circle</span>' : ''}
+                            <span class="material-symbols-outlined text-slate-400 text-base accordion-chevron transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}">expand_more</span>
                         </div>
                     </div>
-                    <!-- Log Button (Below the content) -->
-                    <div class="pt-2 border-t border-slate-100 flex justify-end">
-                        ${btnHtml}
+                    
+                    <!-- Accordion Body / Desktop Card -->
+                    <div class="accordion-body ${bodyClass} md:block border-t border-slate-100 md:border-t-0">
+                        <div onclick="navigateTo('meal-plans')" class="p-4 flex flex-col gap-3 cursor-pointer bg-white">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-[#f0fdf4] text-[#006e2f] flex items-center justify-center shrink-0" style="${imageStyle}">
+                                    <span class="material-symbols-outlined text-lg">eco</span>
+                                </div>
+                                <div>
+                                    <span class="block text-[9px] uppercase tracking-wider text-slate-400 font-bold">${slotName}</span>
+                                    <span class="font-bold text-xs text-slate-800 line-clamp-1 group-hover:text-primary transition-colors">${meal.title}</span>
+                                    <span class="text-[9px] font-bold text-slate-400 block mt-0.5">${meal.calories} kcal</span>
+                                </div>
+                            </div>
+                            <div class="pt-2 border-t border-slate-100 flex justify-end">
+                                ${btnHtml}
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;
         }
     }).join('');
 }
+
+window.toggleMealAccordion = function(slotName) {
+    if (window.innerWidth >= 768) return;
+    
+    const items = document.querySelectorAll('.dashboard-meal-accordion-item');
+    items.forEach(item => {
+        const itemSlot = item.getAttribute('data-slot');
+        const body = item.querySelector('.accordion-body');
+        const chevron = item.querySelector('.accordion-chevron');
+        
+        if (itemSlot === slotName) {
+            const isHidden = body.classList.contains('hidden');
+            if (isHidden) {
+                body.classList.remove('hidden');
+                if (chevron) chevron.classList.add('rotate-180');
+            } else {
+                body.classList.add('hidden');
+                if (chevron) chevron.classList.remove('rotate-180');
+            }
+        } else {
+            if (body) body.classList.add('hidden');
+            if (chevron) chevron.classList.remove('rotate-180');
+        }
+    });
+};
 
 function renderWaterTracker() {
     const grid = document.getElementById('water-glasses-grid');
