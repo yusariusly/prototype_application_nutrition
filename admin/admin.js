@@ -1001,7 +1001,8 @@ window.toggleProgramViewMode = function(editing) {
             sidebar.classList.add('flex');
         }
         if (mainContent) {
-            mainContent.className = 'lg:col-span-9 flex flex-col gap-4 transition-all';
+            mainContent.classList.remove('lg:col-span-12');
+            mainContent.classList.add('lg:col-span-9', 'order-1');
         }
         if (listView) listView.classList.add('hidden');
         if (editorView) editorView.classList.remove('hidden');
@@ -1011,7 +1012,8 @@ window.toggleProgramViewMode = function(editing) {
             sidebar.classList.remove('flex');
         }
         if (mainContent) {
-            mainContent.className = 'lg:col-span-12 flex flex-col gap-4 transition-all';
+            mainContent.classList.remove('lg:col-span-9', 'order-1');
+            mainContent.classList.add('lg:col-span-12');
         }
         if (listView) listView.classList.remove('hidden');
         if (editorView) editorView.classList.add('hidden');
@@ -1096,22 +1098,39 @@ window.renderProgramsList = function() {
                     <p class="text-xs text-on-surface-variant leading-relaxed line-clamp-3">${p.description}</p>
                 </div>
                 
-                <div class="border-t border-outline-variant/20 pt-4 mt-5 flex justify-between items-center gap-2">
-                    <div class="flex flex-col">
-                        <span class="text-[9px] text-on-surface-variant font-bold uppercase tracking-wider">Scheduled Meals</span>
-                        <span class="text-xs font-extrabold text-primary">${totalMeals} meals</span>
+                <div class="border-t border-outline-variant/20 pt-4 mt-5 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
+                    <div class="flex justify-between items-center w-full sm:w-auto">
+                        <div class="flex flex-col">
+                            <span class="text-[9px] text-on-surface-variant font-bold uppercase tracking-wider">Scheduled Meals</span>
+                            <span class="text-xs font-extrabold text-primary">${totalMeals} meals</span>
+                        </div>
+                        <!-- share & chat icons next to it on mobile -->
+                        <div class="flex sm:hidden items-center gap-1.5">
+                            <button onclick="shareProgramLink('${p.id}')" class="bg-surface hover:bg-slate-50 border border-outline-variant/40 text-on-surface-variant font-bold p-2 rounded-xl transition-all cursor-pointer flex items-center justify-center" title="Share Program">
+                                <span class="material-symbols-outlined text-[16px]">share</span>
+                            </button>
+                            <button onclick="openProgramDiscussion('${p.id}')" class="bg-surface hover:bg-slate-50 border border-outline-variant/40 text-on-surface-variant font-bold p-2 rounded-xl transition-all cursor-pointer flex items-center justify-center" title="Program Discussion">
+                                <span class="material-symbols-outlined text-[16px]">forum</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-1.5">
-                        <button onclick="editProgramPlan('${p.id}')" class="bg-primary/10 hover:bg-primary/20 text-primary font-bold text-[10px] px-3 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1">
+                    
+                    <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                        <button onclick="editProgramPlan('${p.id}')" class="flex-grow sm:flex-grow-0 bg-primary/10 hover:bg-primary/20 text-primary font-bold text-[10px] px-3.5 py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5">
                             <span class="material-symbols-outlined text-sm">edit</span> Edit Plan
                         </button>
-                        <button onclick="shareProgramLink('${p.id}')" class="bg-surface hover:bg-slate-50 border border-outline-variant/40 text-on-surface-variant font-bold p-1.5 rounded-xl transition-all cursor-pointer flex items-center justify-center" title="Share Program">
-                            <span class="material-symbols-outlined text-[15px]">share</span>
-                        </button>
-                        <button onclick="openProgramDiscussion('${p.id}')" class="bg-surface hover:bg-slate-50 border border-outline-variant/40 text-on-surface-variant font-bold p-1.5 rounded-xl transition-all cursor-pointer flex items-center justify-center" title="Program Discussion">
-                            <span class="material-symbols-outlined text-[15px]">forum</span>
-                        </button>
-                        <button onclick="openPublishProgramDialog('${p.id}')" class="bg-primary hover:bg-[#005321] text-white font-bold text-[10px] px-3 py-2 rounded-xl transition-all shadow-sm cursor-pointer flex items-center gap-1">
+                        
+                        <!-- Desktop-only share & forum buttons -->
+                        <div class="hidden sm:flex items-center gap-1.5">
+                            <button onclick="shareProgramLink('${p.id}')" class="bg-surface hover:bg-slate-50 border border-outline-variant/40 text-on-surface-variant font-bold p-1.5 rounded-xl transition-all cursor-pointer flex items-center justify-center" title="Share Program">
+                                <span class="material-symbols-outlined text-[15px]">share</span>
+                            </button>
+                            <button onclick="openProgramDiscussion('${p.id}')" class="bg-surface hover:bg-slate-50 border border-outline-variant/40 text-on-surface-variant font-bold p-1.5 rounded-xl transition-all cursor-pointer flex items-center justify-center" title="Program Discussion">
+                                <span class="material-symbols-outlined text-[15px]">forum</span>
+                            </button>
+                        </div>
+                        
+                        <button onclick="openPublishProgramDialog('${p.id}')" class="flex-grow sm:flex-grow-0 bg-primary hover:bg-[#005321] text-white font-bold text-[10px] px-3.5 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1.5">
                             <span class="material-symbols-outlined text-sm">send</span> Publish
                         </button>
                     </div>
