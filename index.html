@@ -627,8 +627,9 @@
                         <div class="flex justify-between items-center">
                             <h2 class="text-lg font-bold text-on-background">Weight Trend</h2>
                             <select id="weight-trend-range" onchange="updateWeightTrendChart()" class="text-xs bg-surface border border-outline-variant/30 rounded-lg px-2 py-1 font-semibold text-on-surface-variant">
-                                <option value="3">Last 3 Months</option>
-                                <option value="6">Last 6 Months</option>
+                                <option value="1w">1 Week</option>
+                                <option value="1m">1 Month</option>
+                                <option value="3m" selected>3 Months</option>
                             </select>
                         </div>
                         <div class="w-full relative h-64"><canvas id="weightTrendChartCanvas"></canvas></div>

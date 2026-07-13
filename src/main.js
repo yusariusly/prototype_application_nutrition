@@ -151,6 +151,37 @@ const RECIPES_DB = {
 let weightChartInstance = null;
 let measurementsChartInstance = null;
 
+function getOrGenerateWeightHistory() {
+    let stored = localStorage.getItem('nutriflow_weight_history');
+    if (stored) {
+        try {
+            const parsed = JSON.parse(stored);
+            if (parsed.length > 0 && parsed[0].date) {
+                return parsed;
+            }
+        } catch(e) {}
+    }
+    
+    const history = [];
+    const today = new Date();
+    let currentWeight = 176.2;
+    
+    for (let i = 90; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(today.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        const progressRatio = (90 - i) / 90; 
+        const targetBaseline = 176.2 - (14.2 * progressRatio);
+        currentWeight = targetBaseline + (Math.sin(progressRatio * 15) * 1.5) + (Math.random() * 0.8 - 0.4);
+        history.push({
+            date: dateStr,
+            weight: parseFloat(currentWeight.toFixed(1))
+        });
+    }
+    localStorage.setItem('nutriflow_weight_history', JSON.stringify(history));
+    return history;
+}
+
 // ==================== STATE SYNC WITH LOCALSTORAGE ====================
 function loadState() {
     if (localStorage.getItem('nutriflow_water_glasses')) {
@@ -162,9 +193,7 @@ function loadState() {
     if (localStorage.getItem('nutriflow_logged_meals')) {
         state.loggedMeals = JSON.parse(localStorage.getItem('nutriflow_logged_meals'));
     }
-    if (localStorage.getItem('nutriflow_weight_history')) {
-        state.profileStats.weightHistory = JSON.parse(localStorage.getItem('nutriflow_weight_history'));
-    }
+    state.profileStats.weightHistory = getOrGenerateWeightHistory();
     if (localStorage.getItem('nutriflow_measurements_history')) {
         state.profileStats.bodyMeasurements = JSON.parse(localStorage.getItem('nutriflow_measurements_history'));
     }
@@ -193,26 +222,6 @@ function loadState() {
             }
         };
         localStorage.setItem('nutriflow_logged_status', JSON.stringify(state.loggedStatus));
-    }
-    
-    // Automatically purge previous spam entries from history
-    if (state.profileStats.weightHistory.length > 6 || state.profileStats.bodyMeasurements.length > 3) {
-        state.profileStats.weightHistory = [
-            { month: 'Jan', weight: 168.0 },
-            { month: 'Feb', weight: 169.5 },
-            { month: 'Mar', weight: 170.2 },
-            { month: 'Apr', weight: 173.0 },
-            { month: 'May', weight: 174.8 },
-            { month: 'Jun', weight: 176.2 }
-        ];
-        state.profileStats.bodyMeasurements = [
-            { label: 'Mar 1', waist: 31.0, hip: 37.0 },
-            { label: 'Apr 1', waist: 30.5, hip: 36.5 },
-            { label: 'Today', waist: 30.0, hip: 36.0 }
-        ];
-        localStorage.setItem('nutriflow_weight_history', JSON.stringify(state.profileStats.weightHistory));
-        localStorage.setItem('nutriflow_measurements_history', JSON.stringify(state.profileStats.bodyMeasurements));
-        localStorage.removeItem('nutriflow_last_logged_date');
     }
     
     // Helper to get formatted relative date (YYYY-MM-DD)
@@ -2523,39 +2532,7 @@ function checkStatsLoggedToday() {
 // ==================== PROFILE / PROGRESS ====================
 function initProfileCharts() {
     checkStatsLoggedToday();
-    
-    const ctxWeight = document.getElementById('weightTrendChartCanvas').getContext('2d');
-    const labels = state.profileStats.weightHistory.map(d => d.month);
-    const weights = state.profileStats.weightHistory.map(d => d.weight);
-
-    if (weightChartInstance) weightChartInstance.destroy();
-    weightChartInstance = new Chart(ctxWeight, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Weight (lbs)',
-                data: weights,
-                borderColor: '#006e2f',
-                backgroundColor: 'rgba(0, 110, 47, 0.05)',
-                borderWidth: 2,
-                pointBackgroundColor: '#006e2f',
-                pointBorderColor: '#ffffff',
-                pointRadius: 4,
-                tension: 0.25,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { grid: { color: 'rgba(211, 228, 254, 0.4)' }, ticks: { color: '#6d7b6c', font: { size: 10 } } },
-                x: { grid: { display: false }, ticks: { color: '#6d7b6c', font: { size: 10 } } }
-            }
-        }
-    });
+    updateWeightTrendChart();
 
     const ctxMeas = document.getElementById('bodyMeasurementsChartCanvas').getContext('2d');
     const measLabels = state.profileStats.bodyMeasurements.map(d => d.label);
@@ -2586,6 +2563,77 @@ function initProfileCharts() {
     });
 }
 
+window.updateWeightTrendChart = function() {
+    const canvas = document.getElementById('weightTrendChartCanvas');
+    if (!canvas) return;
+    const ctxWeight = canvas.getContext('2d');
+    
+    const range = document.getElementById('weight-trend-range')?.value || '3m';
+    const history = state.profileStats.weightHistory || [];
+    
+    const sorted = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    let filtered = [];
+    if (range === '1w') {
+        filtered = sorted.slice(-7);
+    } else if (range === '1m') {
+        filtered = sorted.slice(-30);
+    } else {
+        filtered = sorted.slice(-90);
+    }
+    
+    const labels = filtered.map(d => {
+        const dateObj = new Date(d.date);
+        return dateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+    });
+    const weights = filtered.map(d => d.weight);
+
+    if (weightChartInstance) weightChartInstance.destroy();
+    
+    const numPoints = weights.length;
+    const pointRadius = numPoints > 15 ? 0 : 4; 
+    const maxTicks = numPoints > 30 ? 6 : (numPoints > 7 ? 8 : 7);
+    
+    weightChartInstance = new Chart(ctxWeight, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Weight (lbs)',
+                data: weights,
+                borderColor: '#006e2f',
+                backgroundColor: 'rgba(0, 110, 47, 0.05)',
+                borderWidth: 2,
+                pointBackgroundColor: '#006e2f',
+                pointBorderColor: '#ffffff',
+                pointRadius: pointRadius,
+                pointHoverRadius: 6,
+                tension: 0.2,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { 
+                    grid: { color: 'rgba(211, 228, 254, 0.4)' }, 
+                    ticks: { color: '#6d7b6c', font: { size: 10 } } 
+                },
+                x: { 
+                    grid: { display: false }, 
+                    ticks: { 
+                        color: '#6d7b6c', 
+                        font: { size: 10 },
+                        maxTicksLimit: maxTicks
+                    } 
+                }
+            }
+        }
+    });
+};
+
 window.handleStatsLogSubmit = function(e) {
     e.preventDefault();
     
@@ -2599,17 +2647,19 @@ window.handleStatsLogSubmit = function(e) {
     const hipVal = parseFloat(document.getElementById('stats-hip').value);
     
     const date = new Date();
+    const dateStr = date.toISOString().split('T')[0];
+    
+    state.profileStats.weightHistory.push({ date: dateStr, weight: weightVal });
+    
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const currentMonth = monthNames[date.getMonth()];
     const labelStr = `${currentMonth} ${date.getDate()}`;
-    
-    state.profileStats.weightHistory.push({ month: currentMonth, weight: weightVal });
     state.profileStats.bodyMeasurements.push({ label: labelStr, waist: waistVal, hip: hipVal });
     
     localStorage.setItem('nutriflow_last_logged_date', date.toDateString());
     saveState();
     
-    initProfileCharts();
+    updateWeightTrendChart();
     showToast('Saved health stats entry successfully!', 'success');
 };
 
