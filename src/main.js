@@ -3,6 +3,7 @@
 // ==================== APP STATE ====================
 const state = {
     activeView: 'dashboard',
+    previousView: null,
     streakDays: 12,
     waterGlasses: 5,
     maxWaterGlasses: 8,
@@ -525,6 +526,9 @@ window.navigateTo = function(viewId) {
     if (state.isGuestPreview && viewId !== 'meal-plans') {
         openRegistrationModal();
         return;
+    }
+    if (state.activeView && state.activeView !== viewId && viewId !== 'help-center' && viewId !== 'privacy-policy' && viewId !== 'terms-of-service') {
+        state.previousView = state.activeView;
     }
     state.activeView = viewId;
     
@@ -2706,4 +2710,52 @@ window.handleRegistrationSubmit = function(e) {
     navigateTo('dashboard');
     
     showToast(`Welcome ${clientName.split(' ')[0]}! Your tracking account is now active.`, 'success');
+};
+
+// ==================== HELP CENTER & LEGAL PAGES HELPERS ====================
+window.navigateBackOrHome = function() {
+    navigateTo(state.previousView || 'dashboard');
+};
+
+window.toggleFAQItem = function(header) {
+    const item = header.parentElement;
+    const content = item.querySelector('.faq-content');
+    const chevron = header.querySelector('.chevron-icon');
+    
+    if (content) {
+        const isHidden = content.classList.contains('hidden');
+        if (isHidden) {
+            content.classList.remove('hidden');
+            if (chevron) chevron.classList.add('rotate-180');
+        } else {
+            content.classList.add('hidden');
+            if (chevron) chevron.classList.remove('rotate-180');
+        }
+    }
+};
+
+window.filterHelpTopic = function(topic) {
+    const items = document.querySelectorAll('.faq-item');
+    items.forEach(item => {
+        if (item.getAttribute('data-topic') === topic) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+    showToast(`Filtering FAQs for Topic: ${topic.replace('-', ' ')}`, 'info');
+};
+
+window.filterHelpFAQ = function() {
+    const q = document.getElementById('help-search').value.toLowerCase();
+    const items = document.querySelectorAll('.faq-item');
+    
+    items.forEach(item => {
+        const text = item.innerText.toLowerCase();
+        if (text.includes(q)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
 };
