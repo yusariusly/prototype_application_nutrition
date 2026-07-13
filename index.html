@@ -656,11 +656,16 @@
                     <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
                         <div class="flex justify-between items-center">
                             <h2 class="text-lg font-bold text-on-background">Weight Trend</h2>
-                            <select id="weight-trend-range" onchange="updateWeightTrendChart()" class="text-xs bg-surface border border-outline-variant/30 rounded-lg px-2 py-1 font-semibold text-on-surface-variant">
-                                <option value="1w">1 Week</option>
-                                <option value="1m">1 Month</option>
-                                <option value="3m" selected>3 Months</option>
-                            </select>
+                            <div class="flex items-center gap-2">
+                                <select id="weight-trend-range" onchange="updateWeightTrendChart()" class="text-xs bg-surface border border-outline-variant/30 rounded-lg px-2 py-1 font-semibold text-on-surface-variant">
+                                    <option value="1w">1 Week</option>
+                                    <option value="1m">1 Month</option>
+                                    <option value="3m" selected>3 Months</option>
+                                </select>
+                                <button onclick="openChartZoomModal('weight')" class="p-1.5 hover:bg-surface-container-low rounded-lg border border-outline-variant/30 text-on-surface-variant transition-colors flex items-center justify-center cursor-pointer active:scale-95" title="Zoom In Chart">
+                                    <span class="material-symbols-outlined text-[16px]">zoom_in</span>
+                                </button>
+                            </div>
                         </div>
                         <div class="w-full relative h-64"><canvas id="weightTrendChartCanvas"></canvas></div>
                     </div>
@@ -668,11 +673,16 @@
                     <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
                         <div class="flex justify-between items-center">
                             <h2 class="text-lg font-bold text-on-background">Body Measurements (Inches)</h2>
-                            <select id="measurements-range" onchange="updateMeasurementsChart()" class="text-xs bg-surface border border-outline-variant/30 rounded-lg px-2 py-1 font-semibold text-on-surface-variant">
-                                <option value="1w">1 Week</option>
-                                <option value="1m">1 Month</option>
-                                <option value="3m" selected>3 Months</option>
-                            </select>
+                            <div class="flex items-center gap-2">
+                                <select id="measurements-range" onchange="updateMeasurementsChart()" class="text-xs bg-surface border border-outline-variant/30 rounded-lg px-2 py-1 font-semibold text-on-surface-variant">
+                                    <option value="1w">1 Week</option>
+                                    <option value="1m">1 Month</option>
+                                    <option value="3m" selected>3 Months</option>
+                                </select>
+                                <button onclick="openChartZoomModal('measurements')" class="p-1.5 hover:bg-surface-container-low rounded-lg border border-outline-variant/30 text-on-surface-variant transition-colors flex items-center justify-center cursor-pointer active:scale-95" title="Zoom In Chart">
+                                    <span class="material-symbols-outlined text-[16px]">zoom_in</span>
+                                </button>
+                            </div>
                         </div>
                         <div class="w-full relative h-64"><canvas id="bodyMeasurementsChartCanvas"></canvas></div>
                     </div>
@@ -1105,6 +1115,33 @@
                 </div>
                 <div class="space-y-1"><h4 class="text-xs font-bold uppercase tracking-wider text-primary">Ingredients</h4><ul id="modal-recipe-ingredients" class="list-disc pl-5 text-xs text-on-surface-variant space-y-1"></ul></div>
                 <div class="space-y-1"><h4 class="text-xs font-bold uppercase tracking-wider text-primary">Instructions</h4><p id="modal-recipe-instructions" class="text-xs text-on-surface-variant leading-relaxed"></p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Zoom Modal -->
+    <div id="chart-zoom-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-surface-container-lowest max-w-5xl w-full rounded-2xl overflow-hidden border border-outline-variant/30 shadow-2xl flex flex-col max-h-[90vh]">
+            <!-- Header -->
+            <div class="flex justify-between items-center px-6 py-4 border-b border-outline-variant/30">
+                <h3 class="text-base md:text-lg font-bold text-on-background" id="zoom-modal-title">Zoomed Chart View</h3>
+                <div class="flex items-center gap-3">
+                    <select id="zoom-modal-range" onchange="handleZoomModalRangeChange()" class="text-xs bg-surface border border-outline-variant/30 rounded-lg px-2 py-1 font-semibold text-on-surface-variant">
+                        <option value="1w">1 Week</option>
+                        <option value="1m">1 Month</option>
+                        <option value="3m">3 Months</option>
+                    </select>
+                    <button onclick="closeChartZoomModal()" class="text-on-surface-variant hover:text-primary rounded-full p-1.5 transition-colors flex items-center justify-center border border-outline-variant/35 bg-surface active:scale-95 cursor-pointer">
+                        <span class="material-symbols-outlined text-base">close</span>
+                    </button>
+                </div>
+            </div>
+            <!-- Content -->
+            <div class="p-6 overflow-y-auto flex flex-col gap-6">
+                <!-- Expanded Chart Canvas Container -->
+                <div class="w-full relative h-[380px] md:h-[450px]">
+                    <canvas id="zoomedChartCanvas"></canvas>
+                </div>
             </div>
         </div>
     </div>
