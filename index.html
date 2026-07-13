@@ -385,48 +385,48 @@
 
         <!-- ==================== VIEW 4: BOOKING WIZARD ==================== -->
         <section id="view-book-wizard" class="view-section hidden flex flex-col gap-gutter">
-            <div class="mb-2 text-center md:text-left">
-                <h1 class="text-3xl font-bold tracking-tight text-on-surface">Book Appointment</h1>
-                <p class="text-body-md text-on-surface-variant mt-1" id="booking-subtitle">Select the service that best fits your nutritional goals.</p>
+            <div class="mb-2 text-left">
+                <h1 class="text-xl md:text-3xl font-bold tracking-tight text-on-surface">Book Appointment</h1>
+                <p class="text-xs md:text-body-md text-on-surface-variant mt-1" id="booking-subtitle">Select the service that best fits your nutritional goals.</p>
             </div>
 
             <!-- Progress Stepper -->
-            <div class="w-full max-w-3xl mx-auto mb-8 relative">
+            <div class="w-full max-w-3xl mx-auto mb-4 md:mb-8 relative px-2">
                 <div class="flex items-center justify-between relative">
                     <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-surface-variant z-0 rounded-full"></div>
                     <div id="booking-stepper-progress-line" class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1/3 h-1 bg-primary z-0 rounded-full transition-all duration-500"></div>
                     
-                    <div class="relative z-10 flex flex-col items-center bg-surface px-2" id="step-node-1">
-                        <div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-label-md shadow-md">1</div>
-                        <span class="mt-2 font-label-md text-xs font-semibold text-primary">Service</span>
+                    <div class="relative z-10 flex flex-col items-center bg-surface px-1 md:px-2" id="step-node-1">
+                        <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-xs md:text-label-md shadow-md">1</div>
+                        <span class="mt-1 md:mt-2 text-[10px] md:text-xs font-semibold text-primary">Service</span>
                     </div>
-                    <div class="relative z-10 flex flex-col items-center bg-surface px-2" id="step-node-2">
-                        <div class="w-10 h-10 rounded-full bg-surface text-on-surface-variant border-2 border-surface-variant flex items-center justify-center font-bold text-label-md">2</div>
-                        <span class="mt-2 font-label-md text-xs font-semibold text-on-surface-variant">Date & Time</span>
+                    <div class="relative z-10 flex flex-col items-center bg-surface px-1 md:px-2" id="step-node-2">
+                        <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-surface text-on-surface-variant border-2 border-surface-variant flex items-center justify-center font-bold text-xs md:text-label-md">2</div>
+                        <span class="mt-1 md:mt-2 text-[10px] md:text-xs font-semibold text-on-surface-variant">Date & Time</span>
                     </div>
-                    <div class="relative z-10 flex flex-col items-center bg-surface px-2" id="step-node-3">
-                        <div class="w-10 h-10 rounded-full bg-surface text-on-surface-variant border-2 border-surface-variant flex items-center justify-center font-bold text-label-md">3</div>
-                        <span class="mt-2 font-label-md text-xs font-semibold text-on-surface-variant">Details</span>
+                    <div class="relative z-10 flex flex-col items-center bg-surface px-1 md:px-2" id="step-node-3">
+                        <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-surface text-on-surface-variant border-2 border-surface-variant flex items-center justify-center font-bold text-xs md:text-label-md">3</div>
+                        <span class="mt-1 md:mt-2 text-[10px] md:text-xs font-semibold text-on-surface-variant">Details</span>
                     </div>
-                    <div class="relative z-10 flex flex-col items-center bg-surface px-2" id="step-node-4">
-                        <div class="w-10 h-10 rounded-full bg-surface text-on-surface-variant border-2 border-surface-variant flex items-center justify-center font-bold text-label-md">4</div>
-                        <span class="mt-2 font-label-md text-xs font-semibold text-on-surface-variant">Confirm</span>
+                    <div class="relative z-10 flex flex-col items-center bg-surface px-1 md:px-2" id="step-node-4">
+                        <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-surface text-on-surface-variant border-2 border-surface-variant flex items-center justify-center font-bold text-xs md:text-label-md">4</div>
+                        <span class="mt-1 md:mt-2 text-[10px] md:text-xs font-semibold text-on-surface-variant">Confirm</span>
                     </div>
                 </div>
             </div>
 
             <!-- Steps -->
-            <div id="booking-step-1" class="booking-step-container flex flex-col gap-6">
+            <div id="booking-step-1" class="booking-step-container flex flex-col gap-6 pb-24 md:pb-0">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-md" id="booking-services-grid"></div>
-                <div class="flex justify-end pt-md border-t border-outline-variant/30">
-                    <button id="booking-next-btn-1" class="bg-primary text-on-primary font-bold text-sm py-3 px-6 rounded-lg opacity-50 cursor-not-allowed transition-all shadow-sm flex items-center gap-2" disabled>
+                <div class="fixed bottom-0 left-0 right-0 bg-surface border-t border-outline-variant/30 px-6 py-4 z-40 flex items-center justify-end shadow-[0_-4px_12px_rgba(0,0,0,0.05)] md:relative md:border-t md:border-outline-variant/30 md:bg-transparent md:px-0 md:py-0 md:shadow-none md:mt-4 md:pt-4">
+                    <button id="booking-next-btn-1" class="bg-primary text-on-primary font-bold text-sm py-3 px-6 rounded-full opacity-50 cursor-not-allowed transition-all shadow-sm flex items-center gap-2 w-full md:w-auto justify-center active:scale-95" disabled>
                         Continue to Date & Time
-                        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                        <span class="material-symbols-outlined text-base">arrow_forward</span>
                     </button>
                 </div>
             </div>
 
-            <div id="booking-step-2" class="booking-step-container hidden grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+            <div id="booking-step-2" class="booking-step-container hidden grid grid-cols-1 lg:grid-cols-12 gap-gutter pb-24 md:pb-0">
                 <div class="lg:col-span-4 flex flex-col gap-4">
                     <div class="bg-surface-container-lowest rounded-2xl overflow-hidden border border-outline-variant/30 shadow-sm flex flex-col">
                         <div class="h-44 w-full relative">
@@ -480,14 +480,18 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-between items-center pt-4 border-t border-outline-variant/30">
-                        <button onclick="goBackToBookingStep(1)" class="text-xs text-on-surface-variant hover:text-primary font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">arrow_back</span> Back to Service</button>
-                        <button id="booking-next-btn-2" onclick="advanceBookingStep(3)" class="bg-[#006e2f] hover:bg-[#005321] text-white font-bold text-sm py-3 px-6 rounded-lg shadow-sm flex items-center gap-2 opacity-50 cursor-not-allowed" disabled>Continue <span class="material-symbols-outlined text-[18px]">arrow_forward</span></button>
+                    <div class="fixed bottom-0 left-0 right-0 bg-surface border-t border-outline-variant/30 px-6 py-4 z-40 flex items-center justify-between gap-3 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] md:relative md:border-t md:border-outline-variant/30 md:bg-transparent md:px-0 md:py-0 md:shadow-none md:mt-4 md:pt-4">
+                        <button onclick="goBackToBookingStep(1)" class="text-xs text-on-surface-variant hover:text-primary font-bold flex items-center gap-1 active:scale-95 py-2 px-3 hover:bg-slate-50 rounded-full border border-outline-variant/30 bg-surface md:border-0 md:bg-transparent md:p-0 cursor-pointer">
+                            <span class="material-symbols-outlined text-base">arrow_back</span> Back
+                        </button>
+                        <button id="booking-next-btn-2" onclick="advanceBookingStep(3)" class="bg-[#006e2f] hover:bg-[#005321] text-white font-bold text-sm py-3 px-6 rounded-full shadow-sm flex items-center gap-2 opacity-50 cursor-not-allowed w-1/2 md:w-auto justify-center active:scale-95" disabled>
+                            Continue <span class="material-symbols-outlined text-base">arrow_forward</span>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <div id="booking-step-3" class="booking-step-container hidden flex flex-col gap-6 max-w-2xl mx-auto w-full">
+            <div id="booking-step-3" class="booking-step-container hidden flex flex-col gap-6 max-w-2xl mx-auto w-full pb-24 md:pb-0">
                 <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-5">
                     <h3 class="text-lg font-bold text-on-background">Consultation details</h3>
                     <form id="booking-details-form" onsubmit="handleDetailsSubmit(event)" class="space-y-4">
@@ -522,9 +526,13 @@
                             <textarea id="details-concerns" rows="3" placeholder="Briefly describe health history..." class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-3 py-2 bg-surface"></textarea>
                         </div>
                         
-                        <div class="flex justify-between items-center pt-4 border-t border-outline-variant/30 mt-6">
-                            <button type="button" onclick="goBackToBookingStep(2)" class="text-xs text-on-surface-variant hover:text-primary font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">arrow_back</span> Back</button>
-                            <button type="submit" class="bg-primary hover:bg-[#005321] text-white font-bold text-sm py-3 px-6 rounded-lg shadow-sm flex items-center gap-2">Review Summary <span class="material-symbols-outlined text-[18px]">arrow_forward</span></button>
+                        <div class="fixed bottom-0 left-0 right-0 bg-surface border-t border-outline-variant/30 px-6 py-4 z-40 flex items-center justify-between gap-3 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] md:relative md:border-t md:border-outline-variant/30 md:bg-transparent md:px-0 md:py-0 md:shadow-none md:mt-4 md:pt-4">
+                            <button type="button" onclick="goBackToBookingStep(2)" class="text-xs text-on-surface-variant hover:text-primary font-bold flex items-center gap-1 active:scale-95 py-2 px-3 hover:bg-slate-50 rounded-full border border-outline-variant/30 bg-surface md:border-0 md:bg-transparent md:p-0 cursor-pointer">
+                                <span class="material-symbols-outlined text-base">arrow_back</span> Back
+                            </button>
+                            <button type="submit" class="bg-primary hover:bg-[#005321] text-white font-bold text-sm py-3 px-6 rounded-full shadow-sm flex items-center gap-2 w-1/2 md:w-auto justify-center active:scale-95 cursor-pointer">
+                                Review Summary <span class="material-symbols-outlined text-base">arrow_forward</span>
+                            </button>
                         </div>
                     </form>
                 </div>
