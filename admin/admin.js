@@ -1730,57 +1730,76 @@ window.renderAdminAppointmentsTable = function() {
     };
 
     tbody.innerHTML = filtered.map(apt => `
-        <tr class="flex flex-col lg:table-row bg-surface-container-lowest border border-outline-variant/30 lg:border-0 rounded-2xl p-4 lg:p-0 gap-2 mb-4 lg:mb-0 hover:bg-surface-container-low/30 transition-colors">
-            <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 pl-0 lg:pl-6 text-[10px] text-on-surface-variant font-mono">
-                <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Appt ID</span>
-                <span>#${apt.id.toUpperCase()}</span>
+        <tr class="flex flex-col lg:table-row bg-surface-container-lowest border border-outline-variant/30 lg:border-0 rounded-2xl p-4 lg:p-0 gap-3 mb-4 lg:mb-0 hover:bg-surface-container-low/30 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.02)] lg:shadow-none">
+            <!-- Patient Header (Mobile Card Header) -->
+            <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 pl-0 lg:pl-6 text-left border-b border-outline-variant/15 lg:border-0 pb-3 lg:pb-4">
+                <div class="flex justify-between items-start w-full">
+                    <div class="text-left">
+                        <div class="font-bold text-on-background text-sm lg:text-xs">${apt.clientName}</div>
+                        <div class="text-[10px] font-mono text-on-surface-variant/80 mt-0.5">#${apt.id.toUpperCase()}</div>
+                    </div>
+                    <!-- Status Badge on Mobile -->
+                    <span class="lg:hidden px-2.5 py-0.5 rounded-full text-[9px] font-bold border ${getStatusStyle(apt.status)}">
+                        ${getStatusText(apt.status)}
+                    </span>
+                </div>
             </td>
-            <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 font-bold text-on-background">
-                <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Patient</span>
-                <span>${apt.clientName}</span>
+            
+            <!-- Hidden ID Column for mobile (shown in Header) -->
+            <td class="hidden lg:table-cell px-6 py-4 font-mono text-[10px] text-on-surface-variant">#${apt.id.toUpperCase()}</td>
+            
+            <!-- Service Field -->
+            <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 text-left">
+                <span class="lg:hidden text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/75">Service</span>
+                <span class="font-semibold text-on-background lg:text-on-surface-variant lg:font-normal text-xs lg:text-[11px]">${apt.serviceTitle}</span>
             </td>
-            <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 text-on-surface-variant">
-                <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Service</span>
-                <span>${apt.serviceTitle}</span>
+            
+            <!-- Therapist Field -->
+            <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 text-left">
+                <span class="lg:hidden text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/75">Therapist</span>
+                <span class="font-semibold text-on-background lg:text-on-surface-variant lg:font-normal text-xs lg:text-[11px]">${apt.therapist || 'Unknown'}</span>
             </td>
-            <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 text-on-surface-variant">
-                <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Therapist</span>
-                <span>${apt.therapist || 'Unknown'}</span>
+            
+            <!-- Date & Time Field -->
+            <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 text-on-surface-variant text-right lg:text-left">
+                <span class="lg:hidden text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/75">Date & Time</span>
+                <span class="font-semibold text-on-background lg:text-on-surface-variant lg:font-normal text-xs lg:text-[11px]">${apt.date} • ${apt.time}</span>
             </td>
-            <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 text-on-surface-variant">
-                <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Date & Time</span>
-                <span>${apt.date} • ${apt.time}</span>
+            
+            <!-- Duration Field -->
+            <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 text-left">
+                <span class="lg:hidden text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/75">Duration</span>
+                <span class="font-semibold text-on-background lg:text-on-surface-variant lg:font-normal text-xs lg:text-[11px]">${apt.duration}</span>
             </td>
-            <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 text-on-surface-variant">
-                <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Duration</span>
-                <span>${apt.duration}</span>
-            </td>
-            <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 text-center">
-                <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Status</span>
+            
+            <!-- Status Column (Desktop-only, shown in Header on mobile) -->
+            <td class="hidden lg:table-cell p-0 lg:p-4 text-center">
                 <span class="px-2.5 py-1 rounded-full text-[9px] font-bold border ${getStatusStyle(apt.status)}">
                     ${getStatusText(apt.status)}
                 </span>
             </td>
-            <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 pr-0 lg:pr-6 text-right">
-                <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Actions</span>
+            
+            <!-- Actions Column -->
+            <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 pr-0 lg:pr-6 text-right">
+                <span class="lg:hidden text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/75">Actions</span>
                 <div class="flex items-center justify-end gap-1">
                     ${apt.status === 'pending' ? `
-                        <button onclick="approveAppointment('${apt.id}')" class="text-emerald-600 hover:bg-emerald-50 p-1.5 rounded-lg transition-colors" title="Approve">
+                        <button onclick="approveAppointment('${apt.id}')" class="text-emerald-600 hover:bg-emerald-50 p-1.5 rounded-lg transition-colors cursor-pointer" title="Approve">
                             <span class="material-symbols-outlined text-[16px]">check_circle</span>
                         </button>
-                        <button onclick="declineAppointment('${apt.id}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="Decline">
+                        <button onclick="declineAppointment('${apt.id}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors cursor-pointer" title="Decline">
                             <span class="material-symbols-outlined text-[16px]">cancel</span>
                         </button>
                     ` : `
                         ${(apt.type === 'Video Call' || apt.type.toLowerCase().includes('virtual') || apt.type.toLowerCase().includes('video')) && apt.status === 'approved' ? `
-                            <button onclick="joinAdminVideoCall('${apt.id}')" class="text-primary hover:bg-primary/10 p-1.5 rounded-lg transition-colors" title="Join Video Call">
+                            <button onclick="joinAdminVideoCall('${apt.id}')" class="text-primary hover:bg-primary/10 p-1.5 rounded-lg transition-colors cursor-pointer" title="Join Video Call">
                                 <span class="material-symbols-outlined text-[16px]">videocam</span>
                             </button>
                         ` : ''}
-                        <button onclick="editAppointment('${apt.id}')" class="text-on-surface-variant hover:text-primary hover:bg-surface-container p-1.5 rounded-lg transition-colors" title="Edit">
+                        <button onclick="editAppointment('${apt.id}')" class="text-on-surface-variant hover:text-primary hover:bg-surface-container p-1.5 rounded-lg transition-colors cursor-pointer" title="Edit">
                             <span class="material-symbols-outlined text-[16px]">edit</span>
                         </button>
-                        <button onclick="deleteAppointment('${apt.id}')" class="text-on-surface-variant hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="Delete">
+                        <button onclick="deleteAppointment('${apt.id}')" class="text-on-surface-variant hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors cursor-pointer" title="Delete">
                             <span class="material-symbols-outlined text-[16px]">delete</span>
                         </button>
                     `}
