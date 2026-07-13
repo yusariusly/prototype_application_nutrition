@@ -1680,12 +1680,12 @@ function renderAppointmentsView() {
             { title: 'Check-in', date: 'Aug 02, 2023', doc: assignedTherapist }
         ];
         historyList.innerHTML = histories.map(h => `
-            <div class="flex justify-between items-center pb-2 border-b border-surface-variant/30 text-xs">
+            <div onclick="viewHistoryDetailsByTitle('${h.title}')" class="flex justify-between items-center pb-2 border-b border-surface-variant/30 text-xs cursor-pointer hover:text-primary transition-colors group">
                 <div>
-                    <h4 class="font-bold text-on-background">${h.title}</h4>
+                    <h4 class="font-bold text-on-background group-hover:text-primary transition-colors">${h.title}</h4>
                     <p class="text-[10px] text-on-surface-variant/80 mt-0.5">${h.date} • ${h.doc}</p>
                 </div>
-                <span class="material-symbols-outlined text-on-surface-variant/50 text-[18px]">chevron_right</span>
+                <span class="material-symbols-outlined text-on-surface-variant/50 group-hover:text-primary group-hover:translate-x-0.5 text-[18px] transition-all">chevron_right</span>
             </div>
         `).join('');
     }
@@ -1872,6 +1872,60 @@ window.closeConsultationNotesModal = function() {
     if (modal) {
         modal.classList.add('hidden');
         modal.classList.remove('flex');
+    }
+};
+
+window.viewHistoryDetailsByTitle = function(title) {
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
+    const clientDetails = clientsList.find(c => c.name === activeClient);
+    const assignedTherapist = clientDetails?.therapist || 'Dr. Hasan';
+    
+    const staticHistories = [
+        { title: 'Initial Consultation', date: 'Sep 15, 2023', doc: assignedTherapist },
+        { title: 'Check-in', date: 'Aug 02, 2023', doc: assignedTherapist },
+        { title: 'Body Composition Scan', date: 'Jul 10, 2023', doc: assignedTherapist },
+        { title: 'Bi-weekly Check-in', date: 'Jun 22, 2023', doc: assignedTherapist },
+        { title: 'Progress Assessment', date: 'Jun 05, 2023', doc: assignedTherapist },
+        { title: 'Dietary Plan Review', date: 'May 18, 2023', doc: assignedTherapist }
+    ];
+    
+    const completedApts = state.appointments.filter(a => a.status === 'completed' && a.clientName === activeClient).map(a => ({
+        title: a.serviceTitle,
+        date: new Date(a.date).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+        doc: assignedTherapist
+    }));
+    
+    const allHistory = [...completedApts, ...staticHistories];
+    const itemIndex = allHistory.findIndex(h => h.title === title);
+    
+    if (itemIndex !== -1) {
+        const pageNum = Math.ceil((itemIndex + 1) / 5);
+        historyCurrentPage = pageNum;
+        
+        navigateTo('consultation-history');
+        
+        const indexOnPage = itemIndex % 5;
+        const listId = `history-item-${indexOnPage}`;
+        
+        setTimeout(() => {
+            // Close all others first
+            document.querySelectorAll('[id^="history-item-"]').forEach(el => {
+                el.classList.add('hidden');
+                const header = el.previousElementSibling;
+                const chevron = header?.querySelector('.history-chevron');
+                if (chevron) chevron.classList.remove('rotate-180');
+            });
+            
+            // Open this one
+            toggleHistoryItem(listId);
+            
+            // Scroll to the card
+            const cardEl = document.getElementById(listId)?.parentElement;
+            if (cardEl) cardEl.scrollIntoView({ behavior: 'smooth' });
+        }, 80);
+    } else {
+        navigateTo('consultation-history');
     }
 };
 
