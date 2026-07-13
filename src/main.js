@@ -1630,35 +1630,35 @@ function renderAppointmentsView() {
             const initials = therapistName.split(' ').pop().substring(0,2).toUpperCase();
             
             return `
-                <div class="bg-surface-container-lowest rounded-2xl p-5 border border-outline-variant/30 shadow-sm flex items-center justify-between gap-4">
-                    <div class="flex items-center gap-4">
-                        <div class="w-16 h-16 rounded-xl bg-surface-container-low border border-surface-variant/35 flex flex-col items-center justify-center shrink-0">
-                            <span class="text-[10px] font-bold text-on-surface-variant">${monthStr}</span>
-                            <span class="text-2xl font-extrabold text-on-surface mt-0.5 leading-none">${dayStr}</span>
+                <div class="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/30 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 md:w-16 md:h-16 rounded-xl bg-surface-container-low border border-surface-variant/35 flex flex-col items-center justify-center shrink-0">
+                            <span class="text-[8px] md:text-[10px] font-bold text-on-surface-variant">${monthStr}</span>
+                            <span class="text-lg md:text-2xl font-extrabold text-on-surface mt-0.5 leading-none">${dayStr}</span>
                         </div>
                         <div>
-                            <div class="flex items-center gap-2">
-                                <h3 class="font-bold text-on-background text-base leading-tight">${apt.serviceTitle}</h3>
-                                ${isPending ? `<span class="bg-amber-100 text-amber-800 text-[9px] font-bold px-2 py-0.5 rounded-full border border-amber-300">Pending Approval</span>` : ''}
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="font-bold text-on-background text-sm md:text-base leading-tight">${apt.serviceTitle}</h3>
+                                ${isPending ? `<span class="bg-amber-100 text-amber-800 text-[8px] font-bold px-1.5 py-0.5 rounded-full border border-amber-300">Pending Approval</span>` : ''}
                             </div>
-                            <div class="flex items-center gap-3 text-xs text-on-surface-variant font-medium mt-1">
-                                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">schedule</span> ${apt.time}</span>
+                            <div class="flex items-center gap-2.5 text-[10px] md:text-xs text-on-surface-variant font-medium mt-1">
+                                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[13px] md:text-[15px]">schedule</span> ${apt.time}</span>
                                 <span>•</span>
-                                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">videocam</span> ${apt.type}</span>
+                                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[13px] md:text-[15px]">videocam</span> ${apt.type}</span>
                             </div>
-                            <div class="flex items-center gap-2 mt-2">
-                                <div class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-bold border shrink-0">
+                            <div class="flex items-center gap-2 mt-1.5">
+                                <div class="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[9px] font-bold border shrink-0">
                                     ${initials}
                                 </div>
-                                <span class="text-xs text-on-surface font-semibold">${therapistName}</span>
+                                <span class="text-[10px] md:text-xs text-on-surface font-semibold">${therapistName}</span>
                             </div>
                         </div>
                     </div>
-                    <div class="flex flex-col sm:flex-row gap-2 shrink-0">
+                    <div class="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t border-slate-100 sm:border-t-0 justify-end shrink-0">
                         ${!isPending && isVideo ? `
-                            <button onclick="joinVideoCall('${apt.id}')" class="bg-primary hover:bg-[#005321] text-white font-bold text-xs px-4 py-2 rounded-lg shadow-sm transition-all active:scale-95">Join Call</button>
+                            <button onclick="joinVideoCall('${apt.id}')" class="bg-primary hover:bg-[#005321] text-white font-bold text-[10px] md:text-xs px-3.5 py-2 rounded-lg shadow-sm transition-all active:scale-95 cursor-pointer flex-1 sm:flex-initial text-center justify-center">Join Call</button>
                         ` : ''}
-                        <button onclick="rescheduleAppointment('${apt.id}')" class="border border-outline-variant/30 hover:bg-surface-container text-on-surface-variant font-bold text-xs px-4 py-2 rounded-lg transition-colors">Reschedule</button>
+                        <button onclick="rescheduleAppointment('${apt.id}')" class="border border-outline-variant/30 hover:bg-surface-container text-on-surface-variant font-bold text-[10px] md:text-xs px-3.5 py-2 rounded-lg transition-colors cursor-pointer flex-1 sm:flex-initial text-center justify-center">Reschedule</button>
                     </div>
                 </div>
             `;
