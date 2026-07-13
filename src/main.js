@@ -2070,18 +2070,25 @@ function renderBookingWizard() {
         if (!node) continue;
         const line = document.getElementById('booking-stepper-progress-line');
         
+        const circle = node.querySelector('.rounded-full');
         if (i < step) {
-            node.className = 'relative z-10 flex flex-col items-center bg-surface px-2 step-completed';
-            node.querySelector('.w-10').className = 'w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-label-md shadow-md';
-            node.querySelector('.w-10').innerHTML = '<span class="material-symbols-outlined text-[16px]">check</span>';
+            node.className = 'relative z-10 flex flex-col items-center bg-surface px-1 md:px-2 step-completed';
+            if (circle) {
+                circle.className = 'w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs md:text-label-md shadow-md';
+                circle.innerHTML = '<span class="material-symbols-outlined text-sm md:text-[16px]">check</span>';
+            }
         } else if (i === step) {
-            node.className = 'relative z-10 flex flex-col items-center bg-surface px-2 step-active';
-            node.querySelector('.w-10').className = 'w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-label-md shadow-md';
-            node.querySelector('.w-10').innerText = i;
+            node.className = 'relative z-10 flex flex-col items-center bg-surface px-1 md:px-2 step-active';
+            if (circle) {
+                circle.className = 'w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs md:text-label-md shadow-md';
+                circle.innerText = i;
+            }
         } else {
-            node.className = 'relative z-10 flex flex-col items-center bg-surface px-2 step-inactive';
-            node.querySelector('.w-10').className = 'w-10 h-10 rounded-full bg-surface text-on-surface-variant border-2 border-surface-variant flex items-center justify-center font-bold text-label-md';
-            node.querySelector('.w-10').innerText = i;
+            node.className = 'relative z-10 flex flex-col items-center bg-surface px-1 md:px-2 step-inactive';
+            if (circle) {
+                circle.className = 'w-8 h-8 md:w-10 md:h-10 rounded-full bg-surface text-on-surface-variant border-2 border-surface-variant flex items-center justify-center font-bold text-xs md:text-label-md';
+                circle.innerText = i;
+            }
         }
         
         if (line) {
