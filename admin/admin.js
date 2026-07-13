@@ -452,25 +452,31 @@ function renderSpecialistServicesList(services) {
     }
     
     listContainer.innerHTML = services.map(srv => `
-        <div class="bg-surface-container-lowest border border-outline-variant/20 rounded-xl overflow-hidden shadow-sm flex flex-col h-full text-slate-800 text-xs">
-            <div class="h-28 w-full bg-cover bg-center" style="background-image: url('${srv.image || 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=200'}')"></div>
-            <div class="p-4 flex flex-col flex-grow gap-2">
-                <div class="flex justify-between items-start">
-                    <h4 class="font-bold text-slate-900 text-sm">${srv.title}</h4>
-                    <span class="font-extrabold text-slate-900 text-sm">$${srv.price}</span>
+        <div class="bg-surface-container-lowest border border-outline-variant/30 hover:border-primary/30 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col h-full">
+            <div class="h-32 w-full bg-cover bg-center relative" style="background-image: url('${srv.image || 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400'}')">
+                <div class="absolute top-3 right-3 bg-white/95 backdrop-blur shadow-sm px-2.5 py-1 rounded-xl text-xs font-black text-primary border border-outline-variant/10">
+                    $${srv.price}
                 </div>
-                <p class="text-slate-500 leading-normal line-clamp-2">${srv.description}</p>
-                <div class="flex gap-2 text-[10px] text-slate-400 font-semibold items-center mt-1">
-                    <span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[12px]">schedule</span> ${srv.duration}</span>
-                    <span>•</span>
-                    <span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[12px]">videocam</span> ${srv.type}</span>
+            </div>
+            <div class="p-5 flex flex-col flex-grow gap-2.5 text-xs text-on-background">
+                <h4 class="font-extrabold text-on-background text-sm leading-snug">${srv.title}</h4>
+                <p class="text-on-surface-variant text-[11px] leading-relaxed line-clamp-3">${srv.description}</p>
+                
+                <div class="flex flex-wrap gap-1.5 items-center mt-1">
+                    <span class="flex items-center gap-1 bg-surface-container px-2.5 py-1 rounded-lg text-[10px] font-bold text-on-surface-variant">
+                        <span class="material-symbols-outlined text-[12px] text-primary">schedule</span> ${srv.duration}
+                    </span>
+                    <span class="flex items-center gap-1 bg-surface-container px-2.5 py-1 rounded-lg text-[10px] font-bold text-on-surface-variant">
+                        <span class="material-symbols-outlined text-[12px] text-primary">videocam</span> ${srv.type}
+                    </span>
                 </div>
-                <div class="flex justify-end gap-2 border-t border-slate-100 pt-3 mt-auto">
-                    <button onclick="openEditServiceModal('${srv.id}')" class="text-primary hover:underline font-bold text-[10px] flex items-center gap-0.5 cursor-pointer">
-                        <span class="material-symbols-outlined text-[12px]">edit</span> Edit
+                
+                <div class="flex justify-end gap-2 border-t border-outline-variant/15 pt-3.5 mt-auto">
+                    <button onclick="openEditServiceModal('${srv.id}')" class="bg-primary/5 hover:bg-primary/15 text-primary font-bold text-[10px] px-3 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[13px]">edit</span> Edit
                     </button>
-                    <button onclick="deleteSpecialistService('${srv.id}')" class="text-[#ba1a1a] hover:underline font-bold text-[10px] flex items-center gap-0.5 cursor-pointer">
-                        <span class="material-symbols-outlined text-[12px]">delete</span> Delete
+                    <button onclick="deleteSpecialistService('${srv.id}')" class="bg-red-50 hover:bg-red-100/80 text-red-600 font-bold text-[10px] px-3 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[13px]">delete</span> Delete
                     </button>
                 </div>
             </div>
