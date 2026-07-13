@@ -2336,6 +2336,8 @@ window.backToRecipients = function() {
 window.updateMobileDiscussionUI = function() {
     const sidebar = document.getElementById('discussion-sidebar-panel');
     const chat = document.getElementById('discussion-chat-panel');
+    const containerBox = document.getElementById('discussion-container-box');
+    const mainHeader = document.getElementById('discussion-main-header');
     if (!sidebar || !chat) return;
     
     const isMobile = window.innerWidth < 1024;
@@ -2345,6 +2347,14 @@ window.updateMobileDiscussionUI = function() {
             chat.classList.remove('hidden');
             chat.classList.add('flex');
             
+            // Hide main header to maximize chat space
+            if (mainHeader) mainHeader.classList.add('hidden');
+            
+            // Remove padding, borders, shadows for native-like full viewport look on mobile
+            if (containerBox) {
+                containerBox.className = "flex flex-col h-[calc(100vh-100px)] w-full gap-0 p-0 border-0 shadow-none bg-transparent";
+            }
+            
             // Auto scroll to bottom of chat when loaded
             const chatContainer = document.getElementById('admin-page-chat-container');
             if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -2352,11 +2362,23 @@ window.updateMobileDiscussionUI = function() {
             sidebar.classList.remove('hidden');
             chat.classList.add('hidden');
             chat.classList.remove('flex');
+            
+            // Show main header
+            if (mainHeader) mainHeader.classList.remove('hidden');
+            
+            // Restore regular container box classes
+            if (containerBox) {
+                containerBox.className = "bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-6";
+            }
         }
     } else {
         sidebar.classList.remove('hidden');
         chat.classList.remove('hidden');
         chat.classList.add('flex');
+        if (mainHeader) mainHeader.classList.remove('hidden');
+        if (containerBox) {
+            containerBox.className = "bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-6";
+        }
     }
 };
 
@@ -2445,8 +2467,33 @@ window.renderAdminProgramChat = function() {
     
     container.innerHTML = chatEntry.chatHistory.map(msg => {
         const isDoc = msg.sender === 'doctor';
-        const bubbleBg = isDoc ? 'bg-primary text-white rounded-tr-none' : 'bg-[#e2e8f0] text-slate-800 rounded-tl-none';
+        const bubbleBg = isDoc ? 'bg-primary text-white rounded-tr-none' : 'bg-[#f1f5f9] text-slate-800 rounded-tl-none';
         const align = isDoc ? 'justify-end' : 'justify-start';
+        
+        let attachmentHtml = '';
+        if (msg.file) {
+            if (msg.file.type.startsWith('image/')) {
+                attachmentHtml = `
+                    <div class="mt-2 rounded-lg overflow-hidden max-w-full border border-outline-variant/20 shadow-sm bg-white p-1">
+                        <img class="max-h-48 object-contain rounded-md" src="${msg.file.dataUrl}" alt="${msg.file.name}">
+                    </div>
+                `;
+            } else {
+                attachmentHtml = `
+                    <a href="${msg.file.dataUrl}" download="${msg.file.name}" class="mt-2 flex items-center gap-2 p-2.5 rounded-xl bg-white border border-outline-variant/30 text-slate-800 hover:bg-slate-50 transition-colors w-fit max-w-full">
+                        <span class="material-symbols-outlined text-primary text-xl">description</span>
+                        <div class="text-left min-w-0">
+                            <p class="text-xs font-bold truncate text-slate-700">${msg.file.name}</p>
+                            <p class="text-[9px] text-slate-400 font-semibold">${(msg.file.size / 1024).toFixed(1)} KB</p>
+                        </div>
+                        <span class="material-symbols-outlined text-slate-400 hover:text-primary text-base ml-2">download</span>
+                    </a>
+                `;
+            }
+        }
+        
+        const messageText = msg.text ? `<div>${msg.text}</div>` : '';
+
         return `
             <div class="flex ${align} w-full">
                 <div class="${bubbleBg} text-xs px-3.5 py-2.5 rounded-2xl max-w-[85%] shadow-sm leading-relaxed">
@@ -2454,7 +2501,8 @@ window.renderAdminProgramChat = function() {
                         <span>${msg.senderName}</span>
                         <span>${msg.time}</span>
                     </div>
-                    <div>${msg.text}</div>
+                    ${messageText}
+                    ${attachmentHtml}
                 </div>
             </div>
         `;
