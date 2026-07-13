@@ -316,7 +316,7 @@ window.navigateTo = function(viewId) {
     });
     const activeLink = document.getElementById(`link-${viewId}`);
     if (activeLink) {
-        activeLink.className = 'nav-link h-full flex items-center text-primary font-bold border-b-2 border-primary font-label-md text-label-md px-3 cursor-pointer';
+        activeLink.className = 'nav-link h-full flex items-center text-primary font-bold font-label-md text-label-md px-3 cursor-pointer';
     }
 
     // Toggle active state for mobile bottom nav
