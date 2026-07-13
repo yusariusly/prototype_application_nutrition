@@ -563,6 +563,9 @@ window.navigateTo = function(viewId) {
         renderBookingWizard();
     } else if (viewId === 'profile') {
         setTimeout(initProfileCharts, 50);
+    } else if (viewId === 'chat') {
+        loadState();
+        renderProgramChat();
     }
 };
 
