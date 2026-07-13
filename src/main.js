@@ -1782,6 +1782,36 @@ const MOCK_HISTORY_DETAILS = {
             'Dietitian approved a weekend cheat/rest meal.',
             'Next review session scheduled in 3 weeks.'
         ]
+    },
+    'Bi-weekly Check-in': {
+        summary: 'Conducted regular bi-weekly review. Fat loss is continuing steadily. Adjusted daily hydration targets and carbohydrate source recommendations.',
+        weight: '164.1 lbs',
+        fat: '21.2%',
+        prescription: [
+            'Prioritize complex carbs (oats, brown rice, sweet potatoes).',
+            'Ensure 8 hours of sleep for muscle recovery.',
+            'Continue current cardio plans.'
+        ]
+    },
+    'Progress Assessment': {
+        summary: 'Assessed metrics after first month of plan. Weight down by 5 lbs. Client reports feeling energetic and satiated. Increased protein target slightly.',
+        weight: '166.0 lbs',
+        fat: '22.0%',
+        prescription: [
+            'Increase morning egg white intake.',
+            'Limit sodium intake to minimize bloating.',
+            'Log weight once a week on empty stomach.'
+        ]
+    },
+    'Dietary Plan Review': {
+        summary: 'Initial progress evaluation. Baseline measurements registered. Program adjustments verified for allergies.',
+        weight: '167.5 lbs',
+        fat: '22.3%',
+        prescription: [
+            'Eliminate lactose products from diet diary.',
+            'Begin standard multivitamin supplementation.',
+            'Increase water intake during training.'
+        ]
     }
 };
 
@@ -1845,6 +1875,15 @@ window.closeConsultationNotesModal = function() {
     }
 };
 
+let historyCurrentPage = 1;
+
+window.changeHistoryPage = function(page) {
+    historyCurrentPage = page;
+    renderConsultationHistory();
+    const list = document.getElementById('consultation-history-full-list');
+    if (list) list.scrollIntoView({ behavior: 'smooth' });
+};
+
 window.renderConsultationHistory = function() {
     const list = document.getElementById('consultation-history-full-list');
     if (!list) return;
@@ -1857,7 +1896,10 @@ window.renderConsultationHistory = function() {
     const staticHistories = [
         { title: 'Initial Consultation', date: 'Sep 15, 2023', doc: assignedTherapist },
         { title: 'Check-in', date: 'Aug 02, 2023', doc: assignedTherapist },
-        { title: 'Body Composition Scan', date: 'Jul 10, 2023', doc: assignedTherapist }
+        { title: 'Body Composition Scan', date: 'Jul 10, 2023', doc: assignedTherapist },
+        { title: 'Bi-weekly Check-in', date: 'Jun 22, 2023', doc: assignedTherapist },
+        { title: 'Progress Assessment', date: 'Jun 05, 2023', doc: assignedTherapist },
+        { title: 'Dietary Plan Review', date: 'May 18, 2023', doc: assignedTherapist }
     ];
     
     const completedApts = state.appointments.filter(a => a.status === 'completed' && a.clientName === activeClient).map(a => ({
@@ -1867,8 +1909,16 @@ window.renderConsultationHistory = function() {
     }));
     
     const allHistory = [...completedApts, ...staticHistories];
+    const totalPages = Math.ceil(allHistory.length / 5);
     
-    list.innerHTML = allHistory.map((h, i) => {
+    if (historyCurrentPage > totalPages) {
+        historyCurrentPage = totalPages > 0 ? totalPages : 1;
+    }
+    
+    const startIndex = (historyCurrentPage - 1) * 5;
+    const paginatedHistory = allHistory.slice(startIndex, startIndex + 5);
+    
+    let listHtml = paginatedHistory.map((h, i) => {
         const detail = MOCK_HISTORY_DETAILS[h.title] || MOCK_HISTORY_DETAILS['Initial Consultation'];
         const listId = `history-item-${i}`;
         
@@ -1922,6 +1972,23 @@ window.renderConsultationHistory = function() {
             </div>
         `;
     }).join('');
+    
+    // Add pagination controls if total pages exceeds 1
+    if (totalPages > 1) {
+        listHtml += `
+            <div class="flex items-center justify-between mt-4 px-3 py-3 bg-surface rounded-2xl border border-outline-variant/30 shadow-sm shrink-0">
+                <button onclick="changeHistoryPage(${historyCurrentPage - 1})" ${historyCurrentPage === 1 ? 'disabled' : ''} class="px-4 py-2 rounded-lg font-bold text-xs bg-surface border border-outline-variant/35 text-on-surface-variant hover:bg-slate-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1 active:scale-95">
+                    <span class="material-symbols-outlined text-base">chevron_left</span> Back
+                </button>
+                <span class="text-xs font-bold text-on-surface-variant">Page ${historyCurrentPage} of ${totalPages}</span>
+                <button onclick="changeHistoryPage(${historyCurrentPage + 1})" ${historyCurrentPage === totalPages ? 'disabled' : ''} class="px-4 py-2 rounded-lg font-bold text-xs bg-surface border border-outline-variant/35 text-on-surface-variant hover:bg-slate-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1 active:scale-95">
+                    Next <span class="material-symbols-outlined text-base">chevron_right</span>
+                </button>
+            </div>
+        `;
+    }
+    
+    list.innerHTML = listHtml;
 };
 
 window.toggleHistoryItem = function(itemId) {
