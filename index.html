@@ -375,7 +375,7 @@
                     <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
                         <div class="flex justify-between items-center">
                             <h3 class="text-lg font-bold text-on-background">Past History</h3>
-                            <button onclick="showPastHistoryModal()" class="text-xs text-primary font-bold hover:underline">View All</button>
+                            <button onclick="navigateTo('consultation-history')" class="text-xs text-primary font-bold hover:underline cursor-pointer">View All</button>
                         </div>
                         <div class="space-y-3" id="appointments-history-list"></div>
                     </div>
@@ -683,6 +683,22 @@
                     </form>
                 </div>
             </div>
+        </section>
+
+        <!-- ==================== VIEW 7: CONSULTATION HISTORY ==================== -->
+        <section id="view-consultation-history" class="view-section hidden flex flex-col gap-gutter">
+            <div class="flex items-center gap-3">
+                <button onclick="navigateTo('appointments')" class="p-2 hover:bg-surface-container-low rounded-full transition-colors active:scale-95 text-on-surface-variant flex items-center justify-center border border-outline-variant/20 bg-surface">
+                    <span class="material-symbols-outlined text-base">arrow_back</span>
+                </button>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-on-surface">Consultation History</h1>
+                    <p class="text-xs md:text-body-md text-on-surface-variant mt-1">Review your past consultation notes, metrics, and specialist prescriptions.</p>
+                </div>
+            </div>
+
+            <!-- List Container -->
+            <div class="flex flex-col gap-4 mt-2" id="consultation-history-full-list"></div>
         </section>
     </main>
 

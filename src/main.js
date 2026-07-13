@@ -566,6 +566,9 @@ window.navigateTo = function(viewId) {
     } else if (viewId === 'chat') {
         loadState();
         renderProgramChat();
+    } else if (viewId === 'consultation-history') {
+        loadState();
+        renderConsultationHistory();
     }
     
     // Hide footer, navbar, bottom nav, and expand container for chat view to look like native WhatsApp/Instagram
@@ -1839,6 +1842,102 @@ window.closeConsultationNotesModal = function() {
     if (modal) {
         modal.classList.add('hidden');
         modal.classList.remove('flex');
+    }
+};
+
+window.renderConsultationHistory = function() {
+    const list = document.getElementById('consultation-history-full-list');
+    if (!list) return;
+    
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
+    const clientDetails = clientsList.find(c => c.name === activeClient);
+    const assignedTherapist = clientDetails?.therapist || 'Dr. Hasan';
+    
+    const staticHistories = [
+        { title: 'Initial Consultation', date: 'Sep 15, 2023', doc: assignedTherapist },
+        { title: 'Check-in', date: 'Aug 02, 2023', doc: assignedTherapist },
+        { title: 'Body Composition Scan', date: 'Jul 10, 2023', doc: assignedTherapist }
+    ];
+    
+    const completedApts = state.appointments.filter(a => a.status === 'completed' && a.clientName === activeClient).map(a => ({
+        title: a.serviceTitle,
+        date: new Date(a.date).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+        doc: assignedTherapist
+    }));
+    
+    const allHistory = [...completedApts, ...staticHistories];
+    
+    list.innerHTML = allHistory.map((h, i) => {
+        const detail = MOCK_HISTORY_DETAILS[h.title] || MOCK_HISTORY_DETAILS['Initial Consultation'];
+        const listId = `history-item-${i}`;
+        
+        return `
+            <div class="bg-surface border border-outline-variant/30 rounded-2xl overflow-hidden shadow-sm transition-all duration-200">
+                <!-- Header -->
+                <div onclick="toggleHistoryItem('${listId}')" class="p-4 flex items-center justify-between gap-3 cursor-pointer select-none bg-surface hover:bg-slate-50/50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
+                            <span class="material-symbols-outlined text-base">event_available</span>
+                        </div>
+                        <div class="text-left">
+                            <h3 class="font-bold text-sm text-on-background">${h.title}</h3>
+                            <p class="text-[10px] text-on-surface-variant font-medium mt-0.5">${h.date} • ${h.doc}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Completed</span>
+                        <span class="material-symbols-outlined text-on-surface-variant text-base history-chevron transition-transform duration-200">expand_more</span>
+                    </div>
+                </div>
+                
+                <!-- Expanded Content -->
+                <div id="${listId}" class="hidden border-t border-outline-variant/20 bg-surface-container-lowest p-4 flex flex-col gap-4 animate-fade-in">
+                    <!-- Session Notes -->
+                    <div>
+                        <h4 class="text-[10px] uppercase font-bold text-primary tracking-wider mb-1.5">Consultation Notes</h4>
+                        <p class="text-xs text-slate-700 leading-relaxed">${detail.summary}</p>
+                    </div>
+                    
+                    <!-- Metrics Row -->
+                    <div class="grid grid-cols-2 gap-3 bg-surface-container-low p-3 rounded-xl border border-outline-variant/15">
+                        <div>
+                            <span class="text-[9px] uppercase font-bold text-on-surface-variant tracking-wider block">Recorded Weight</span>
+                            <span class="text-sm font-bold text-on-background block mt-0.5">${detail.weight}</span>
+                        </div>
+                        <div>
+                            <span class="text-[9px] uppercase font-bold text-on-surface-variant tracking-wider block">Body Fat Ratio</span>
+                            <span class="text-sm font-bold text-on-background block mt-0.5">${detail.fat}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Prescriptions -->
+                    <div>
+                        <h4 class="text-[10px] uppercase font-bold text-[#006a61] tracking-wider mb-1.5">Practitioner Prescriptions</h4>
+                        <ul class="list-disc pl-4 text-xs text-slate-700 space-y-1">
+                            ${detail.prescription.map(p => `<li>${p}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+};
+
+window.toggleHistoryItem = function(itemId) {
+    const el = document.getElementById(itemId);
+    if (!el) return;
+    
+    const isHidden = el.classList.contains('hidden');
+    const header = el.previousElementSibling;
+    const chevron = header.querySelector('.history-chevron');
+    
+    if (isHidden) {
+        el.classList.remove('hidden');
+        if (chevron) chevron.classList.add('rotate-180');
+    } else {
+        el.classList.add('hidden');
+        if (chevron) chevron.classList.remove('rotate-180');
     }
 };
 
