@@ -283,6 +283,26 @@ window.showToast = function(message, type = 'success') {
     }, 3000);
 };
 
+// ==================== ACCORDION ====================
+window.toggleMobileAccordion = function(trElement) {
+    if (!trElement) return;
+    
+    // Toggle class on tr
+    trElement.classList.toggle('accordion-expanded');
+    
+    // Toggle hidden class on child accordion-contents
+    trElement.querySelectorAll('.accordion-content').forEach(el => {
+        el.classList.toggle('hidden');
+    });
+    
+    // Toggle chevron icon
+    const icon = trElement.querySelector('.accordion-chevron');
+    if (icon) {
+        const isExpanded = trElement.classList.contains('accordion-expanded');
+        icon.innerText = isExpanded ? 'expand_less' : 'expand_more';
+    }
+};
+
 // ==================== ROUTER ====================
 window.navigateTo = function(viewId) {
     state.activeView = viewId;
@@ -742,8 +762,8 @@ function renderAdminClientsList() {
     tbody.innerHTML = pageItems.map(cli => {
         return `
             <tr class="flex flex-col lg:table-row bg-surface-container-lowest border border-outline-variant/30 lg:border-0 rounded-2xl p-4 lg:p-0 gap-3 mb-4 lg:mb-0 hover:bg-surface-container-low/30 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.02)] lg:shadow-none">
-                <!-- Client Card Header -->
-                <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 pl-0 lg:pl-6 text-left border-b border-outline-variant/15 lg:border-0 pb-3 lg:pb-4">
+                <!-- Client Card Header (Click to Expand on Mobile) -->
+                <td onclick="toggleMobileAccordion(this.closest('tr'))" class="cursor-pointer lg:cursor-default flex justify-between items-center lg:table-cell p-0 lg:p-4 pl-0 lg:pl-6 text-left border-b border-outline-variant/15 lg:border-0 pb-3 lg:pb-4">
                     <div class="flex items-center justify-between w-full">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">${cli.avatar}</div>
@@ -752,27 +772,33 @@ function renderAdminClientsList() {
                                 <div class="text-[10px] text-on-surface-variant/80">${cli.email}</div>
                             </div>
                         </div>
-                        <!-- Action chat button on mobile (hidden on desktop) -->
-                        <button onclick="openClientProgramDiscussion('${cli.activeProgramId}', '${cli.name}')" class="lg:hidden p-2 bg-primary/5 hover:bg-primary/15 text-primary rounded-full transition-colors cursor-pointer" title="Send message">
-                            <span class="material-symbols-outlined text-[18px]">chat</span>
-                        </button>
+                        <div class="flex items-center gap-1">
+                            <!-- Action chat button on mobile (hidden on desktop) -->
+                            <button onclick="event.stopPropagation(); openClientProgramDiscussion('${cli.activeProgramId}', '${cli.name}')" class="lg:hidden p-2 bg-primary/5 hover:bg-primary/15 text-primary rounded-full transition-colors cursor-pointer" title="Send message">
+                                <span class="material-symbols-outlined text-[18px]">chat</span>
+                            </button>
+                            <!-- Accordion Chevron Toggle -->
+                            <button class="lg:hidden p-1 text-on-surface-variant hover:text-primary transition-colors">
+                                <span class="accordion-chevron material-symbols-outlined text-[20px]">expand_more</span>
+                            </button>
+                        </div>
                     </div>
                 </td>
                 
-                <!-- Goal Field -->
-                <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 text-left">
+                <!-- Goal Field (Collapsible) -->
+                <td class="accordion-content hidden lg:table-cell flex justify-between items-center p-0 lg:p-4 text-left mt-2 lg:mt-0">
                     <span class="lg:hidden text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/75">Goal</span>
                     <span class="bg-[#e5eeff] text-[#006a61] px-2.5 py-0.5 rounded text-[10px] font-bold">${cli.goal}</span>
                 </td>
                 
-                <!-- Last Check-In Field -->
-                <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 text-on-surface-variant text-right lg:text-left">
+                <!-- Last Check-In Field (Collapsible) -->
+                <td class="accordion-content hidden lg:table-cell flex justify-between items-center p-0 lg:p-4 text-on-surface-variant text-right lg:text-left">
                     <span class="lg:hidden text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/75">Last Check-In</span>
                     <span class="font-semibold text-on-background lg:text-on-surface-variant lg:font-normal">${cli.lastCheckIn}</span>
                 </td>
                 
-                <!-- Compliance Field -->
-                <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 text-left">
+                <!-- Compliance Field (Collapsible) -->
+                <td class="accordion-content hidden lg:table-cell flex justify-between items-center p-0 lg:p-4 text-left">
                     <span class="lg:hidden text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/75">Compliance</span>
                     <div class="flex items-center gap-2 font-bold">
                         <div class="w-16 bg-surface-variant h-1.5 rounded-full overflow-hidden">
@@ -782,8 +808,8 @@ function renderAdminClientsList() {
                     </div>
                 </td>
                 
-                <!-- Weight Progress Field -->
-                <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 w-auto lg:w-28 text-left">
+                <!-- Weight Progress Field (Collapsible) -->
+                <td class="accordion-content hidden lg:table-cell flex justify-between items-center p-0 lg:p-4 w-auto lg:w-28 text-left">
                     <span class="lg:hidden text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/75">Weight Progress</span>
                     <svg class="w-20 lg:w-full h-8" viewBox="0 0 100 30">
                         <path d="${generateSparklinePath(cli.weightTrend)}" fill="none" stroke="${cli.compliance > 80 ? '#006e2f' : '#9d4300'}" stroke-width="2"></path>
@@ -1731,43 +1757,49 @@ window.renderAdminAppointmentsTable = function() {
 
     tbody.innerHTML = filtered.map(apt => `
         <tr class="flex flex-col lg:table-row bg-surface-container-lowest border border-outline-variant/30 lg:border-0 rounded-2xl p-4 lg:p-0 gap-3 mb-4 lg:mb-0 hover:bg-surface-container-low/30 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.02)] lg:shadow-none">
-            <!-- Patient Header (Mobile Card Header) -->
-            <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 pl-0 lg:pl-6 text-left border-b border-outline-variant/15 lg:border-0 pb-3 lg:pb-4">
+            <!-- Patient Header (Mobile Card Header - Click to Expand) -->
+            <td onclick="toggleMobileAccordion(this.closest('tr'))" class="cursor-pointer lg:cursor-default flex justify-between items-center lg:table-cell p-0 lg:p-4 pl-0 lg:pl-6 text-left border-b border-outline-variant/15 lg:border-0 pb-3 lg:pb-4">
                 <div class="flex justify-between items-start w-full">
                     <div class="text-left">
                         <div class="font-bold text-on-background text-sm lg:text-xs">${apt.clientName}</div>
                         <div class="text-[10px] font-mono text-on-surface-variant/80 mt-0.5">#${apt.id.toUpperCase()}</div>
                     </div>
-                    <!-- Status Badge on Mobile -->
-                    <span class="lg:hidden px-2.5 py-0.5 rounded-full text-[9px] font-bold border ${getStatusStyle(apt.status)}">
-                        ${getStatusText(apt.status)}
-                    </span>
+                    <div class="flex items-center gap-2">
+                        <!-- Status Badge on Mobile -->
+                        <span class="lg:hidden px-2.5 py-0.5 rounded-full text-[9px] font-bold border ${getStatusStyle(apt.status)}">
+                            ${getStatusText(apt.status)}
+                        </span>
+                        <!-- Accordion Chevron Toggle -->
+                        <button class="lg:hidden p-1 text-on-surface-variant hover:text-primary transition-colors">
+                            <span class="accordion-chevron material-symbols-outlined text-[20px]">expand_more</span>
+                        </button>
+                    </div>
                 </div>
             </td>
             
             <!-- Hidden ID Column for mobile (shown in Header) -->
             <td class="hidden lg:table-cell px-6 py-4 font-mono text-[10px] text-on-surface-variant">#${apt.id.toUpperCase()}</td>
             
-            <!-- Service Field -->
-            <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 text-left">
+            <!-- Service Field (Collapsible) -->
+            <td class="accordion-content hidden lg:table-cell flex justify-between items-center p-0 lg:p-4 text-left mt-2 lg:mt-0">
                 <span class="lg:hidden text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/75">Service</span>
                 <span class="font-semibold text-on-background lg:text-on-surface-variant lg:font-normal text-xs lg:text-[11px]">${apt.serviceTitle}</span>
             </td>
             
-            <!-- Therapist Field -->
-            <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 text-left">
+            <!-- Therapist Field (Collapsible) -->
+            <td class="accordion-content hidden lg:table-cell flex justify-between items-center p-0 lg:p-4 text-left">
                 <span class="lg:hidden text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/75">Therapist</span>
                 <span class="font-semibold text-on-background lg:text-on-surface-variant lg:font-normal text-xs lg:text-[11px]">${apt.therapist || 'Unknown'}</span>
             </td>
             
-            <!-- Date & Time Field -->
-            <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 text-on-surface-variant text-right lg:text-left">
+            <!-- Date & Time Field (Collapsible) -->
+            <td class="accordion-content hidden lg:table-cell flex justify-between items-center p-0 lg:p-4 text-on-surface-variant text-right lg:text-left">
                 <span class="lg:hidden text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/75">Date & Time</span>
                 <span class="font-semibold text-on-background lg:text-on-surface-variant lg:font-normal text-xs lg:text-[11px]">${apt.date} • ${apt.time}</span>
             </td>
             
-            <!-- Duration Field -->
-            <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 text-left">
+            <!-- Duration Field (Collapsible) -->
+            <td class="accordion-content hidden lg:table-cell flex justify-between items-center p-0 lg:p-4 text-left">
                 <span class="lg:hidden text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/75">Duration</span>
                 <span class="font-semibold text-on-background lg:text-on-surface-variant lg:font-normal text-xs lg:text-[11px]">${apt.duration}</span>
             </td>
@@ -1779,27 +1811,27 @@ window.renderAdminAppointmentsTable = function() {
                 </span>
             </td>
             
-            <!-- Actions Column -->
-            <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 pr-0 lg:pr-6 text-right">
+            <!-- Actions Column (Collapsible) -->
+            <td class="accordion-content hidden lg:table-cell flex justify-between items-center p-0 lg:p-4 pr-0 lg:pr-6 text-right">
                 <span class="lg:hidden text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/75">Actions</span>
                 <div class="flex items-center justify-end gap-1">
                     ${apt.status === 'pending' ? `
-                        <button onclick="approveAppointment('${apt.id}')" class="text-emerald-600 hover:bg-emerald-50 p-1.5 rounded-lg transition-colors cursor-pointer" title="Approve">
+                        <button onclick="event.stopPropagation(); approveAppointment('${apt.id}')" class="text-emerald-600 hover:bg-emerald-50 p-1.5 rounded-lg transition-colors cursor-pointer" title="Approve">
                             <span class="material-symbols-outlined text-[16px]">check_circle</span>
                         </button>
-                        <button onclick="declineAppointment('${apt.id}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors cursor-pointer" title="Decline">
+                        <button onclick="event.stopPropagation(); declineAppointment('${apt.id}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors cursor-pointer" title="Decline">
                             <span class="material-symbols-outlined text-[16px]">cancel</span>
                         </button>
                     ` : `
                         ${(apt.type === 'Video Call' || apt.type.toLowerCase().includes('virtual') || apt.type.toLowerCase().includes('video')) && apt.status === 'approved' ? `
-                            <button onclick="joinAdminVideoCall('${apt.id}')" class="text-primary hover:bg-primary/10 p-1.5 rounded-lg transition-colors cursor-pointer" title="Join Video Call">
+                            <button onclick="event.stopPropagation(); joinAdminVideoCall('${apt.id}')" class="text-primary hover:bg-primary/10 p-1.5 rounded-lg transition-colors cursor-pointer" title="Join Video Call">
                                 <span class="material-symbols-outlined text-[16px]">videocam</span>
                             </button>
                         ` : ''}
-                        <button onclick="editAppointment('${apt.id}')" class="text-on-surface-variant hover:text-primary hover:bg-surface-container p-1.5 rounded-lg transition-colors cursor-pointer" title="Edit">
+                        <button onclick="event.stopPropagation(); editAppointment('${apt.id}')" class="text-on-surface-variant hover:text-primary hover:bg-surface-container p-1.5 rounded-lg transition-colors cursor-pointer" title="Edit">
                             <span class="material-symbols-outlined text-[16px]">edit</span>
                         </button>
-                        <button onclick="deleteAppointment('${apt.id}')" class="text-on-surface-variant hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors cursor-pointer" title="Delete">
+                        <button onclick="event.stopPropagation(); deleteAppointment('${apt.id}')" class="text-on-surface-variant hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors cursor-pointer" title="Delete">
                             <span class="material-symbols-outlined text-[16px]">delete</span>
                         </button>
                     `}
