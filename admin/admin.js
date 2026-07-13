@@ -2363,7 +2363,7 @@ window.renderDiscussionSidebar = function() {
 window.selectDiscussionClient = function(clientName) {
     state.activeDiscussionClientName = clientName;
     state.mobileViewingThread = true;
-    window.renderDiscussionClientsList();
+    window.renderDiscussionSidebar();
     window.renderAdminProgramChat();
     window.updateMobileDiscussionUI();
 };
