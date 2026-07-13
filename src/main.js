@@ -2566,6 +2566,41 @@ function checkStatsLoggedToday() {
 // ==================== PROFILE / PROGRESS ====================
 function initProfileCharts() {
     checkStatsLoggedToday();
+    
+    const clientName = localStorage.getItem('nutriflow_client_logged_name') || 'Elena Lopez';
+    const initials = clientName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    
+    const avatarEl = document.getElementById('profile-card-avatar');
+    if (avatarEl) avatarEl.innerText = initials;
+    
+    const nameEl = document.getElementById('profile-card-name');
+    if (nameEl) nameEl.innerText = clientName;
+    
+    const dietitianName = localStorage.getItem('nutriflow_assigned_dietitian') || 'Dr. Hasan';
+    const dietitianEl = document.getElementById('profile-card-dietitian');
+    if (dietitianEl) dietitianEl.innerText = dietitianName;
+    
+    const history = state.profileStats.weightHistory || [];
+    const latestWeightObj = history[history.length - 1];
+    const currentWeight = latestWeightObj ? latestWeightObj.weight : 162.0;
+    const startWeight = history[0] ? history[0].weight : 176.2;
+    const targetWeight = 150.0;
+    
+    const currentWeightEl = document.getElementById('profile-goal-current');
+    if (currentWeightEl) currentWeightEl.innerText = currentWeight.toFixed(1);
+    
+    const targetWeightEl = document.getElementById('profile-goal-target');
+    if (targetWeightEl) targetWeightEl.innerText = targetWeight.toFixed(1);
+    
+    const barEl = document.getElementById('profile-goal-bar');
+    if (barEl) {
+        const diffTotal = startWeight - targetWeight;
+        const diffCurrent = startWeight - currentWeight;
+        let pct = diffTotal > 0 ? (diffCurrent / diffTotal) * 100 : 0;
+        pct = Math.max(0, Math.min(100, pct));
+        barEl.style.width = `${pct}%`;
+    }
+    
     updateWeightTrendChart();
     updateMeasurementsChart();
 }
@@ -2623,10 +2658,10 @@ window.updateMeasurementsChart = function() {
                 {
                     label: 'Hip (in)',
                     data: hips,
-                    borderColor: '#006a61',
-                    backgroundColor: 'rgba(0, 106, 97, 0.02)',
+                    borderColor: '#ff6f00',
+                    backgroundColor: 'rgba(255, 111, 0, 0.02)',
                     borderWidth: 2,
-                    pointBackgroundColor: '#006a61',
+                    pointBackgroundColor: '#ff6f00',
                     pointBorderColor: '#ffffff',
                     pointRadius: pointRadius,
                     pointHoverRadius: 6,
