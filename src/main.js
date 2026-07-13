@@ -580,11 +580,11 @@ window.navigateTo = function(viewId) {
     if (activeSec) activeSec.classList.remove('hidden');
 
     document.querySelectorAll('.nav-link').forEach(link => {
-        link.className = 'nav-link h-full flex items-center gap-1.5 text-on-surface-variant hover:text-primary font-bold text-xs transition-colors px-3 cursor-pointer';
+        link.className = 'nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer';
     });
     const activeLink = document.getElementById(`link-${viewId}`);
     if (activeLink) {
-        activeLink.className = 'nav-link h-full flex items-center gap-1.5 text-primary font-bold border-b-2 border-primary text-xs px-3 cursor-pointer';
+        activeLink.className = 'nav-link h-full flex items-center text-primary font-bold border-b-2 border-primary font-label-md text-label-md px-3 cursor-pointer';
     }
 
     // Toggle navbar profile avatar and logout button visibility based on active view

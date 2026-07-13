@@ -63,16 +63,10 @@
         </div>
 
         <!-- Links (center) -->
-        <div class="hidden md:flex justify-center gap-0 h-full items-center overflow-hidden">
-            <a onclick="navigateToView('analytics')" id="link-analytics" class="nav-link h-full flex items-center text-primary font-bold border-b-2 border-primary text-xs px-3 cursor-pointer gap-1 whitespace-nowrap">
-                <span class="material-symbols-outlined text-[15px]">insights</span> Analytics
-            </a>
-            <a onclick="navigateToView('patients')" id="link-patients" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer gap-1 whitespace-nowrap">
-                <span class="material-symbols-outlined text-[15px]">group</span> Patients
-            </a>
-            <a onclick="navigateToView('nutritionists')" id="link-nutritionists" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer gap-1 whitespace-nowrap">
-                <span class="material-symbols-outlined text-[15px]">badge</span> Specialists
-            </a>
+        <div class="hidden md:flex justify-center gap-4 h-full items-center overflow-hidden">
+            <a onclick="navigateToView('analytics')" id="link-analytics" class="nav-link active h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer">Analytics</a>
+            <a onclick="navigateToView('patients')" id="link-patients" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer">Patients</a>
+            <a onclick="navigateToView('nutritionists')" id="link-nutritionists" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-semibold text-xs transition-colors px-3 cursor-pointer">Specialists</a>
         </div>
 
         <!-- Sign Out -->
