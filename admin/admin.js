@@ -730,42 +730,57 @@ function renderAdminClientsList() {
 
     tbody.innerHTML = pageItems.map(cli => {
         return `
-            <tr class="flex flex-col lg:table-row bg-surface-container-lowest border border-outline-variant/30 lg:border-0 rounded-2xl p-4 lg:p-0 gap-2 mb-4 lg:mb-0 hover:bg-surface-container-low/30 transition-colors">
-                <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 pl-0 lg:pl-6 text-left">
-                    <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Client</span>
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">${cli.avatar}</div>
-                        <div class="text-left">
-                            <div class="font-bold text-on-background">${cli.name}</div>
-                            <div class="text-[10px] text-on-surface-variant/80">${cli.email}</div>
+            <tr class="flex flex-col lg:table-row bg-surface-container-lowest border border-outline-variant/30 lg:border-0 rounded-2xl p-4 lg:p-0 gap-3 mb-4 lg:mb-0 hover:bg-surface-container-low/30 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.02)] lg:shadow-none">
+                <!-- Client Card Header -->
+                <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 pl-0 lg:pl-6 text-left border-b border-outline-variant/15 lg:border-0 pb-3 lg:pb-4">
+                    <div class="flex items-center justify-between w-full">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">${cli.avatar}</div>
+                            <div class="text-left">
+                                <div class="font-bold text-on-background text-sm lg:text-xs">${cli.name}</div>
+                                <div class="text-[10px] text-on-surface-variant/80">${cli.email}</div>
+                            </div>
                         </div>
+                        <!-- Action chat button on mobile (hidden on desktop) -->
+                        <button onclick="openClientProgramDiscussion('${cli.activeProgramId}', '${cli.name}')" class="lg:hidden p-2 bg-primary/5 hover:bg-primary/15 text-primary rounded-full transition-colors cursor-pointer" title="Send message">
+                            <span class="material-symbols-outlined text-[18px]">chat</span>
+                        </button>
                     </div>
                 </td>
-                <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 text-left">
-                    <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Goal</span>
-                    <span class="bg-[#e5eeff] text-[#006a61] px-2 py-0.5 rounded text-[10px] font-semibold">${cli.goal}</span>
+                
+                <!-- Goal Field -->
+                <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 text-left">
+                    <span class="lg:hidden text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/75">Goal</span>
+                    <span class="bg-[#e5eeff] text-[#006a61] px-2.5 py-0.5 rounded text-[10px] font-bold">${cli.goal}</span>
                 </td>
-                <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 text-on-surface-variant text-right lg:text-left">
-                    <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Last Check-In</span>
-                    <span>${cli.lastCheckIn}</span>
+                
+                <!-- Last Check-In Field -->
+                <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 text-on-surface-variant text-right lg:text-left">
+                    <span class="lg:hidden text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/75">Last Check-In</span>
+                    <span class="font-semibold text-on-background lg:text-on-surface-variant lg:font-normal">${cli.lastCheckIn}</span>
                 </td>
-                <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 text-left">
-                    <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Compliance</span>
-                    <div class="flex items-center gap-1.5 font-bold">
+                
+                <!-- Compliance Field -->
+                <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 text-left">
+                    <span class="lg:hidden text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/75">Compliance</span>
+                    <div class="flex items-center gap-2 font-bold">
                         <div class="w-16 bg-surface-variant h-1.5 rounded-full overflow-hidden">
                             <div class="bg-primary h-full" style="width: ${cli.compliance}%"></div>
                         </div>
-                        <span>${cli.compliance}%</span>
+                        <span class="text-xs lg:text-[11px]">${cli.compliance}%</span>
                     </div>
                 </td>
-                <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 w-auto lg:w-28 text-left">
-                    <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Weight Progress</span>
-                    <svg class="w-24 lg:w-full h-8" viewBox="0 0 100 30">
+                
+                <!-- Weight Progress Field -->
+                <td class="flex justify-between items-center lg:table-cell p-0 lg:p-4 w-auto lg:w-28 text-left">
+                    <span class="lg:hidden text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/75">Weight Progress</span>
+                    <svg class="w-20 lg:w-full h-8" viewBox="0 0 100 30">
                         <path d="${generateSparklinePath(cli.weightTrend)}" fill="none" stroke="${cli.compliance > 80 ? '#006e2f' : '#9d4300'}" stroke-width="2"></path>
                     </svg>
                 </td>
-                <td class="flex justify-between items-center lg:table-cell p-1 lg:p-4 pr-0 lg:pr-6 text-right">
-                    <span class="lg:hidden text-[9px] uppercase tracking-wider text-on-surface-variant font-bold">Actions</span>
+                
+                <!-- Actions Column (Desktop-only) -->
+                <td class="hidden lg:table-cell p-0 lg:p-4 pr-0 lg:pr-6 text-right">
                     <button onclick="openClientProgramDiscussion('${cli.activeProgramId}', '${cli.name}')" class="p-2 hover:bg-surface-container hover:text-primary rounded-full transition-colors inline-block cursor-pointer" title="Send message">
                         <span class="material-symbols-outlined text-[18px]">chat</span>
                     </button>

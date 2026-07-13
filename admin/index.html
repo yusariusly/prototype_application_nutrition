@@ -189,12 +189,12 @@
                         <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant/60">search</span>
                         <input type="text" id="admin-client-search" oninput="filterAdminClients()" placeholder="Search clients..." class="w-full rounded-xl border-outline-variant/40 focus:border-primary focus:ring-primary text-xs pl-10 pr-4 py-2.5 bg-surface-container-low/55">
                     </div>
-                    <div class="flex gap-2">
-                        <select id="admin-client-filter-owner" onchange="filterAdminClients()" class="text-xs bg-surface border border-outline-variant/30 rounded-xl px-3 py-2 text-on-surface-variant font-semibold">
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <select id="admin-client-filter-owner" onchange="filterAdminClients()" class="w-1/2 sm:w-auto text-xs bg-surface border border-outline-variant/30 rounded-xl px-3 py-2.5 text-on-surface-variant font-semibold focus:ring-primary focus:border-primary">
                             <option value="mine">My Clients</option>
                             <option value="all">All Clients</option>
                         </select>
-                        <select id="admin-client-filter-goal" onchange="filterAdminClients()" class="text-xs bg-surface border border-outline-variant/30 rounded-xl px-3 py-2 text-on-surface-variant font-semibold">
+                        <select id="admin-client-filter-goal" onchange="filterAdminClients()" class="w-1/2 sm:w-auto text-xs bg-surface border border-outline-variant/30 rounded-xl px-3 py-2.5 text-on-surface-variant font-semibold focus:ring-primary focus:border-primary">
                             <option value="all">All Goals</option>
                             <option value="Weight Loss">Weight Loss</option>
                             <option value="Muscle Gain">Muscle Gain</option>
