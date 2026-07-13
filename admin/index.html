@@ -555,23 +555,23 @@
 
     <!-- Mobile Bottom Navigation (Only visible on mobile screens) -->
     <div class="md:hidden fixed bottom-0 left-0 right-0 bg-surface border-t border-outline-variant/30 flex justify-around items-center h-16 z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] px-2">
-        <button onclick="navigateTo('admin-clients')" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
+        <button onclick="navigateTo('admin-clients')" id="mobile-link-admin-clients" class="mobile-nav-link flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
             <span class="material-symbols-outlined text-[22px]">group</span>
             <span class="text-[9px] font-bold mt-0.5">Clients</span>
         </button>
-        <button onclick="navigateTo('admin-meal-builder')" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
+        <button onclick="navigateTo('admin-meal-builder')" id="mobile-link-admin-meal-builder" class="mobile-nav-link flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
             <span class="material-symbols-outlined text-[22px]">restaurant_menu</span>
             <span class="text-[9px] font-bold mt-0.5">Meal Builder</span>
         </button>
-        <button onclick="navigateTo('admin-calendar')" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
+        <button onclick="navigateTo('admin-calendar')" id="mobile-link-admin-calendar" class="mobile-nav-link flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
             <span class="material-symbols-outlined text-[22px]">calendar_month</span>
             <span class="text-[9px] font-bold mt-0.5">Appointments</span>
         </button>
-        <button onclick="navigateTo('admin-services')" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
+        <button onclick="navigateTo('admin-services')" id="mobile-link-admin-services" class="mobile-nav-link flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
             <span class="material-symbols-outlined text-[22px]">medical_services</span>
             <span class="text-[9px] font-bold mt-0.5">Services</span>
         </button>
-        <button onclick="navigateTo('admin-profile')" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
+        <button onclick="navigateTo('admin-profile')" id="mobile-link-admin-profile" class="mobile-nav-link flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
             <span class="material-symbols-outlined text-[22px]">account_circle</span>
             <span class="text-[9px] font-bold mt-0.5">Profile</span>
         </button>

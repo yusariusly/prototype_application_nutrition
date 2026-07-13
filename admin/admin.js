@@ -299,6 +299,17 @@ window.navigateTo = function(viewId) {
         activeLink.className = 'nav-link h-full flex items-center text-primary font-bold border-b-2 border-primary font-label-md text-label-md px-3 cursor-pointer';
     }
 
+    // Toggle active state for mobile bottom nav
+    document.querySelectorAll('.mobile-nav-link').forEach(link => {
+        link.classList.remove('text-primary');
+        link.classList.add('text-on-surface-variant');
+    });
+    const activeMobileLink = document.getElementById(`mobile-link-${viewId}`);
+    if (activeMobileLink) {
+        activeMobileLink.classList.remove('text-on-surface-variant');
+        activeMobileLink.classList.add('text-primary');
+    }
+
     if (viewId === 'admin-clients') {
         renderAdminClientsList();
     } else if (viewId === 'admin-meal-builder') {
