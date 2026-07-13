@@ -2414,7 +2414,13 @@ window.renderAdminProgramChat = function() {
     
     const label = document.getElementById('discussion-chat-with-label');
     if (label) {
-        label.innerText = `Chatting with: ${activeClient}`;
+        label.innerText = activeClient;
+    }
+    
+    const avatar = document.getElementById('chat-page-client-avatar');
+    if (avatar) {
+        const initials = activeClient.split(' ').map(s => s[0]).join('').substring(0, 2).toUpperCase();
+        avatar.innerText = initials;
     }
     
     const allProgramChats = JSON.parse(localStorage.getItem('nutriflow_program_chats')) || [];

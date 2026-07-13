@@ -395,32 +395,43 @@
                             </div>
 
                             <!-- Right: Chat Box Main -->
-                            <div id="discussion-chat-panel" class="hidden lg:flex lg:col-span-8 flex-col justify-between bg-slate-50 border border-slate-200 rounded-2xl p-4 min-h-[450px]">
-                                <div class="flex flex-col flex-grow">
-                                    <div class="border-b pb-2 mb-3 flex items-center gap-2">
+                            <div id="discussion-chat-panel" class="hidden lg:flex lg:col-span-8 flex-col justify-between bg-surface border border-outline-variant/35 rounded-2xl overflow-hidden shadow-sm min-h-[450px]">
+                                <!-- Chat Window Header -->
+                                <div class="flex items-center justify-between px-4 py-3 bg-surface border-b border-outline-variant/30 shrink-0">
+                                    <div class="flex items-center gap-3">
                                         <!-- Mobile Back button to list -->
-                                        <button onclick="backToRecipients()" class="lg:hidden p-1.5 hover:bg-slate-200 text-slate-600 rounded-xl transition-colors cursor-pointer mr-1" title="Back to recipients">
-                                            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                                        <button type="button" onclick="backToRecipients()" class="lg:hidden p-2 hover:bg-surface-container-low rounded-full transition-colors active:scale-95 text-on-surface-variant flex items-center justify-center">
+                                            <span class="material-symbols-outlined text-lg">arrow_back</span>
                                         </button>
-                                        <div>
-                                            <h4 class="text-xs font-bold text-slate-800" id="discussion-chat-with-label">Chatting with Guest User</h4>
-                                            <p class="text-[9px] text-slate-400">All responses are private and visible only to this client.</p>
+                                        <!-- Client Avatar & Status -->
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center border border-outline-variant/30" id="chat-page-client-avatar">
+                                                --
+                                            </div>
+                                            <div class="text-left">
+                                                <h2 class="font-bold text-xs text-on-background leading-none" id="discussion-chat-with-label">Chatting with Client</h2>
+                                                <span class="text-[9px] text-primary font-bold block mt-1.5 flex items-center gap-1">
+                                                    <span class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span> Active Client
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                    
-                                    <!-- Messages feed container -->
-                                    <div id="admin-page-chat-container" class="flex flex-col gap-3 overflow-y-auto pr-2 scroll-smooth flex-grow max-h-[350px] min-h-[300px]">
-                                        <!-- Dynamic messages populate here -->
-                                    </div>
                                 </div>
-
-                                <!-- Input field form -->
-                                <form onsubmit="handleAdminPageChatSubmit(event)" class="flex gap-2 items-center border-t pt-3 mt-3">
-                                    <input type="text" id="admin-page-chat-input" placeholder="Type a reply to the client..." required class="flex-1 rounded-xl border-slate-200 text-xs px-4 py-3 bg-white focus:border-primary focus:ring-primary text-slate-800">
-                                    <button type="submit" class="bg-primary hover:bg-[#005321] text-white p-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center cursor-pointer">
-                                        <span class="material-symbols-outlined text-[18px]">send</span>
-                                    </button>
-                                </form>
+                                
+                                <!-- Message List -->
+                                <div id="admin-page-chat-container" class="flex-grow overflow-y-auto px-4 py-5 flex flex-col gap-4 bg-slate-50/50 scroll-smooth max-h-[350px] min-h-[300px]">
+                                    <!-- Dynamic messages populate here -->
+                                </div>
+                                
+                                <!-- Chat Footer Input Area -->
+                                <div class="p-3 bg-surface border-t border-outline-variant/30 shrink-0">
+                                    <form onsubmit="handleAdminPageChatSubmit(event)" class="flex gap-2 items-center">
+                                        <input type="text" id="admin-page-chat-input" placeholder="Type a message..." required class="flex-1 bg-surface-container-low border border-outline-variant/30 text-xs px-4 py-3 rounded-full focus:outline-none focus:border-primary/50 text-slate-800 transition-all">
+                                        <button type="submit" class="bg-primary hover:bg-[#005321] text-white p-3 rounded-full shadow-md transition-all active:scale-95 flex items-center justify-center cursor-pointer">
+                                            <span class="material-symbols-outlined text-base">send</span>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
