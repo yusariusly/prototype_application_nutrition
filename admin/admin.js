@@ -193,6 +193,26 @@ function loadAdminState() {
                 else if (c.name === 'Elena Lopez') c.activeProgramId = 'prog-elena';
                 updated = true;
             }
+            if (c.compliance === undefined || c.compliance === null) {
+                c.compliance = 85;
+                updated = true;
+            }
+            if (!c.weightTrend || !Array.isArray(c.weightTrend) || c.weightTrend.length === 0) {
+                c.weightTrend = [160, 159, 158, 158, 157, 156];
+                updated = true;
+            }
+            if (!c.avatar) {
+                c.avatar = c.name ? c.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'CL';
+                updated = true;
+            }
+            if (!c.goal) {
+                c.goal = 'Weight Loss';
+                updated = true;
+            }
+            if (!c.lastCheckIn) {
+                c.lastCheckIn = 'Never';
+                updated = true;
+            }
         });
         if (updated) {
             localStorage.setItem('nutriflow_clients', JSON.stringify(state.clients));
