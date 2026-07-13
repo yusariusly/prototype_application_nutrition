@@ -1015,6 +1015,50 @@ function renderMealPlans() {
     renderProgramChat();
 }
 
+let selectedChatFile = null;
+
+window.handleProgramChatFileSelected = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (file.size > 2 * 1024 * 1024) {
+        showToast('File size exceeds the 2MB limit.', 'error');
+        e.target.value = '';
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        selectedChatFile = {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            dataUrl: evt.target.result
+        };
+        
+        const preview = document.getElementById('program-chat-file-preview');
+        const pName = document.getElementById('preview-file-name');
+        const pSize = document.getElementById('preview-file-size');
+        const pIcon = document.getElementById('preview-file-icon');
+        
+        if (preview && pName && pSize && pIcon) {
+            pName.innerText = file.name;
+            pSize.innerText = `${(file.size / 1024).toFixed(1)} KB`;
+            pIcon.innerText = file.type.startsWith('image/') ? 'image' : 'description';
+            preview.classList.remove('hidden');
+        }
+    };
+    reader.readAsDataURL(file);
+};
+
+window.clearSelectedChatFile = function() {
+    selectedChatFile = null;
+    const preview = document.getElementById('program-chat-file-preview');
+    const fileInput = document.getElementById('program-chat-file');
+    if (preview) preview.classList.add('hidden');
+    if (fileInput) fileInput.value = '';
+};
+
 window.renderProgramChat = function() {
     const container = document.getElementById('program-chat-container');
     if (!container) return;
@@ -1059,6 +1103,31 @@ window.renderProgramChat = function() {
         const isDoc = msg.sender === 'doctor';
         const bubbleBg = isDoc ? 'bg-[#f1f5f9] text-slate-800 rounded-tl-none' : 'bg-primary text-white rounded-tr-none';
         const align = isDoc ? 'justify-start' : 'justify-end';
+        
+        let attachmentHtml = '';
+        if (msg.file) {
+            if (msg.file.type.startsWith('image/')) {
+                attachmentHtml = `
+                    <div class="mt-2 rounded-lg overflow-hidden max-w-full border border-outline-variant/20 shadow-sm bg-white p-1">
+                        <img class="max-h-48 object-contain rounded-md" src="${msg.file.dataUrl}" alt="${msg.file.name}">
+                    </div>
+                `;
+            } else {
+                attachmentHtml = `
+                    <a href="${msg.file.dataUrl}" download="${msg.file.name}" class="mt-2 flex items-center gap-2 p-2.5 rounded-xl bg-white border border-outline-variant/30 text-slate-800 hover:bg-slate-50 transition-colors w-fit max-w-full">
+                        <span class="material-symbols-outlined text-primary text-xl">description</span>
+                        <div class="text-left min-w-0">
+                            <p class="text-xs font-bold truncate text-slate-700">${msg.file.name}</p>
+                            <p class="text-[9px] text-slate-400 font-semibold">${(msg.file.size / 1024).toFixed(1)} KB</p>
+                        </div>
+                        <span class="material-symbols-outlined text-slate-400 hover:text-primary text-base ml-2">download</span>
+                    </a>
+                `;
+            }
+        }
+        
+        const messageText = msg.text ? `<div>${msg.text}</div>` : '';
+
         return `
             <div class="flex ${align} w-full">
                 <div class="${bubbleBg} text-xs px-3.5 py-2.5 rounded-2xl max-w-[85%] shadow-sm leading-relaxed">
@@ -1066,7 +1135,8 @@ window.renderProgramChat = function() {
                         <span>${msg.senderName}</span>
                         <span>${msg.time}</span>
                     </div>
-                    <div>${msg.text}</div>
+                    ${messageText}
+                    ${attachmentHtml}
                 </div>
             </div>
         `;
@@ -1086,7 +1156,7 @@ window.handleProgramChatSubmit = function(e) {
     if (!input) return;
     
     const val = input.value.trim();
-    if (!val) return;
+    if (!val && !selectedChatFile) return;
     
     const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
     const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
@@ -1120,21 +1190,34 @@ window.handleProgramChatSubmit = function(e) {
         
         const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         
-        chatEntry.chatHistory.push({
+        const newMessage = {
             sender: 'client',
             senderName: activeClient,
             text: val,
             time: timeNow
-        });
+        };
         
+        if (selectedChatFile) {
+            newMessage.file = selectedChatFile;
+        }
+        
+        chatEntry.chatHistory.push(newMessage);
         localStorage.setItem('nutriflow_program_chats', JSON.stringify(allProgramChats));
+        
+        const fileRef = selectedChatFile;
         input.value = '';
+        clearSelectedChatFile();
         renderProgramChat();
         
         // Auto-reply simulation from nutritionist after 2 seconds
         setTimeout(() => {
             const timeRep = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const replyText = `Thanks for your question! I have reviewed your comment about "${val}" and will get back to you with updates on your program details shortly.`;
+            let replyText = '';
+            if (fileRef) {
+                replyText = `Thanks for sending the attachment "${fileRef.name}"! I will review it and get back to you with my feedback soon.`;
+            } else {
+                replyText = `Thanks for your question! I have reviewed your comment about "${val}" and will get back to you with updates on your program details shortly.`;
+            }
             
             const currentChats = JSON.parse(localStorage.getItem('nutriflow_program_chats')) || [];
             const freshChat = currentChats.find(c => c.id === chatKey);
