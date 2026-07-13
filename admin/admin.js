@@ -2578,17 +2578,30 @@ window.openProgramChatSelectionModal = function() {
             listContainer.innerHTML = state.programs.map(p => {
                 const activeClientsCount = state.clients.filter(c => c.activeProgramId === p.id).length;
                 return `
-                    <div onclick="selectProgramForChat('${p.id}')" class="flex items-center justify-between p-3 border border-outline-variant/30 rounded-xl hover:border-primary/40 hover:bg-primary/5 transition-all cursor-pointer shadow-sm group">
-                        <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                                <span class="material-symbols-outlined text-[20px] text-primary">assignment</span>
+                    <div onclick="selectProgramForChat('${p.id}')" class="flex items-center justify-between p-4 border border-outline-variant/30 rounded-2xl hover:border-primary/40 hover:bg-primary/[0.015] hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98] transition-all cursor-pointer shadow-sm group bg-white">
+                        <div class="flex items-center gap-3.5">
+                            <!-- Styled Icon with Chat motif -->
+                            <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center transition-all group-hover:scale-105">
+                                <span class="material-symbols-outlined text-[22px] font-medium text-primary">chat_bubble</span>
                             </div>
                             <div class="text-left">
-                                <p class="text-xs font-bold text-on-background group-hover:text-primary transition-colors leading-snug">${p.name}</p>
-                                <p class="text-[9px] text-on-surface-variant/80 mt-0.5 font-medium">${activeClientsCount} active client${activeClientsCount !== 1 ? 's' : ''}</p>
+                                <p class="text-sm font-extrabold text-on-background group-hover:text-primary transition-colors leading-snug">${p.name}</p>
+                                <!-- Dynamic status pill badge for client counts -->
+                                <div class="mt-1 flex items-center gap-1.5">
+                                    ${activeClientsCount > 0 ? `
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200/40">
+                                            <span class="w-1 h-1 rounded-full bg-emerald-600 animate-pulse"></span>
+                                            ${activeClientsCount} active client${activeClientsCount !== 1 ? 's' : ''}
+                                        </span>
+                                    ` : `
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-50 text-slate-400 border border-outline-variant/30">
+                                            No active clients
+                                        </span>
+                                    `}
+                                </div>
                             </div>
                         </div>
-                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[18px]">chevron_right</span>
+                        <span class="material-symbols-outlined text-on-surface-variant/70 group-hover:text-primary group-hover:translate-x-1 transition-all text-[20px]">chevron_right</span>
                     </div>
                 `;
             }).join('');
