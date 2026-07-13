@@ -263,54 +263,56 @@
         <section id="view-meal-plans" class="view-section hidden flex flex-col gap-gutter">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 class="text-3xl font-bold tracking-tight text-on-surface" id="client-program-title">Your Nutrition Program</h1>
-                    <p class="text-body-md text-on-surface-variant mt-1" id="client-program-description">Follow this program to reach your wellness goals.</p>
+                    <h1 class="text-xl md:text-3xl font-bold tracking-tight text-on-surface" id="client-program-title">Your Nutrition Program</h1>
+                    <p class="text-xs md:text-body-md text-on-surface-variant mt-1" id="client-program-description">Follow this program to reach your wellness goals.</p>
                 </div>
-                <div class="flex items-center gap-3 flex-wrap">
-                    <div class="flex flex-wrap gap-1 bg-surface-container-low p-1 rounded-xl border border-outline-variant/20" id="meal-weekday-switcher"></div>
+                <div class="flex items-center w-full md:w-auto">
+                    <div class="flex flex-nowrap overflow-x-auto gap-1 bg-surface-container-low p-1 rounded-xl border border-outline-variant/20 w-full md:w-auto hide-scrollbar" id="meal-weekday-switcher"></div>
                 </div>
             </div>
 
-            <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-                <div class="md:col-span-3 flex flex-col items-center border-b md:border-b-0 md:border-r border-surface-variant/30 pb-4 md:pb-0">
-                    <div class="relative w-32 h-32">
+            <div class="bg-surface-container-lowest rounded-2xl p-4 md:p-6 border border-outline-variant/30 shadow-sm flex flex-row items-center gap-4 md:grid md:grid-cols-12 md:gap-6">
+                <!-- Circular progress (Left on mobile, md:col-span-3 on desktop) -->
+                <div class="shrink-0 md:col-span-3 flex flex-col items-center md:border-r border-surface-variant/30 md:pr-6 py-1">
+                    <div class="relative w-20 h-20 md:w-32 md:h-32">
                         <svg class="w-full h-full" viewBox="0 0 100 100">
                             <circle class="text-surface-variant stroke-current" cx="50" cy="50" fill="transparent" r="40" stroke-width="8"></circle>
                             <circle id="meals-progress-circle" class="text-[#006e2f] stroke-current progress-ring__circle" cx="50" cy="50" fill="transparent" r="40" stroke-dasharray="251.2" stroke-dashoffset="120" stroke-linecap="round" stroke-width="8"></circle>
                         </svg>
                         <div class="absolute inset-0 flex flex-col items-center justify-center">
-                            <span class="text-xl font-bold text-on-background" id="meals-kcal-ratio">1,850</span>
-                            <span class="text-[9px] uppercase font-bold text-on-surface-variant tracking-wider" id="meals-kcal-target-label">/ 2400 kcal</span>
+                            <span class="text-sm md:text-xl font-bold text-on-background leading-none" id="meals-kcal-ratio">1,850</span>
+                            <span class="text-[7px] md:text-[9px] uppercase font-bold text-on-surface-variant tracking-wider mt-0.5" id="meals-kcal-target-label">/ 2400 kcal</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="md:col-span-9 flex flex-col gap-3">
-                    <h3 class="text-xs uppercase tracking-widest font-bold text-[#006a61]">Daily Macro Targets</h3>
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-xs font-semibold">
+                <!-- Macro Bars (Right on mobile, md:col-span-9 on desktop) -->
+                <div class="flex-1 md:col-span-9 flex flex-col gap-2 md:gap-3">
+                    <h3 class="text-[9px] md:text-xs uppercase tracking-widest font-bold text-[#006a61] leading-none">Daily Macro Targets</h3>
+                    <div class="space-y-0.5 md:space-y-1">
+                        <div class="flex justify-between text-[10px] md:text-xs font-semibold leading-none">
                             <span class="text-on-surface-variant">Protein</span>
                             <span class="text-on-background" id="meals-macro-protein-label">120g / 150g</span>
                         </div>
-                        <div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden">
+                        <div class="w-full bg-surface-variant h-1.5 md:h-2 rounded-full overflow-hidden">
                             <div id="meals-macro-protein-bar" class="bg-primary h-full rounded-full" style="width: 80%"></div>
                         </div>
                     </div>
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-xs font-semibold">
+                    <div class="space-y-0.5 md:space-y-1">
+                        <div class="flex justify-between text-[10px] md:text-xs font-semibold leading-none">
                             <span class="text-on-surface-variant">Carbs</span>
                             <span class="text-on-background" id="meals-macro-carbs-label">200g / 250g</span>
                         </div>
-                        <div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden">
+                        <div class="w-full bg-surface-variant h-1.5 md:h-2 rounded-full overflow-hidden">
                             <div id="meals-macro-carbs-bar" class="bg-[#006a61] h-full rounded-full" style="width: 80%"></div>
                         </div>
                     </div>
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-xs font-semibold">
+                    <div class="space-y-0.5 md:space-y-1">
+                        <div class="flex justify-between text-[10px] md:text-xs font-semibold leading-none">
                             <span class="text-on-surface-variant">Fats</span>
                             <span class="text-on-background" id="meals-macro-fats-label">45g / 65g</span>
                         </div>
-                        <div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden">
+                        <div class="w-full bg-surface-variant h-1.5 md:h-2 rounded-full overflow-hidden">
                             <div id="meals-macro-fats-bar" class="bg-tertiary h-full rounded-full" style="width: 69%"></div>
                         </div>
                     </div>
