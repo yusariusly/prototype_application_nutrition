@@ -2282,6 +2282,9 @@ window.openProgramDiscussion = function(programId, targetClientName = null) {
         titleEl.innerHTML = `<span class="material-symbols-outlined text-primary text-xl">forum</span> Discussion: ${program.name}`;
     }
     
+    // Hide navbars & footers for full-page view
+    window.toggleDiscussionFullView(true);
+    
     window.renderDiscussionSidebar();
     window.renderAdminProgramChat();
     window.updateMobileDiscussionUI();
@@ -2381,6 +2384,7 @@ window.updateMobileDiscussionUI = function() {
     const chat = document.getElementById('discussion-chat-panel');
     const containerBox = document.getElementById('discussion-container-box');
     const mainHeader = document.getElementById('discussion-main-header');
+    const gridContainer = document.getElementById('discussion-grid-container');
     if (!sidebar || !chat) return;
     
     const isMobile = window.innerWidth < 1024;
@@ -2395,7 +2399,10 @@ window.updateMobileDiscussionUI = function() {
             
             // Remove padding, borders, shadows for native-like full viewport look on mobile
             if (containerBox) {
-                containerBox.className = "flex flex-col h-[calc(100vh-100px)] w-full gap-0 p-0 border-0 shadow-none bg-transparent";
+                containerBox.className = "flex flex-col h-[calc(100vh-20px)] w-full gap-0 p-0 border-0 shadow-none bg-transparent";
+            }
+            if (gridContainer) {
+                gridContainer.className = "grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-90px)] lg:h-[550px]";
             }
             
             // Auto scroll to bottom of chat when loaded
@@ -2413,6 +2420,9 @@ window.updateMobileDiscussionUI = function() {
             if (containerBox) {
                 containerBox.className = "bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-6";
             }
+            if (gridContainer) {
+                gridContainer.className = "grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-220px)] lg:h-[550px]";
+            }
         }
     } else {
         sidebar.classList.remove('hidden');
@@ -2420,7 +2430,10 @@ window.updateMobileDiscussionUI = function() {
         chat.classList.add('flex');
         if (mainHeader) mainHeader.classList.remove('hidden');
         if (containerBox) {
-            containerBox.className = "bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-6";
+            containerBox.className = "bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-6 h-[calc(100vh-48px)]";
+        }
+        if (gridContainer) {
+            gridContainer.className = "grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-140px)]";
         }
     }
 };
@@ -2436,6 +2449,9 @@ window.addEventListener('resize', () => {
 window.exitProgramDiscussion = function() {
     const discView = document.getElementById('program-discussion-view');
     if (discView) discView.classList.add('hidden');
+    
+    // Restore navbars and footers
+    window.toggleDiscussionFullView(false);
     
     const parentView = state.chatParentView || 'programs-list-view';
     state.chatParentView = null;
@@ -2661,6 +2677,9 @@ window.openProgramChatSelectionModal = function() {
         titleEl.innerHTML = `<span class="material-symbols-outlined text-primary text-xl">forum</span> Program Discussions`;
     }
     
+    // Hide navbars & footers for full-page view
+    window.toggleDiscussionFullView(true);
+    
     window.renderDiscussionSidebar();
     window.renderAdminProgramChat();
     window.updateMobileDiscussionUI();
@@ -2702,5 +2721,21 @@ window.goBackToSidebarPrograms = function() {
     window.renderDiscussionSidebar();
     window.renderAdminProgramChat();
     window.updateMobileDiscussionUI();
+};
+
+window.toggleDiscussionFullView = function(fullViewActive) {
+    const desktopNav = document.getElementById('admin-desktop-navbar');
+    const mobileNav = document.getElementById('admin-mobile-navbar');
+    const footer = document.getElementById('admin-page-footer');
+    
+    if (fullViewActive) {
+        if (desktopNav) desktopNav.classList.add('hidden');
+        if (mobileNav) mobileNav.classList.add('hidden');
+        if (footer) footer.classList.add('hidden');
+    } else {
+        if (desktopNav) desktopNav.classList.remove('hidden');
+        if (mobileNav) mobileNav.classList.remove('hidden');
+        if (footer) footer.classList.remove('hidden');
+    }
 };
 
