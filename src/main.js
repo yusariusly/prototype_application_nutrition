@@ -593,6 +593,13 @@ window.navigateTo = function(viewId) {
             chatWindow.classList.remove('rounded-2xl', 'border', 'shadow-sm');
             chatWindow.classList.add('border-0', 'rounded-none');
         }
+    } else if (viewId === 'book-wizard') {
+        if (footerEl) footerEl.classList.add('hidden');
+        if (navbarEl) navbarEl.classList.remove('hidden');
+        if (mobileNavEl) mobileNavEl.classList.add('hidden');
+        if (mainContainerEl) {
+            mainContainerEl.className = 'flex-grow w-full max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-lg relative';
+        }
     } else {
         if (footerEl) footerEl.classList.remove('hidden');
         if (navbarEl) navbarEl.classList.remove('hidden');
