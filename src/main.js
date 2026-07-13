@@ -2127,21 +2127,78 @@ function renderBookingStep1() {
     const grid = document.getElementById('booking-services-grid');
     if (!grid) return;
     
-    const services = [
-        { id: 'initial-consultation', title: 'Initial Consultation', duration: '60 min', price: 150, description: 'A comprehensive deep dive into your medical history, habits, and goals to build your plan.', type: 'Virtual or In-Person', image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=200' },
-        { id: 'follow-up', title: 'Follow-up Session', duration: '30 min', price: 75, description: 'A check-in to review progress, adjust macros, and troubleshoot plan challenges.', type: 'Virtual Only', image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200' },
-        { id: 'body-scan', title: 'Body Composition Scan', duration: '15 min', price: 50, description: 'In-office scan measuring fat, muscle mass distribution, visceral fat, and water levels.', type: 'In-Person Only', image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200' }
-    ];
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
+    const clientDetails = clientsList.find(c => c.name === activeClient);
+    const assignedTherapist = clientDetails?.therapist || 'Dr. Hasan';
     
-    const specialists = [
-        { id: 'hasan', name: 'Dr. Hasan', role: 'Clinical Nutritionist', avatar: 'DH' },
-        { id: 'amanda', name: 'Amanda', role: 'Sports Dietitian', avatar: 'AM' },
-        { id: 'jenkins', name: 'Dr. Sarah Jenkins', role: 'Dietetic Coach', avatar: 'SJ' }
-    ];
+    state.bookingFlow.selectedSpecialist = assignedTherapist;
+
+    const key = `nutriflow_services_${assignedTherapist}`;
+    let therapistServices = JSON.parse(localStorage.getItem(key));
     
-    state.currentTherapistServices = services;
+    if (!therapistServices || therapistServices.length === 0) {
+        if (assignedTherapist.includes('Hasan')) {
+            therapistServices = [
+                {
+                    id: 'srv-hasan-1',
+                    title: 'Weight Loss Consultation',
+                    description: 'A dedicated session focusing on weight loss strategies, body composition targets, and custom macro ratios.',
+                    duration: '60 min',
+                    type: 'Virtual or In-Person',
+                    price: 150,
+                    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDI0OL4dSef_9_KtBWKJ_8d0de_3jKJ307lRmzwECWHykwC2Sh_-p2uUnTh-2y0Yyj2x5txHJ1-_Z9u3YVyIFYjVwQFMkm0ufr1Envl8PlT8JyiHkOB-hHpJszVsfgn9wthQZBcxDIFw3emAo4TPjLWJ43YEqFZsYmGT0kh9do_2JTuvnjgBOOrtceFxVxH_JZX7krm4i7Rjsz16LRwnXm93LXDXh78J5Agw0JsZToFhkL6qU3xrqPBtQ'
+                },
+                {
+                    id: 'srv-hasan-2',
+                    title: 'Weekly Meal Review',
+                    description: 'A 30-minute check-in to adjust your weekly calorie limits, recipes, and raw ingredients in your active program.',
+                    duration: '30 min',
+                    type: 'Virtual Only',
+                    price: 75,
+                    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBGsbf12JBu1YUhQl78vA1aGmjNYjjGnyb8cmgHlmCOxHKWee0ybL9-1rqta2RUKAJJewh6CU3PkcStb675EhEkzaWohu52Oj7rEOvZZt5-KwE8CSpbidQcEI59WkIrdFAd1LKLAv1EB0t69XGbzUv3jpNPAxWeFPSO8fipEBXZWlqqzxB9GQ2cJzZSc6G7cGZVRlaCrNQ79-yv4AL_kM2EKJba8qTKqFux18RVXNHQHkGLV2pI17tZjw'
+                }
+            ];
+        } else if (assignedTherapist.includes('Amanda')) {
+            therapistServices = [
+                {
+                    id: 'srv-amanda-1',
+                    title: 'Sports Performance Nutrition',
+                    description: 'Optimize your energy levels, muscle protein synthesis, and sports supplements to match your training cycles.',
+                    duration: '60 min',
+                    type: 'Virtual or In-Person',
+                    price: 160,
+                    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDI0OL4dSef_9_KtBWKJ_8d0de_3jKJ307lRmzwECWHykwC2Sh_-p2uUnTh-2y0Yyj2x5txHJ1-_Z9u3YVyIFYjVwQFMkm0ufr1Envl8PlT8JyiHkOB-hHpJszVsfgn9wthQZBcxDIFw3emAo4TPjLWJ43YEqFZsYmGT0kh9do_2JTuvnjgBOOrtceFxVxH_JZX7krm4i7Rjsz16LRwnXm93LXDXh78J5Agw0JsZToFhkL6qU3xrqPBtQ'
+                }
+            ];
+        } else {
+            therapistServices = [
+                {
+                    id: 'initial-consultation',
+                    title: 'Initial Consultation',
+                    description: 'A comprehensive 60-minute deep dive into your medical history, habits, and goals to build your plan.',
+                    duration: '60 min',
+                    type: 'Virtual or In-Person',
+                    price: 150,
+                    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDI0OL4dSef_9_KtBWKJ_8d0de_3jKJ307lRmzwECWHykwC2Sh_-p2uUnTh-2y0Yyj2x5txHJ1-_Z9u3YVyIFYjVwQFMkm0ufr1Envl8PlT8JyiHkOB-hHpJszVsfgn9wthQZBcxDIFw3emAo4TPjLWJ43YEqFZsYmGT0kh9do_2JTuvnjgBOOrtceFxVxH_JZX7krm4i7Rjsz16LRwnXm93LXDXh78J5Agw0JsZToFhkL6qU3xrqPBtQ'
+                },
+                {
+                    id: 'follow-up',
+                    title: 'Follow-up Session',
+                    description: 'A 30-minute check-in to review progress, adjust macros, and troubleshoot plan challenges.',
+                    duration: '30 min',
+                    type: 'Virtual Only',
+                    price: 75,
+                    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBGsbf12JBu1YUhQl78vA1aGmjNYjjGnyb8cmgHlmCOxHKWee0ybL9-1rqta2RUKAJJewh6CU3PkcStb675EhEkzaWohu52Oj7rEOvZZt5-KwE8CSpbidQcEI59WkIrdFAd1LKLAv1EB0t69XGbzUv3jpNPAxWeFPSO8fipEBXZWlqqzxB9GQ2cJzZSc6G7cGZVRlaCrNQ79-yv4AL_kM2EKJba8qTKqFux18RVXNHQHkGLV2pI17tZjw'
+                }
+            ];
+        }
+        localStorage.setItem(key, JSON.stringify(therapistServices));
+    }
     
-    grid.innerHTML = services.map(srv => {
+    state.currentTherapistServices = therapistServices;
+    
+    grid.innerHTML = therapistServices.map(srv => {
         const isSelected = state.bookingFlow.selectedServiceId === srv.id;
         
         return `
@@ -2166,29 +2223,10 @@ function renderBookingStep1() {
             </div>
         `;
     }).join('');
-    
-    const specGrid = document.getElementById('booking-specialists-grid');
-    if (specGrid) {
-        specGrid.innerHTML = specialists.map(spec => {
-            const isSelected = state.bookingFlow.selectedSpecialist === spec.name;
-            
-            return `
-                <div onclick="selectBookingSpecialist('${spec.name}')" class="rounded-2xl p-4 cursor-pointer flex flex-col items-center text-center gap-2 border bg-surface hover:border-primary/50 transition-all ${isSelected ? 'border-primary ring-2 ring-primary bg-surface' : 'border-outline-variant/30'}">
-                    <div class="w-10 h-10 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center border border-primary/20 shrink-0">
-                        ${spec.avatar}
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-xs text-on-background leading-tight">${spec.name}</h4>
-                        <p class="text-[9px] text-on-surface-variant font-semibold mt-1">${spec.role}</p>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
 
     const nextBtn = document.getElementById('booking-next-btn-1');
     if (nextBtn) {
-        if (state.bookingFlow.selectedServiceId && state.bookingFlow.selectedSpecialist) {
+        if (state.bookingFlow.selectedServiceId) {
             nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             nextBtn.disabled = false;
         } else {
@@ -2200,11 +2238,6 @@ function renderBookingStep1() {
 
 window.selectBookingService = function(srvId) {
     state.bookingFlow.selectedServiceId = srvId;
-    renderBookingStep1();
-};
-
-window.selectBookingSpecialist = function(name) {
-    state.bookingFlow.selectedSpecialist = name;
     renderBookingStep1();
 };
 
