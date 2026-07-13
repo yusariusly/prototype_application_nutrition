@@ -2255,8 +2255,10 @@ window.openProgramDiscussion = function(programId, targetClientName = null) {
             clientNames.unshift(targetClientName);
         }
         state.activeDiscussionClientName = targetClientName;
+        state.mobileViewingThread = true;
     } else {
         state.activeDiscussionClientName = clientNames[0];
+        state.mobileViewingThread = false;
     }
     
     // Hide editor and list views, show discussion view
@@ -2280,6 +2282,7 @@ window.openProgramDiscussion = function(programId, targetClientName = null) {
     
     window.renderDiscussionClientsList(clientNames);
     window.renderAdminProgramChat();
+    window.updateMobileDiscussionUI();
 };
 
 window.renderDiscussionClientsList = function(clientNames) {
@@ -2319,9 +2322,51 @@ window.renderDiscussionClientsList = function(clientNames) {
 
 window.selectDiscussionClient = function(clientName) {
     state.activeDiscussionClientName = clientName;
+    state.mobileViewingThread = true;
     window.renderDiscussionClientsList();
     window.renderAdminProgramChat();
+    window.updateMobileDiscussionUI();
 };
+
+window.backToRecipients = function() {
+    state.mobileViewingThread = false;
+    window.updateMobileDiscussionUI();
+};
+
+window.updateMobileDiscussionUI = function() {
+    const sidebar = document.getElementById('discussion-sidebar-panel');
+    const chat = document.getElementById('discussion-chat-panel');
+    if (!sidebar || !chat) return;
+    
+    const isMobile = window.innerWidth < 1024;
+    if (isMobile) {
+        if (state.mobileViewingThread) {
+            sidebar.classList.add('hidden');
+            chat.classList.remove('hidden');
+            chat.classList.add('flex');
+            
+            // Auto scroll to bottom of chat when loaded
+            const chatContainer = document.getElementById('admin-page-chat-container');
+            if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
+        } else {
+            sidebar.classList.remove('hidden');
+            chat.classList.add('hidden');
+            chat.classList.remove('flex');
+        }
+    } else {
+        sidebar.classList.remove('hidden');
+        chat.classList.remove('hidden');
+        chat.classList.add('flex');
+    }
+};
+
+window.addEventListener('resize', () => {
+    // Only process if active view is program-discussion-view
+    const discView = document.getElementById('program-discussion-view');
+    if (discView && !discView.classList.contains('hidden')) {
+        window.updateMobileDiscussionUI();
+    }
+});
 
 window.exitProgramDiscussion = function() {
     const discView = document.getElementById('program-discussion-view');
