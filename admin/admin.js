@@ -2397,12 +2397,12 @@ window.updateMobileDiscussionUI = function() {
             // Hide main header to maximize chat space
             if (mainHeader) mainHeader.classList.add('hidden');
             
-            // Remove padding, borders, shadows for native-like full viewport look on mobile
+            // Absolute edge-to-edge fullscreen layout on mobile
             if (containerBox) {
-                containerBox.className = "flex flex-col h-[calc(100vh-20px)] w-full gap-0 p-0 border-0 shadow-none bg-transparent";
+                containerBox.className = "flex flex-col h-screen w-screen gap-0 p-0 border-0 shadow-none bg-surface-container-lowest";
             }
             if (gridContainer) {
-                gridContainer.className = "grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-90px)] lg:h-[550px]";
+                gridContainer.className = "grid grid-cols-1 gap-0 h-[calc(100vh-20px)]";
             }
             
             // Auto scroll to bottom of chat when loaded
@@ -2416,12 +2416,12 @@ window.updateMobileDiscussionUI = function() {
             // Show main header
             if (mainHeader) mainHeader.classList.remove('hidden');
             
-            // Restore regular container box classes
+            // Full width sidebar list list on mobile
             if (containerBox) {
-                containerBox.className = "bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-6";
+                containerBox.className = "flex flex-col h-screen w-screen gap-4 p-4 border-0 shadow-none bg-surface-container-lowest";
             }
             if (gridContainer) {
-                gridContainer.className = "grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-220px)] lg:h-[550px]";
+                gridContainer.className = "grid grid-cols-1 gap-4 h-[calc(100vh-100px)]";
             }
         }
     } else {
@@ -2429,11 +2429,13 @@ window.updateMobileDiscussionUI = function() {
         chat.classList.remove('hidden');
         chat.classList.add('flex');
         if (mainHeader) mainHeader.classList.remove('hidden');
+        
+        // Full screen edge-to-edge desktop layout (no borders, no rounded corners, fills monitor)
         if (containerBox) {
-            containerBox.className = "bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-6 h-[calc(100vh-48px)]";
+            containerBox.className = "bg-surface-container-lowest rounded-none p-6 border-0 shadow-none flex flex-col gap-6 h-screen w-screen";
         }
         if (gridContainer) {
-            gridContainer.className = "grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-140px)]";
+            gridContainer.className = "grid grid-cols-12 gap-6 h-[calc(100vh-120px)]";
         }
     }
 };
@@ -2727,15 +2729,22 @@ window.toggleDiscussionFullView = function(fullViewActive) {
     const desktopNav = document.getElementById('admin-desktop-navbar');
     const mobileNav = document.getElementById('admin-mobile-navbar');
     const footer = document.getElementById('admin-page-footer');
+    const mainContainer = document.getElementById('admin-main-container');
     
     if (fullViewActive) {
         if (desktopNav) desktopNav.classList.add('hidden');
         if (mobileNav) mobileNav.classList.add('hidden');
         if (footer) footer.classList.add('hidden');
+        if (mainContainer) {
+            mainContainer.className = "w-screen h-screen max-w-none p-0 m-0 relative flex flex-col flex-grow bg-surface-container-lowest overflow-hidden";
+        }
     } else {
         if (desktopNav) desktopNav.classList.remove('hidden');
         if (mobileNav) mobileNav.classList.remove('hidden');
         if (footer) footer.classList.remove('hidden');
+        if (mainContainer) {
+            mainContainer.className = "flex-grow w-full max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-lg relative";
+        }
     }
 };
 
