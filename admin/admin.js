@@ -1136,13 +1136,10 @@ window.renderProgramsList = function() {
                             <span class="text-[9px] text-on-surface-variant font-bold uppercase tracking-wider">Scheduled Meals</span>
                             <span class="text-xs font-extrabold text-primary">${totalMeals} meals</span>
                         </div>
-                        <!-- share & chat icons next to it on mobile -->
+                        <!-- share icon next to it on mobile -->
                         <div class="flex sm:hidden items-center gap-1.5">
                             <button onclick="shareProgramLink('${p.id}')" class="bg-surface hover:bg-slate-50 border border-outline-variant/40 text-on-surface-variant font-bold p-2 rounded-xl transition-all cursor-pointer flex items-center justify-center" title="Share Program">
                                 <span class="material-symbols-outlined text-[16px]">share</span>
-                            </button>
-                            <button onclick="openProgramDiscussion('${p.id}')" class="bg-surface hover:bg-slate-50 border border-outline-variant/40 text-on-surface-variant font-bold p-2 rounded-xl transition-all cursor-pointer flex items-center justify-center" title="Program Discussion">
-                                <span class="material-symbols-outlined text-[16px]">forum</span>
                             </button>
                         </div>
                     </div>
@@ -1152,13 +1149,10 @@ window.renderProgramsList = function() {
                             <span class="material-symbols-outlined text-sm">edit</span> Edit Plan
                         </button>
                         
-                        <!-- Desktop-only share & forum buttons -->
+                        <!-- Desktop-only share button -->
                         <div class="hidden sm:flex items-center gap-1.5">
                             <button onclick="shareProgramLink('${p.id}')" class="bg-surface hover:bg-slate-50 border border-outline-variant/40 text-on-surface-variant font-bold p-1.5 rounded-xl transition-all cursor-pointer flex items-center justify-center" title="Share Program">
                                 <span class="material-symbols-outlined text-[15px]">share</span>
-                            </button>
-                            <button onclick="openProgramDiscussion('${p.id}')" class="bg-surface hover:bg-slate-50 border border-outline-variant/40 text-on-surface-variant font-bold p-1.5 rounded-xl transition-all cursor-pointer flex items-center justify-center" title="Program Discussion">
-                                <span class="material-symbols-outlined text-[15px]">forum</span>
                             </button>
                         </div>
                         
