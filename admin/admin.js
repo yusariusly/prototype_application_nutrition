@@ -18,7 +18,7 @@ const state = {
         { id: 'f-6', title: 'Mixed Raw Berries', type: 'Raw Foods', calories: 85, p: 1, c: 21, f: 0.5, image: 'https://images.unsplash.com/photo-1518635017498-87f514b751ba?w=200', favorite: false, recipeIngredients: "1/2 cup fresh strawberries\n1/4 cup blueberries\n1/4 cup raspberries", recipeSteps: "Rinse berries and serve in a small bowl." },
         { id: 'f-7', title: 'Berry Protein Smoothie Bowl', type: 'Recipes', calories: 350, p: 30, c: 45, f: 8, image: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=200', favorite: true, recipeIngredients: "1 cup frozen mixed berries\n1 scoop vanilla whey protein powder\n1/2 cup almond milk\n1 tbsp chia seeds\nHandful of fresh raspberries for topping", recipeSteps: "Blend the frozen berries, protein powder, and almond milk until thick and smooth. Pour into a bowl, then top with chia seeds and fresh raspberries. Serve cold." },
         { id: 'f-8', title: 'Quinoa Buddha Bowl', type: 'Recipes', calories: 450, p: 15, c: 65, f: 18, image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=200', favorite: true, recipeIngredients: "1/2 cup cooked quinoa\n1/2 sweet potato\n1/2 avocado\n1 cup spinach\n2 tbsp lemon tahini dressing", recipeSteps: "Arrange spinach, quinoa, sweet potato, and avocado. Drizzle dressing." },
-        { id: 'f-9', title: 'Mixed Nuts & Apple', type: 'Raw Foods', calories: 200, p: 5, c: 25, f: 10, image: 'https://images.unsplash.com/photo-1514733670139-4d87a19ec157?w=200', favorite: false, recipeIngredients: "1 small apple\n1 oz mixed nuts", recipeSteps: "Slice apple and serve with nuts." },
+        { id: 'f-9', title: 'Mixed Nuts & Apple', type: 'Raw Foods', calories: 200, p: 5, c: 25, f: 10, image: 'https://images.unsplash.com/photo-1534080564583-6be75777b70a?w=200', favorite: false, recipeIngredients: "1 small apple\n1 oz mixed nuts", recipeSteps: "Slice apple and serve with nuts." },
         { id: 'f-10', title: 'Grilled Salmon & Asparagus', type: 'Recipes', calories: 520, p: 42, c: 12, f: 32, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=200', favorite: true, recipeIngredients: "150g salmon\n1 bunch asparagus\n1 tbsp lemon juice\n1 tsp olive oil", recipeSteps: "Brush with oil, grill salmon and asparagus, drizzle with lemon juice." }
     ],
     programs: [],
@@ -43,10 +43,10 @@ function loadAdminState() {
     // Clear old mismatched cached states (e.g. Smoothie Bowl using Avocado Toast image or old googleusercontent links)
     const storedPlans = localStorage.getItem('nutriflow_client_meal_plans');
     const storedLib = localStorage.getItem('nutriflow_food_library');
-    if (storedLib && !storedLib.includes('f-10')) {
+    if (storedLib && (storedLib.includes('photo-1596560548464-f01068e3dbf0') || storedLib.includes('photo-1514733670139-4d87a19ec157') || !storedLib.includes('f-10'))) {
         localStorage.removeItem('nutriflow_food_library');
     }
-    if (storedPlans && (storedPlans.includes('lh3.googleusercontent.com') || storedPlans.includes('photo-1596560548464-f01068e3dbf0') || (storedPlans.includes('Smoothie Bowl') && storedPlans.includes('photo-1525351484163-7529414344d8')))) {
+    if (storedPlans && (storedPlans.includes('lh3.googleusercontent.com') || storedPlans.includes('photo-1596560548464-f01068e3dbf0') || storedPlans.includes('photo-1514733670139-4d87a19ec157') || (storedPlans.includes('Smoothie Bowl') && storedPlans.includes('photo-1525351484163-7529414344d8')))) {
         localStorage.removeItem('nutriflow_client_meal_plans');
         localStorage.removeItem('nutriflow_programs_draft');
         localStorage.removeItem('nutriflow_clients');
@@ -147,7 +147,7 @@ function loadAdminState() {
                     'Wed': [
                         { type: 'Breakfast', title: 'Berry Protein Smoothie Bowl', calories: 350, p: 30, c: 45, f: 8, image: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=200', favorite: true, recipeIngredients: "1 cup frozen mixed berries\n1 scoop vanilla whey protein powder\n1/2 cup almond milk\n1 tbsp chia seeds", recipeSteps: "Blend berries, protein powder, and almond milk. Pour into a bowl and top with chia seeds." },
                         { type: 'Lunch', title: 'Quinoa Buddha Bowl', calories: 450, p: 15, c: 65, f: 18, image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=200', favorite: true, recipeIngredients: "1/2 cup cooked quinoa\n1/2 sweet potato\n1/2 avocado\n1 cup spinach\n2 tbsp lemon tahini dressing", recipeSteps: "Arrange spinach, quinoa, sweet potato, and avocado. Drizzle dressing." },
-                        { type: 'Snack', title: 'Mixed Nuts & Apple', calories: 200, p: 5, c: 25, f: 10, image: 'https://images.unsplash.com/photo-1514733670139-4d87a19ec157?w=200', favorite: false, recipeIngredients: "1 small apple\n1 oz mixed nuts", recipeSteps: "Slice apple and serve with nuts." },
+                        { type: 'Snack', title: 'Mixed Nuts & Apple', calories: 200, p: 5, c: 25, f: 10, image: 'https://images.unsplash.com/photo-1534080564583-6be75777b70a?w=200', favorite: false, recipeIngredients: "1 small apple\n1 oz mixed nuts", recipeSteps: "Slice apple and serve with nuts." },
                         { type: 'Dinner', title: 'Grilled Salmon & Asparagus', calories: 520, p: 42, c: 12, f: 32, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=200', favorite: true, recipeIngredients: "150g salmon\n1 bunch asparagus\n1 tbsp lemon juice\n1 tsp olive oil", recipeSteps: "Brush with oil, grill salmon and asparagus, drizzle with lemon juice." }
                     ],
                     'Thu': [], 'Fri': [], 'Sat': [], 'Sun': []
