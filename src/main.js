@@ -231,9 +231,9 @@ function loadState() {
     // Initialize default clients, programs and meal plans if not present
     if (!localStorage.getItem('nutriflow_clients')) {
         const defaultClients = [
-            { name: 'Sarah Jenkins', email: 'sarah.j@email.com', goal: 'Weight Loss', lastCheckIn: 'Today, 9:00 AM', compliance: 92, weightTrend: [168, 169, 170, 173, 174, 176], avatar: 'SJ', therapist: 'Dr. Hasan', activeProgramId: 'prog-sarah' },
-            { name: 'Marcus Reid', email: 'm.reid@email.com', goal: 'Muscle Gain', lastCheckIn: '2 days ago', compliance: 78, weightTrend: [180, 182, 181, 183, 182, 185], avatar: 'MR', therapist: 'Dr. Hasan', activeProgramId: 'prog-marcus' },
-            { name: 'Elena Lopez', email: 'elena.l@email.com', goal: 'Maintenance', lastCheckIn: 'Yesterday', compliance: 95, weightTrend: [142, 142, 141, 142, 142, 142], avatar: 'EL', therapist: 'Dr. Amanda', activeProgramId: 'prog-elena' }
+            { name: 'Sarah Jenkins', email: 'sarah.j@email.com', goal: 'Weight Loss', lastCheckIn: 'Today, 9:00 AM', compliance: 92, weightTrend: [168, 169, 170, 173, 174, 176], avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150', therapist: 'Dr. Hasan', activeProgramId: 'prog-sarah' },
+            { name: 'Marcus Reid', email: 'm.reid@email.com', goal: 'Muscle Gain', lastCheckIn: '2 days ago', compliance: 78, weightTrend: [180, 182, 181, 183, 182, 185], avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150', therapist: 'Dr. Hasan', activeProgramId: 'prog-marcus' },
+            { name: 'Elena Lopez', email: 'elena.l@email.com', goal: 'Maintenance', lastCheckIn: 'Yesterday', compliance: 95, weightTrend: [142, 142, 141, 142, 142, 142], avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150', therapist: 'Dr. Amanda', activeProgramId: 'prog-elena' }
         ];
         localStorage.setItem('nutriflow_clients', JSON.stringify(defaultClients));
     }
@@ -2691,10 +2691,17 @@ function initProfileCharts() {
     checkStatsLoggedToday();
     
     const clientName = localStorage.getItem('nutriflow_client_logged_name') || 'Elena Lopez';
+    const clientObj = (state.clients || []).find(c => c.name === clientName);
     const initials = clientName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
     
     const avatarEl = document.getElementById('profile-card-avatar');
-    if (avatarEl) avatarEl.innerText = initials;
+    if (avatarEl) {
+        if (clientObj && clientObj.avatar && clientObj.avatar.startsWith('http')) {
+            avatarEl.innerHTML = `<img class="w-full h-full object-cover rounded-full" src="${clientObj.avatar}" alt="${clientName}">`;
+        } else {
+            avatarEl.innerText = initials;
+        }
+    }
     
     const nameEl = document.getElementById('profile-card-name');
     if (nameEl) nameEl.innerText = clientName;

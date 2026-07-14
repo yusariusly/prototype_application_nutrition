@@ -5,9 +5,9 @@ const state = {
     activeView: 'admin-clients',
     appointments: [],
     clients: [
-        { name: 'Sarah Jenkins', email: 'sarah.j@email.com', goal: 'Weight Loss', lastCheckIn: 'Today, 9:00 AM', compliance: 92, weightTrend: [168, 169, 170, 173, 174, 176], avatar: 'SJ', therapist: 'Dr. Hasan', activeProgramId: 'prog-sarah' },
-        { name: 'Marcus Reid', email: 'm.reid@email.com', goal: 'Muscle Gain', lastCheckIn: '2 days ago', compliance: 78, weightTrend: [180, 182, 181, 183, 182, 185], avatar: 'MR', therapist: 'Dr. Hasan', activeProgramId: 'prog-marcus' },
-        { name: 'Elena Lopez', email: 'elena.l@email.com', goal: 'Maintenance', lastCheckIn: 'Yesterday', compliance: 95, weightTrend: [142, 142, 141, 142, 142, 142], avatar: 'EL', therapist: 'Dr. Amanda', activeProgramId: 'prog-elena' }
+        { name: 'Sarah Jenkins', email: 'sarah.j@email.com', goal: 'Weight Loss', lastCheckIn: 'Today, 9:00 AM', compliance: 92, weightTrend: [168, 169, 170, 173, 174, 176], avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150', therapist: 'Dr. Hasan', activeProgramId: 'prog-sarah' },
+        { name: 'Marcus Reid', email: 'm.reid@email.com', goal: 'Muscle Gain', lastCheckIn: '2 days ago', compliance: 78, weightTrend: [180, 182, 181, 183, 182, 185], avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150', therapist: 'Dr. Hasan', activeProgramId: 'prog-marcus' },
+        { name: 'Elena Lopez', email: 'elena.l@email.com', goal: 'Maintenance', lastCheckIn: 'Yesterday', compliance: 95, weightTrend: [142, 142, 141, 142, 142, 142], avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150', therapist: 'Dr. Amanda', activeProgramId: 'prog-elena' }
     ],
     foodLibrary: [
         { id: 'f-1', title: 'Avocado Egg Toast', type: 'Recipes', calories: 320, p: 14, c: 22, f: 18, image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=200', favorite: true, recipeIngredients: "2 slices whole wheat bread\n1 ripe avocado\n2 large eggs\n1 tsp lemon juice\nPinch of salt and black pepper", recipeSteps: "1. Toast 2 slices of whole wheat bread.\n2. Mash 1 avocado with lemon juice, salt, and pepper.\n3. Fry 2 eggs to your liking.\n4. Spread avocado on toast and top with eggs. Serve warm." },
@@ -797,7 +797,9 @@ function renderAdminClientsList() {
                 <td onclick="toggleMobileAccordion(this.closest('tr'))" class="cursor-pointer lg:cursor-default flex justify-between items-center lg:table-cell p-0 lg:p-4 pl-0 lg:pl-6 text-left border-b border-outline-variant/15 lg:border-0 pb-3 lg:pb-4">
                     <div class="flex items-center justify-between w-full">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">${cli.avatar}</div>
+                            <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden">
+                                ${cli.avatar.startsWith('http') ? `<img class="w-full h-full object-cover" src="${cli.avatar}" alt="${cli.name}">` : cli.avatar}
+                            </div>
                             <div class="text-left">
                                 <div class="font-bold text-on-background text-sm lg:text-xs">${cli.name}</div>
                                 <div class="text-[10px] text-on-surface-variant/80">${cli.email}</div>
@@ -911,7 +913,16 @@ window.openClientProgramDiscussion = function(programId, clientName) {
 window.openAdminChatModal = function(name) {
     activeChatClient = name;
     document.getElementById('chat-client-name').innerText = name;
-    document.getElementById('chat-client-avatar').innerText = name.split(' ').map(n => n[0]).join('').toUpperCase();
+    
+    const clientObj = state.clients.find(c => c.name === name);
+    const avatarEl = document.getElementById('chat-client-avatar');
+    if (avatarEl) {
+        if (clientObj && clientObj.avatar && clientObj.avatar.startsWith('http')) {
+            avatarEl.innerHTML = `<img class="w-full h-full object-cover rounded-full" src="${clientObj.avatar}">`;
+        } else {
+            avatarEl.innerText = name.split(' ').map(n => n[0]).join('').toUpperCase();
+        }
+    }
     
     // Load chat messages
     const chatContainer = document.getElementById('chat-messages-container');
@@ -2549,8 +2560,13 @@ window.renderAdminProgramChat = function() {
     
     const avatar = document.getElementById('chat-page-client-avatar');
     if (avatar) {
-        const initials = activeClient.split(' ').map(s => s[0]).join('').substring(0, 2).toUpperCase();
-        avatar.innerText = initials;
+        const clientObj = state.clients.find(c => c.name === activeClient);
+        if (clientObj && clientObj.avatar && clientObj.avatar.startsWith('http')) {
+            avatar.innerHTML = `<img class="w-full h-full object-cover rounded-full" src="${clientObj.avatar}">`;
+        } else {
+            const initials = activeClient.split(' ').map(s => s[0]).join('').substring(0, 2).toUpperCase();
+            avatar.innerText = initials;
+        }
     }
     
     const allProgramChats = JSON.parse(localStorage.getItem('nutriflow_program_chats')) || [];
