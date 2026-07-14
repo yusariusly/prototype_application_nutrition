@@ -2725,7 +2725,7 @@ window.updateMeasurementsChart = function() {
     if (!canvas) return;
     const ctxMeas = canvas.getContext('2d');
     
-    const range = document.getElementById('measurements-range')?.value || '3m';
+    const range = document.getElementById('measurements-range')?.value || '1w';
     const history = state.profileStats.bodyMeasurements || [];
     
     const sorted = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -2814,7 +2814,7 @@ window.updateWeightTrendChart = function() {
     if (!canvas) return;
     const ctxWeight = canvas.getContext('2d');
     
-    const range = document.getElementById('weight-trend-range')?.value || '3m';
+    const range = document.getElementById('weight-trend-range')?.value || '1w';
     const history = state.profileStats.weightHistory || [];
     
     const sorted = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));

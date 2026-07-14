@@ -687,9 +687,9 @@
                             <h2 class="text-lg font-bold text-on-background">Weight Trend</h2>
                             <div class="flex items-center gap-2">
                                 <select id="weight-trend-range" onchange="updateWeightTrendChart()" class="text-xs bg-surface border border-outline-variant/30 rounded-lg px-2 py-1 font-semibold text-on-surface-variant">
-                                    <option value="1w">1 Week</option>
+                                    <option value="1w" selected>1 Week</option>
                                     <option value="1m">1 Month</option>
-                                    <option value="3m" selected>3 Months</option>
+                                    <option value="3m">3 Months</option>
                                 </select>
                                 <button onclick="openChartZoomModal('weight')" class="p-1.5 hover:bg-surface-container-low rounded-lg border border-outline-variant/30 text-on-surface-variant transition-colors flex items-center justify-center cursor-pointer active:scale-95" title="Zoom In Chart">
                                     <span class="material-symbols-outlined text-[16px]">zoom_in</span>
@@ -704,9 +704,9 @@
                             <h2 class="text-lg font-bold text-on-background">Body Measurements (Inches)</h2>
                             <div class="flex items-center gap-2">
                                 <select id="measurements-range" onchange="updateMeasurementsChart()" class="text-xs bg-surface border border-outline-variant/30 rounded-lg px-2 py-1 font-semibold text-on-surface-variant">
-                                    <option value="1w">1 Week</option>
+                                    <option value="1w" selected>1 Week</option>
                                     <option value="1m">1 Month</option>
-                                    <option value="3m" selected>3 Months</option>
+                                    <option value="3m">3 Months</option>
                                 </select>
                                 <button onclick="openChartZoomModal('measurements')" class="p-1.5 hover:bg-surface-container-low rounded-lg border border-outline-variant/30 text-on-surface-variant transition-colors flex items-center justify-center cursor-pointer active:scale-95" title="Zoom In Chart">
                                     <span class="material-symbols-outlined text-[16px]">zoom_in</span>
