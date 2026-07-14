@@ -2410,10 +2410,10 @@ window.updateMobileDiscussionUI = function() {
             
             // Absolute edge-to-edge fullscreen layout on mobile
             if (containerBox) {
-                containerBox.className = "flex flex-col h-screen w-screen gap-0 p-0 border-0 shadow-none bg-surface-container-lowest";
+                containerBox.className = "flex flex-col h-full w-full gap-0 p-0 border-0 shadow-none bg-surface-container-lowest overflow-hidden";
             }
             if (gridContainer) {
-                gridContainer.className = "grid grid-cols-1 gap-0 h-[calc(100vh-20px)]";
+                gridContainer.className = "grid grid-cols-1 gap-0 h-full w-full min-h-0";
             }
             
             // Auto scroll to bottom of chat when loaded
@@ -2429,10 +2429,10 @@ window.updateMobileDiscussionUI = function() {
             
             // Full width sidebar list list on mobile
             if (containerBox) {
-                containerBox.className = "flex flex-col h-screen w-screen gap-4 p-4 border-0 shadow-none bg-surface-container-lowest";
+                containerBox.className = "flex flex-col h-full w-full gap-4 p-4 border-0 shadow-none bg-surface-container-lowest overflow-hidden";
             }
             if (gridContainer) {
-                gridContainer.className = "grid grid-cols-1 gap-4 h-[calc(100vh-100px)]";
+                gridContainer.className = "grid grid-cols-1 gap-4 h-full w-full min-h-0";
             }
         }
     } else {
@@ -2741,6 +2741,7 @@ window.toggleDiscussionFullView = function(fullViewActive) {
     const mobileNav = document.getElementById('admin-mobile-navbar');
     const footer = document.getElementById('admin-page-footer');
     const mainContainer = document.getElementById('admin-main-container');
+    const discView = document.getElementById('program-discussion-view');
     
     if (fullViewActive) {
         document.documentElement.classList.add('overflow-hidden');
@@ -2751,6 +2752,14 @@ window.toggleDiscussionFullView = function(fullViewActive) {
         if (mainContainer) {
             mainContainer.className = "w-screen h-screen max-w-none p-0 m-0 relative flex flex-col flex-grow bg-surface-container-lowest overflow-hidden";
         }
+        if (discView) {
+            const isMobile = window.innerWidth < 1024;
+            if (isMobile) {
+                discView.className = "view-section flex flex-col fixed inset-0 z-40 bg-surface w-full p-0 m-0 h-[100dvh]";
+            } else {
+                discView.className = "view-section flex flex-col gap-4 w-full h-full";
+            }
+        }
     } else {
         document.documentElement.classList.remove('overflow-hidden');
         document.body.classList.remove('overflow-hidden');
@@ -2759,6 +2768,9 @@ window.toggleDiscussionFullView = function(fullViewActive) {
         if (footer) footer.classList.remove('hidden');
         if (mainContainer) {
             mainContainer.className = "flex-grow w-full max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-lg relative";
+        }
+        if (discView) {
+            discView.className = "view-section hidden flex flex-col gap-4 w-full";
         }
     }
 };

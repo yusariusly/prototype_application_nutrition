@@ -715,11 +715,11 @@ window.navigateTo = function(viewId) {
         if (navbarEl) navbarEl.classList.add('hidden');
         if (mobileNavEl) mobileNavEl.classList.add('hidden');
         if (mainContainerEl) {
-            mainContainerEl.className = 'flex-grow w-full h-screen relative flex flex-col p-0 m-0 max-w-full';
+            mainContainerEl.className = 'flex-grow w-full relative flex flex-col p-0 m-0 max-w-full';
         }
         const chatSection = document.getElementById('view-chat');
         if (chatSection) {
-            chatSection.className = 'view-section flex flex-col h-screen w-full p-0 m-0';
+            chatSection.className = 'view-section flex flex-col fixed inset-0 z-40 bg-surface w-full p-0 m-0';
         }
         const chatWindow = chatSection?.querySelector('.flex-grow');
         if (chatWindow) {
