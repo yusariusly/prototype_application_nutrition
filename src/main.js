@@ -360,7 +360,7 @@ function loadState() {
                 serviceTitle: 'Monthly Progress Review',
                 price: 150,
                 duration: '60 min',
-                therapist: 'Dr. Sarah Jenkins',
+                therapist: 'Dr. Hasan',
                 date: getRelativeDate(0),
                 time: '10:00 AM',
                 status: 'approved',
@@ -410,6 +410,34 @@ function loadState() {
             }
         ];
         saveState();
+    }
+
+    // Guarantee that Sarah Jenkins has at least one active approved Video Call appointment today
+    const activeClientNameForApt = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    if (activeClientNameForApt === 'Sarah Jenkins') {
+        const hasActiveVideoCall = state.appointments.some(apt => 
+            apt.clientName === 'Sarah Jenkins' && 
+            apt.status === 'approved' && 
+            apt.type === 'Video Call' &&
+            apt.date === getRelativeDate(0)
+        );
+        if (!hasActiveVideoCall) {
+            state.appointments.push({
+                id: 'apt-sarah-auto',
+                clientName: 'Sarah Jenkins',
+                clientEmail: 'sarah.j@email.com',
+                serviceId: 'initial-consultation',
+                serviceTitle: 'Video Consultation Progress Review',
+                price: 150,
+                duration: '60 min',
+                therapist: 'Dr. Hasan',
+                date: getRelativeDate(0),
+                time: '10:00 AM',
+                status: 'approved',
+                type: 'Video Call'
+            });
+            localStorage.setItem('nutriflow_appointments', JSON.stringify(state.appointments));
+        }
     }
 
     // Sync customized weekly plans from admin builder
