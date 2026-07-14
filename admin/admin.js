@@ -220,6 +220,23 @@ function loadAdminState() {
     } else {
         localStorage.setItem('nutriflow_clients', JSON.stringify(state.clients));
     }
+
+    // Initialize default client meal plans linked to activeProgramId if not present
+    if (!localStorage.getItem('nutriflow_client_meal_plans')) {
+        const defaultClients = JSON.parse(localStorage.getItem('nutriflow_clients')) || state.clients;
+        const defaultPrograms = JSON.parse(localStorage.getItem('nutriflow_programs_draft')) || state.programs;
+        const initialMealPlans = {};
+        
+        defaultClients.forEach(c => {
+            if (c.activeProgramId) {
+                const program = defaultPrograms.find(p => p.id === c.activeProgramId);
+                if (program) {
+                    initialMealPlans[c.name] = JSON.parse(JSON.stringify(program.meals || {}));
+                }
+            }
+        });
+        localStorage.setItem('nutriflow_client_meal_plans', JSON.stringify(initialMealPlans));
+    }
 }
 
 function saveAdminState() {
