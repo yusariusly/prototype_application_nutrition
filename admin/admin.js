@@ -36,6 +36,14 @@ function checkAdminSession() {
 
 // ==================== STATE SYNC ====================
 function loadAdminState() {
+    // Clear old mismatched cached states (e.g. Smoothie Bowl using Avocado Toast image or old googleusercontent links)
+    const storedPlans = localStorage.getItem('nutriflow_client_meal_plans');
+    if (storedPlans && (storedPlans.includes('lh3.googleusercontent.com') || (storedPlans.includes('Smoothie Bowl') && storedPlans.includes('photo-1525351484163-7529414344d8')))) {
+        localStorage.removeItem('nutriflow_client_meal_plans');
+        localStorage.removeItem('nutriflow_programs_draft');
+        localStorage.removeItem('nutriflow_clients');
+    }
+
     // Helper to get formatted relative date (YYYY-MM-DD)
     const getRelativeDate = (offsetDays) => {
         const d = new Date();
