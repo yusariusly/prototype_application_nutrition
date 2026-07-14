@@ -15,7 +15,11 @@ const state = {
         { id: 'f-3', title: 'Greek Yogurt Bowl', type: 'Recipes', calories: 250, p: 20, c: 30, f: 5, image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=200', favorite: true, recipeIngredients: "1 cup plain Greek yogurt\n1/2 cup fresh mixed berries\n1 tbsp chia seeds\n1 tsp honey", recipeSteps: "1. Scoop Greek yogurt into a bowl.\n2. Top with mixed fresh berries (strawberries, blueberries).\n3. Sprinkle chia seeds and drizzle 1 tsp honey on top." },
         { id: 'f-4', title: 'Baked Salmon & Quinoa', type: 'Recipes', calories: 520, p: 38, c: 45, f: 22, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=200', favorite: true, recipeIngredients: "150g salmon fillet\n1/2 cup cooked quinoa\n8-10 stalks of fresh asparagus\n1 tbsp lemon juice\n1 tsp olive oil", recipeSteps: "1. Pre-heat oven to 400°F (200°C).\n2. Place salmon fillet on a baking sheet, drizzle with olive oil and squeeze fresh lemon.\n3. Bake for 12-15 minutes.\n4. Serve alongside cooked quinoa and steamed asparagus." },
         { id: 'f-5', title: 'Fresh Apple & Almonds', type: 'Raw Foods', calories: 150, p: 4, c: 18, f: 9, image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=200', favorite: false, recipeIngredients: "1 medium apple\n12 raw almonds", recipeSteps: "Serve fresh apple sliced with raw almonds." },
-        { id: 'f-6', title: 'Mixed Raw Berries', type: 'Raw Foods', calories: 85, p: 1, c: 21, f: 0.5, image: 'https://images.unsplash.com/photo-1518635017498-87f514b751ba?w=200', favorite: false, recipeIngredients: "1/2 cup fresh strawberries\n1/4 cup blueberries\n1/4 cup raspberries", recipeSteps: "Rinse berries and serve in a small bowl." }
+        { id: 'f-6', title: 'Mixed Raw Berries', type: 'Raw Foods', calories: 85, p: 1, c: 21, f: 0.5, image: 'https://images.unsplash.com/photo-1518635017498-87f514b751ba?w=200', favorite: false, recipeIngredients: "1/2 cup fresh strawberries\n1/4 cup blueberries\n1/4 cup raspberries", recipeSteps: "Rinse berries and serve in a small bowl." },
+        { id: 'f-7', title: 'Berry Protein Smoothie Bowl', type: 'Recipes', calories: 350, p: 30, c: 45, f: 8, image: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=200', favorite: true, recipeIngredients: "1 cup frozen mixed berries\n1 scoop vanilla whey protein powder\n1/2 cup almond milk\n1 tbsp chia seeds\nHandful of fresh raspberries for topping", recipeSteps: "Blend the frozen berries, protein powder, and almond milk until thick and smooth. Pour into a bowl, then top with chia seeds and fresh raspberries. Serve cold." },
+        { id: 'f-8', title: 'Quinoa Buddha Bowl', type: 'Recipes', calories: 450, p: 15, c: 65, f: 18, image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=200', favorite: true, recipeIngredients: "1/2 cup cooked quinoa\n1/2 sweet potato\n1/2 avocado\n1 cup spinach\n2 tbsp lemon tahini dressing", recipeSteps: "Arrange spinach, quinoa, sweet potato, and avocado. Drizzle dressing." },
+        { id: 'f-9', title: 'Mixed Nuts & Apple', type: 'Raw Foods', calories: 200, p: 5, c: 25, f: 10, image: 'https://images.unsplash.com/photo-1514733670139-4d87a19ec157?w=200', favorite: false, recipeIngredients: "1 small apple\n1 oz mixed nuts", recipeSteps: "Slice apple and serve with nuts." },
+        { id: 'f-10', title: 'Grilled Salmon & Asparagus', type: 'Recipes', calories: 520, p: 42, c: 12, f: 32, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=200', favorite: true, recipeIngredients: "150g salmon\n1 bunch asparagus\n1 tbsp lemon juice\n1 tsp olive oil", recipeSteps: "Brush with oil, grill salmon and asparagus, drizzle with lemon juice." }
     ],
     programs: [],
     editingProgramId: null,
@@ -38,6 +42,10 @@ function checkAdminSession() {
 function loadAdminState() {
     // Clear old mismatched cached states (e.g. Smoothie Bowl using Avocado Toast image or old googleusercontent links)
     const storedPlans = localStorage.getItem('nutriflow_client_meal_plans');
+    const storedLib = localStorage.getItem('nutriflow_food_library');
+    if (storedLib && !storedLib.includes('f-10')) {
+        localStorage.removeItem('nutriflow_food_library');
+    }
     if (storedPlans && (storedPlans.includes('lh3.googleusercontent.com') || storedPlans.includes('photo-1596560548464-f01068e3dbf0') || (storedPlans.includes('Smoothie Bowl') && storedPlans.includes('photo-1525351484163-7529414344d8')))) {
         localStorage.removeItem('nutriflow_client_meal_plans');
         localStorage.removeItem('nutriflow_programs_draft');

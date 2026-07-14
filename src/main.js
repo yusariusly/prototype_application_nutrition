@@ -222,6 +222,10 @@ function getOrGenerateMeasurementsHistory() {
 function loadState() {
     // Clear old mismatched cached states (e.g. Smoothie Bowl using Avocado Toast image or old googleusercontent links)
     const storedPlans = localStorage.getItem('nutriflow_client_meal_plans');
+    const storedLib = localStorage.getItem('nutriflow_food_library');
+    if (storedLib && !storedLib.includes('f-10')) {
+        localStorage.removeItem('nutriflow_food_library');
+    }
     if (storedPlans && (storedPlans.includes('lh3.googleusercontent.com') || storedPlans.includes('photo-1596560548464-f01068e3dbf0') || (storedPlans.includes('Smoothie Bowl') && storedPlans.includes('photo-1525351484163-7529414344d8')))) {
         localStorage.removeItem('nutriflow_client_meal_plans');
         localStorage.removeItem('nutriflow_programs_draft');
