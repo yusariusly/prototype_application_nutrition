@@ -709,6 +709,8 @@ window.navigateTo = function(viewId) {
     const mainContainerEl = document.getElementById('client-main-container');
     
     if (viewId === 'chat') {
+        document.documentElement.classList.add('overflow-hidden');
+        document.body.classList.add('overflow-hidden');
         if (footerEl) footerEl.classList.add('hidden');
         if (navbarEl) navbarEl.classList.add('hidden');
         if (mobileNavEl) mobileNavEl.classList.add('hidden');
@@ -725,6 +727,8 @@ window.navigateTo = function(viewId) {
             chatWindow.classList.add('border-0', 'rounded-none');
         }
     } else if (viewId === 'book-wizard') {
+        document.documentElement.classList.remove('overflow-hidden');
+        document.body.classList.remove('overflow-hidden');
         if (footerEl) footerEl.classList.add('hidden');
         if (navbarEl) navbarEl.classList.remove('hidden');
         if (mobileNavEl) mobileNavEl.classList.add('hidden');
@@ -732,6 +736,8 @@ window.navigateTo = function(viewId) {
             mainContainerEl.className = 'flex-grow w-full max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-lg relative';
         }
     } else {
+        document.documentElement.classList.remove('overflow-hidden');
+        document.body.classList.remove('overflow-hidden');
         if (footerEl) footerEl.classList.remove('hidden');
         if (navbarEl) navbarEl.classList.remove('hidden');
         if (mobileNavEl) mobileNavEl.classList.remove('hidden');

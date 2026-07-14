@@ -2743,6 +2743,8 @@ window.toggleDiscussionFullView = function(fullViewActive) {
     const mainContainer = document.getElementById('admin-main-container');
     
     if (fullViewActive) {
+        document.documentElement.classList.add('overflow-hidden');
+        document.body.classList.add('overflow-hidden');
         if (desktopNav) desktopNav.classList.add('hidden');
         if (mobileNav) mobileNav.classList.add('hidden');
         if (footer) footer.classList.add('hidden');
@@ -2750,6 +2752,8 @@ window.toggleDiscussionFullView = function(fullViewActive) {
             mainContainer.className = "w-screen h-screen max-w-none p-0 m-0 relative flex flex-col flex-grow bg-surface-container-lowest overflow-hidden";
         }
     } else {
+        document.documentElement.classList.remove('overflow-hidden');
+        document.body.classList.remove('overflow-hidden');
         if (desktopNav) desktopNav.classList.remove('hidden');
         if (mobileNav) mobileNav.classList.remove('hidden');
         if (footer) footer.classList.remove('hidden');
