@@ -109,7 +109,7 @@ const SERVICES = {
     }
 };
 
-const RECIPES_DB = {
+let RECIPES_DB = {
     'Berry Protein Smoothie Bowl': {
         ingredients: ['1 cup frozen mixed berries', '1 scoop vanilla whey protein powder', '1/2 cup unsweetened almond milk', '1 tbsp chia seeds', 'Handful of fresh raspberries for topping'],
         instructions: 'Blend the frozen berries, protein powder, and almond milk until thick and smooth. Pour into a bowl, then top with chia seeds and fresh raspberries. Serve cold.'
@@ -536,6 +536,9 @@ function loadState() {
     if (changed) {
         localStorage.setItem('nutriflow_client_meal_plans', JSON.stringify(state.clientMealPlans));
     }
+
+    if (window.rebuildScanDb) window.rebuildScanDb();
+    if (window.rebuildRecipesDb) window.rebuildRecipesDb();
 }
 
 function saveState() {
@@ -1506,7 +1509,7 @@ window.removeMealFromSlot = function(day, slotName) {
 };
 
 // ==================== AI FOOD SCANNER ====================
-const SCAN_DB = {
+let SCAN_DB = {
     'avocado-toast': { title: 'Avocado Egg Toast', type: 'Breakfast', calories: 320, p: 14, c: 22, f: 18, image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=500', advice: 'Rich in healthy monounsaturated fats from avocado and high-quality protein from eggs. Excellent source of morning energy!' },
     'chicken-salad': { title: 'Grilled Chicken Salad', type: 'Lunch', calories: 450, p: 45, c: 12, f: 20, image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500', advice: 'Fantastic lean-protein choice! High fiber from garden vegetables keeps digestion active. Very low glycemic response.' },
     'salmon': { title: 'Grilled Salmon & Asparagus', type: 'Dinner', calories: 520, p: 42, c: 12, f: 32, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=500', advice: 'Superb source of Omega-3 essential fatty acids. Promotes cardiovascular health and muscle recovery. Perfect dinner meal.' },
@@ -1516,6 +1519,47 @@ const SCAN_DB = {
 };
 
 let activeScannedMeal = null;
+
+window.rebuildScanDb = function() {
+    const stored = localStorage.getItem('nutriflow_food_library');
+    if (!stored) return;
+    try {
+        const library = JSON.parse(stored);
+        SCAN_DB = {};
+        library.forEach(food => {
+            const key = food.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+            SCAN_DB[key] = {
+                title: food.title,
+                type: food.type === 'Recipes' ? 'Recipe' : 'Raw Food',
+                calories: food.calories,
+                p: food.p,
+                c: food.c,
+                f: food.f,
+                image: food.image,
+                advice: food.recipeSteps ? `Rich in nutrients. Preparation steps: ${food.recipeSteps}` : `Fresh and healthy raw option. Enjoy directly!`
+            };
+        });
+    } catch (e) {
+        console.error("Error rebuilding SCAN_DB:", e);
+    }
+};
+
+window.rebuildRecipesDb = function() {
+    const stored = localStorage.getItem('nutriflow_food_library');
+    if (!stored) return;
+    try {
+        const library = JSON.parse(stored);
+        RECIPES_DB = {};
+        library.forEach(food => {
+            RECIPES_DB[food.title] = {
+                ingredients: food.recipeIngredients ? food.recipeIngredients.split('\n').filter(line => line.trim() !== '') : ['Portion as recommended by dietitian'],
+                instructions: food.recipeSteps || 'Prepare as directed by practitioner.'
+            };
+        });
+    } catch (e) {
+        console.error("Error rebuilding RECIPES_DB:", e);
+    }
+};
 
 window.openAIScanner = function() {
     activeScannedMeal = null;
@@ -1531,6 +1575,21 @@ window.openAIScanner = function() {
     if (logBtn) {
         logBtn.disabled = true;
         logBtn.className = 'bg-slate-300 text-slate-500 font-bold text-xs px-5 py-2 rounded-xl cursor-not-allowed';
+    }
+
+    // Render Dynamic Sample Buttons from Synced Food Library
+    const samplesList = document.getElementById('scanner-samples-list');
+    if (samplesList) {
+        window.rebuildScanDb();
+        samplesList.innerHTML = Object.keys(SCAN_DB).map(key => {
+            const food = SCAN_DB[key];
+            return `
+                <button onclick="selectScanSample('${key}')" class="bg-surface hover:bg-primary/10 text-on-surface hover:text-primary border border-outline-variant/35 font-bold text-[10px] px-3.5 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95">
+                    <span class="material-symbols-outlined text-sm">restaurant</span>
+                    ${food.title}
+                </button>
+            `;
+        }).join('');
     }
     
     // Show Modal
