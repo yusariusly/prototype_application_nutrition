@@ -245,6 +245,25 @@ function loadState() {
         localStorage.removeItem('nutriflow_clients');
     }
 
+    // Clean random test chat messages (sdkahfifj and dsdskdhdhd)
+    const storedChats = localStorage.getItem('nutriflow_program_chats');
+    if (storedChats && (storedChats.includes('sdkahfifj') || storedChats.includes('dsdskdhdhd'))) {
+        try {
+            const chats = JSON.parse(storedChats);
+            chats.forEach(chat => {
+                if (chat.chatHistory) {
+                    chat.chatHistory = chat.chatHistory.filter(msg => {
+                        const txt = (msg.text || '').toLowerCase();
+                        return !txt.includes('sdkahfifj') && !txt.includes('dsdskdhdhd');
+                    });
+                }
+            });
+            localStorage.setItem('nutriflow_program_chats', JSON.stringify(chats));
+        } catch(e) {
+            console.error("Error cleaning chat history:", e);
+        }
+    }
+
     // Initialize default clients, programs and meal plans if not present
     if (!localStorage.getItem('nutriflow_clients')) {
         const defaultClients = [

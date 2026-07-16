@@ -65,6 +65,25 @@ function loadAdminState() {
         localStorage.removeItem('nutriflow_clients');
     }
 
+    // Clean random test chat messages (sdkahfifj and dsdskdhdhd)
+    const storedChats = localStorage.getItem('nutriflow_program_chats');
+    if (storedChats && (storedChats.includes('sdkahfifj') || storedChats.includes('dsdskdhdhd'))) {
+        try {
+            const chats = JSON.parse(storedChats);
+            chats.forEach(chat => {
+                if (chat.chatHistory) {
+                    chat.chatHistory = chat.chatHistory.filter(msg => {
+                        const txt = (msg.text || '').toLowerCase();
+                        return !txt.includes('sdkahfifj') && !txt.includes('dsdskdhdhd');
+                    });
+                }
+            });
+            localStorage.setItem('nutriflow_program_chats', JSON.stringify(chats));
+        } catch(e) {
+            console.error("Error cleaning chat history:", e);
+        }
+    }
+
     // Helper to get formatted relative date (YYYY-MM-DD)
     const getRelativeDate = (offsetDays) => {
         const d = new Date();
