@@ -773,13 +773,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (banner) banner.classList.remove('hidden');
         localStorage.removeItem('nutriflow_trigger_onboarding');
         setTimeout(() => {
-            if (window.openOnboardingModal) window.openOnboardingModal();
-        }, 300);
+            if (window.navigateTo) window.navigateTo('profile');
+            showToast('Welcome! Please complete your Medical Intake Profile below.', 'info');
+        }, 400);
     } else if (isTriggered) {
         localStorage.removeItem('nutriflow_trigger_onboarding');
         setTimeout(() => {
-            if (window.openOnboardingModal) window.openOnboardingModal();
-        }, 300);
+            if (window.navigateTo) window.navigateTo('profile');
+            showToast('Welcome! Please complete your Medical Intake Profile below.', 'info');
+        }, 400);
     } else {
         if (banner) banner.classList.add('hidden');
     }
@@ -3330,13 +3332,21 @@ window.handleStatsLogSubmit = function(e) {
 };
 
 window.loadClientIntakeProfile = function() {
-    const rawData = localStorage.getItem('nutriflow_client_health_profile');
-    const profile = rawData ? JSON.parse(rawData) : {
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const isSeedClient = ['Sarah Jenkins', 'Marcus Reid', 'Elena Lopez'].includes(activeClient);
+    
+    const rawData = localStorage.getItem(`nutriflow_client_health_profile_${activeClient}`);
+    const profile = rawData ? JSON.parse(rawData) : (isSeedClient ? {
         allergies: ['Peanuts', 'Seafood/Shellfish'],
         conditions: ['Diabetes Type 2'],
         dietPref: 'Halal',
         notes: 'Pre-diabetic management, allergic to peanuts.'
-    };
+    } : {
+        allergies: [],
+        conditions: [],
+        dietPref: 'None',
+        notes: ''
+    });
 
     const allergyCbs = document.querySelectorAll('input[name="client-allergies"]');
     allergyCbs.forEach(cb => {
@@ -3349,14 +3359,14 @@ window.loadClientIntakeProfile = function() {
     });
 
     const dietSelect = document.getElementById('client-diet-pref');
-    if (dietSelect && profile.dietPref) dietSelect.value = profile.dietPref;
+    if (dietSelect) dietSelect.value = profile.dietPref || 'None';
 
     const notesTa = document.getElementById('client-intake-notes');
-    if (notesTa && profile.notes) notesTa.value = profile.notes;
+    if (notesTa) notesTa.value = profile.notes || '';
 
     const badge = document.getElementById('intake-status-badge');
     if (badge) {
-        if ((profile.allergies && profile.allergies.length) || (profile.conditions && profile.conditions.length)) {
+        if ((profile.allergies && profile.allergies.length) || (profile.conditions && profile.conditions.length) || profile.notes) {
             badge.innerText = 'Completed';
             badge.className = 'bg-primary/10 text-primary text-[10px] font-bold px-2.5 py-1 rounded-full';
         } else {
@@ -3368,6 +3378,7 @@ window.loadClientIntakeProfile = function() {
 
 window.handleClientIntakeSubmit = function(e) {
     e.preventDefault();
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
     const allergyCbs = document.querySelectorAll('input[name="client-allergies"]:checked');
     const allergies = Array.from(allergyCbs).map(cb => cb.value);
 
@@ -3378,7 +3389,31 @@ window.handleClientIntakeSubmit = function(e) {
     const notes = document.getElementById('client-intake-notes').value;
 
     const profileData = { allergies, conditions, dietPref, notes };
-    localStorage.setItem('nutriflow_client_health_profile', JSON.stringify(profileData));
+    localStorage.setItem(`nutriflow_client_health_profile_${activeClient}`, JSON.stringify(profileData));
+
+    // Also update nutriflow_client_intakes for banner detection compatibility
+    const intakeMap = JSON.parse(localStorage.getItem('nutriflow_client_intakes') || '{}');
+    intakeMap[activeClient] = {
+        weight: 0,
+        targetWeight: 0,
+        goal: 'Health Improvement',
+        diet: dietPref,
+        allergies: allergies,
+        notes: notes,
+        updatedAt: new Date().toISOString()
+    };
+    localStorage.setItem('nutriflow_client_intakes', JSON.stringify(intakeMap));
+
+    // Refresh badge status
+    const badge = document.getElementById('intake-status-badge');
+    if (badge) {
+        badge.innerText = 'Completed';
+        badge.className = 'bg-primary/10 text-primary text-[10px] font-bold px-2.5 py-1 rounded-full';
+    }
+
+    // Hide dashboard warning banner
+    const banner = document.getElementById('onboarding-incomplete-banner');
+    if (banner) banner.classList.add('hidden');
 
     showToast('Saved Medical Intake & Health Profile!', 'success');
 };
