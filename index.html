@@ -436,6 +436,25 @@
                     <h2 class="text-xs font-bold text-on-background uppercase tracking-wider mb-1">Select Session Method</h2>
                     <p class="text-[10px] text-on-surface-variant leading-relaxed">Choose whether you want a virtual consultation or an offline visit at our clinic.</p>
                 </div>
+
+                <!-- Specialist Rating Info -->
+                <div class="bg-surface-container-low/50 rounded-2xl p-4 border border-outline-variant/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0 border border-primary/20" id="booking-spec-avatar">DH</div>
+                        <div>
+                            <span class="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider block">Assigned Specialist</span>
+                            <h4 class="font-bold text-xs text-on-background" id="booking-spec-display-name">Dr. Hasan</h4>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 border-slate-200/60 pt-2 sm:pt-0">
+                        <div class="flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full shadow-xs">
+                            <span class="text-amber-500">★</span> <span id="booking-spec-rating-val">4.9</span>
+                        </div>
+                        <button type="button" onclick="openSpecialistReviewsModal(document.getElementById('booking-spec-display-name').innerText)" class="text-xs text-primary font-bold hover:underline cursor-pointer flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[15px]">rate_review</span> Read Testimonials
+                        </button>
+                    </div>
+                </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="booking-methods-grid">
                     <!-- Method A: Online -->
@@ -565,29 +584,69 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Reason for Visit / Main Concern</label>
-                            <textarea id="details-concerns" rows="3" required placeholder="Describe your nutritional goals or current health symptoms..." class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-3 py-2 bg-surface"></textarea>
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Reason for Visit / Main Concern (Optional)</label>
+                            <textarea id="details-concerns" rows="2" placeholder="Describe your nutritional goals or current health symptoms..." class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-3 py-2 bg-surface"></textarea>
                         </div>
                         
-                        <!-- File Upload Dropzone -->
-                        <div>
-                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Supporting Documents (Optional)</label>
-                            <p class="text-[10px] text-on-surface-variant mb-2">Upload your latest blood test results, dietary plans, or doctor referrals (Max 2MB).</p>
+                        <!-- Checkout Order Summary & Payment Gateway Selector -->
+                        <div class="border-t border-surface-variant/30 pt-4 space-y-3">
+                            <h4 class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Payment Method</h4>
                             
-                            <input type="file" id="booking-upload-file" class="hidden" onchange="handleBookingFileSelected(event)">
-                            <div onclick="document.getElementById('booking-upload-file').click()" class="border-2 border-dashed border-outline-variant/40 rounded-xl p-5 text-center hover:bg-slate-50/50 hover:border-primary/50 transition-all cursor-pointer flex flex-col items-center gap-2 bg-surface-container-low" id="booking-dropzone">
-                                <span class="material-symbols-outlined text-primary text-3xl">upload_file</span>
-                                <div class="text-xs font-bold text-on-background" id="booking-upload-status-text">Click to upload document or file</div>
-                                <div class="text-[9px] text-slate-400 font-semibold" id="booking-upload-info-text">PDF, JPEG, PNG formats supported</div>
+                            <!-- Order Summary Box -->
+                            <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/30 flex flex-col gap-2 text-xs">
+                                <div class="flex justify-between items-center text-on-surface font-medium">
+                                    <span>Consultation Fee</span>
+                                    <span class="font-bold" id="checkout-service-price">$150.00 SGD</span>
+                                </div>
+                                <div class="flex justify-between items-center text-on-surface-variant text-[11px]">
+                                    <span>Processing & Admin Fee</span>
+                                    <span class="text-emerald-700 font-bold">FREE ($0.00)</span>
+                                </div>
+                                <div class="border-t border-outline-variant/20 pt-2 flex justify-between items-center font-extrabold text-sm text-primary">
+                                    <span>Total Payable</span>
+                                    <span id="checkout-total-price">$150.00 SGD</span>
+                                </div>
                             </div>
+
+                            <!-- Payment Options Grid -->
+                            <div class="grid grid-cols-2 gap-2" id="checkout-payment-methods">
+                                <!-- Option 1: PayNow QR -->
+                                <div onclick="selectCheckoutPaymentMethod('qr')" id="pay-opt-qr" class="pay-method-opt bg-surface border-2 border-primary rounded-xl p-3 cursor-pointer hover:border-primary transition-all flex flex-col items-center text-center gap-1.5 active:scale-95 shadow-sm">
+                                    <span class="material-symbols-outlined text-primary text-xl">qr_code_2</span>
+                                    <span class="font-bold text-xs text-on-surface">PayNow QR</span>
+                                    <span class="text-[9px] text-on-surface-variant/80">Instant QR Scan</span>
+                                </div>
+
+                                <!-- Option 2: E-Wallet -->
+                                <div onclick="selectCheckoutPaymentMethod('ewallet')" id="pay-opt-ewallet" class="pay-method-opt bg-surface border border-outline-variant/30 rounded-xl p-3 cursor-pointer hover:border-primary transition-all flex flex-col items-center text-center gap-1.5 active:scale-95">
+                                    <span class="material-symbols-outlined text-secondary text-xl">account_balance_wallet</span>
+                                    <span class="font-bold text-xs text-on-surface">E-Wallet</span>
+                                    <span class="text-[9px] text-on-surface-variant/80">GrabPay / PayLah!</span>
+                                </div>
+
+                                <!-- Option 3: Bank Transfer -->
+                                <div onclick="selectCheckoutPaymentMethod('fpx')" id="pay-opt-fpx" class="pay-method-opt bg-surface border border-outline-variant/30 rounded-xl p-3 cursor-pointer hover:border-primary transition-all flex flex-col items-center text-center gap-1.5 active:scale-95">
+                                    <span class="material-symbols-outlined text-tertiary text-xl">account_balance</span>
+                                    <span class="font-bold text-xs text-on-surface">Bank Transfer (FAST)</span>
+                                    <span class="text-[9px] text-on-surface-variant/80">DBS / OCBC / UOB</span>
+                                </div>
+
+                                <!-- Option 4: Card -->
+                                <div onclick="selectCheckoutPaymentMethod('card')" id="pay-opt-card" class="pay-method-opt bg-surface border border-outline-variant/30 rounded-xl p-3 cursor-pointer hover:border-primary transition-all flex flex-col items-center text-center gap-1.5 active:scale-95">
+                                    <span class="material-symbols-outlined text-slate-700 text-xl">credit_card</span>
+                                    <span class="font-bold text-xs text-on-surface">Credit / Debit Card</span>
+                                    <span class="text-[9px] text-on-surface-variant/80">Visa / Mastercard / AMEX</span>
+                                </div>
+                            </div>
+                            <input type="hidden" id="selected-checkout-pay-method" value="qr">
                         </div>
-                        
+
                         <div class="fixed bottom-0 left-0 right-0 bg-surface border-t border-outline-variant/30 px-6 py-4 z-40 flex items-center justify-between gap-3 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] md:relative md:border-t md:border-outline-variant/30 md:bg-transparent md:px-0 md:py-0 md:shadow-none md:mt-4 md:pt-4">
                             <button type="button" onclick="goBackToBookingStep(3)" class="text-xs text-on-surface-variant hover:text-primary font-bold flex items-center gap-1 active:scale-95 py-2 px-3 hover:bg-slate-50 rounded-full border border-outline-variant/30 bg-surface md:border-0 md:bg-transparent md:p-0 cursor-pointer">
                                 <span class="material-symbols-outlined text-base">arrow_back</span> Back
                             </button>
-                            <button type="submit" class="bg-primary hover:bg-[#005321] text-white font-bold text-sm py-3 px-6 rounded-full shadow-sm flex items-center gap-2 w-1/2 md:w-auto justify-center active:scale-95 cursor-pointer">
-                                Book Appointment <span class="material-symbols-outlined text-base">check</span>
+                            <button type="button" onclick="handleDetailsSubmit(event)" class="bg-primary hover:bg-[#005321] text-white font-bold text-sm py-3 px-6 rounded-full shadow-sm flex items-center gap-2 w-1/2 md:w-auto justify-center active:scale-95 cursor-pointer">
+                                Pay & Confirm Booking <span class="material-symbols-outlined text-base">check</span>
                             </button>
                         </div>
                     </form>
@@ -648,6 +707,86 @@
                                 <label for="stats-fasted">Fasted Weigh-in</label>
                             </div>
                             <button type="submit" id="stats-submit-btn" class="w-full bg-[#006e2f] hover:bg-[#005321] text-white font-bold text-sm py-2.5 rounded-lg transition-all shadow-sm cursor-pointer">Save Entry</button>
+                        </form>
+                    </div>
+
+                    <!-- Medical Intake & Health Profile Card -->
+                    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
+                        <div class="flex items-center justify-between border-b border-surface-variant/30 pb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary text-[20px]">medical_information</span>
+                                <h3 class="text-base font-bold text-on-background">Medical Intake & Profile</h3>
+                            </div>
+                            <span id="intake-status-badge" class="bg-primary/10 text-primary text-[10px] font-bold px-2.5 py-1 rounded-full">Completed</span>
+                        </div>
+
+                        <form id="client-intake-form" onsubmit="handleClientIntakeSubmit(event)" class="space-y-4">
+                            <!-- Food Allergies -->
+                            <div>
+                                <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Food Allergies & Intolerances</label>
+                                <div class="grid grid-cols-2 gap-2 text-xs font-medium text-on-surface">
+                                    <label class="flex items-center gap-1.5 cursor-pointer">
+                                        <input type="checkbox" name="client-allergies" value="Peanuts" class="rounded text-primary focus:ring-primary"> Peanuts
+                                    </label>
+                                    <label class="flex items-center gap-1.5 cursor-pointer">
+                                        <input type="checkbox" name="client-allergies" value="Seafood/Shellfish" class="rounded text-primary focus:ring-primary"> Seafood / Shellfish
+                                    </label>
+                                    <label class="flex items-center gap-1.5 cursor-pointer">
+                                        <input type="checkbox" name="client-allergies" value="Lactose/Dairy" class="rounded text-primary focus:ring-primary"> Lactose / Dairy
+                                    </label>
+                                    <label class="flex items-center gap-1.5 cursor-pointer">
+                                        <input type="checkbox" name="client-allergies" value="Gluten/Wheat" class="rounded text-primary focus:ring-primary"> Gluten / Wheat
+                                    </label>
+                                    <label class="flex items-center gap-1.5 cursor-pointer">
+                                        <input type="checkbox" name="client-allergies" value="Eggs" class="rounded text-primary focus:ring-primary"> Eggs
+                                    </label>
+                                    <label class="flex items-center gap-1.5 cursor-pointer">
+                                        <input type="checkbox" name="client-allergies" value="Soy" class="rounded text-primary focus:ring-primary"> Soy
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Medical Conditions -->
+                            <div>
+                                <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Medical Conditions</label>
+                                <div class="grid grid-cols-2 gap-2 text-xs font-medium text-on-surface">
+                                    <label class="flex items-center gap-1.5 cursor-pointer">
+                                        <input type="checkbox" name="client-conditions" value="Diabetes Type 2" class="rounded text-primary focus:ring-primary"> Diabetes Tipe 2
+                                    </label>
+                                    <label class="flex items-center gap-1.5 cursor-pointer">
+                                        <input type="checkbox" name="client-conditions" value="Hypertension" class="rounded text-primary focus:ring-primary"> Hipertensi
+                                    </label>
+                                    <label class="flex items-center gap-1.5 cursor-pointer">
+                                        <input type="checkbox" name="client-conditions" value="High Cholesterol" class="rounded text-primary focus:ring-primary"> Kolesterol Tinggi
+                                    </label>
+                                    <label class="flex items-center gap-1.5 cursor-pointer">
+                                        <input type="checkbox" name="client-conditions" value="GERD/Maag" class="rounded text-primary focus:ring-primary"> GERD / Asam Lambung
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Dietary Preference -->
+                            <div>
+                                <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Dietary Preference</label>
+                                <select id="client-diet-pref" class="w-full rounded-lg border border-outline-variant/40 focus:border-primary focus:ring-primary text-xs px-3 py-2 bg-surface font-semibold text-on-surface">
+                                    <option value="None">Balanced / No Restriction</option>
+                                    <option value="Halal">Halal</option>
+                                    <option value="Vegetarian">Vegetarian</option>
+                                    <option value="Vegan">Vegan</option>
+                                    <option value="Keto">Keto / Low Carb</option>
+                                    <option value="Low Sodium">Low Sodium (Darah Tinggi)</option>
+                                </select>
+                            </div>
+
+                            <!-- Notes / Medications -->
+                            <div>
+                                <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Notes & Medications</label>
+                                <textarea id="client-intake-notes" rows="2" placeholder="e.g. Taking Metformin, allergic to penicillin..." class="w-full rounded-lg border border-outline-variant/40 focus:border-primary focus:ring-primary text-xs px-3 py-2 bg-surface resize-none"></textarea>
+                            </div>
+
+                            <button type="submit" class="w-full bg-[#006e2f] hover:bg-[#005321] text-white font-bold text-xs py-2.5 rounded-lg transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1">
+                                <span class="material-symbols-outlined text-[16px]">save</span> Save Health Profile
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -1312,6 +1451,225 @@
                 </div>
                 <button type="submit" class="w-full bg-primary hover:bg-[#005321] text-white font-bold text-xs py-2.5 rounded-lg transition-all shadow-sm cursor-pointer mt-2">Unlock Full Portal</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Leave Review Modal -->
+    <div id="leave-review-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-surface max-w-sm w-full rounded-2xl p-6 border border-slate-100 shadow-2xl flex flex-col gap-4 text-slate-800">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-sm font-bold text-slate-800">Rate Your Consultation</h3>
+                <button onclick="closeLeaveReviewModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer"><span class="material-symbols-outlined text-[18px]">close</span></button>
+            </div>
+            <form onsubmit="handleReviewSubmit(event)" class="space-y-4">
+                <input type="hidden" id="review-specialist-name">
+                <input type="hidden" id="review-appointment-id">
+                
+                <div>
+                    <span class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Specialist</span>
+                    <p class="font-bold text-sm text-primary" id="review-modal-specialist-title">Dr. Hasan</p>
+                </div>
+
+                <!-- Star Rating Selector -->
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Your Rating</label>
+                    <div class="flex items-center gap-1.5 justify-center py-2 bg-slate-50 rounded-xl border border-slate-100" id="star-rating-picker">
+                        <span onclick="setStarRating(1)" class="material-symbols-outlined text-2xl text-amber-400 cursor-pointer transition-transform hover:scale-125">star</span>
+                        <span onclick="setStarRating(2)" class="material-symbols-outlined text-2xl text-amber-400 cursor-pointer transition-transform hover:scale-125">star</span>
+                        <span onclick="setStarRating(3)" class="material-symbols-outlined text-2xl text-amber-400 cursor-pointer transition-transform hover:scale-125">star</span>
+                        <span onclick="setStarRating(4)" class="material-symbols-outlined text-2xl text-amber-400 cursor-pointer transition-transform hover:scale-125">star</span>
+                        <span onclick="setStarRating(5)" class="material-symbols-outlined text-2xl text-amber-400 cursor-pointer transition-transform hover:scale-125">star</span>
+                    </div>
+                    <input type="hidden" id="review-rating-value" value="5">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Your Feedback / Testimonial</label>
+                    <textarea id="review-comment-text" required rows="3" placeholder="Describe your experience with this specialist..." class="w-full rounded-lg border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary focus:ring-primary resize-none"></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-[#006e2f] hover:bg-[#005321] text-white font-bold text-xs py-2.5 rounded-lg transition-all shadow-sm cursor-pointer">Submit Review</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Specialist Reviews Modal -->
+    <div id="view-specialist-reviews-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-surface max-w-md w-full rounded-2xl p-6 border border-slate-100 shadow-2xl flex flex-col gap-4 max-h-[85vh] overflow-hidden text-slate-800">
+            <div class="flex justify-between items-center border-b pb-3 shrink-0">
+                <div>
+                    <h3 class="text-base font-bold text-slate-800" id="spec-reviews-title">Client Reviews & Testimonials</h3>
+                    <p class="text-[10px] text-slate-500" id="spec-reviews-subtitle">Real feedback from verified consultations</p>
+                </div>
+                <button onclick="closeSpecialistReviewsModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer"><span class="material-symbols-outlined text-[20px]">close</span></button>
+            </div>
+
+            <!-- Average Header -->
+            <div class="bg-primary/5 p-4 rounded-xl border border-primary/10 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3">
+                    <span class="text-3xl font-extrabold text-primary" id="spec-reviews-avg-num">4.9</span>
+                    <div>
+                        <div class="flex text-amber-400 text-sm" id="spec-reviews-avg-stars">★★★★★</div>
+                        <span class="text-[10px] text-slate-500 font-semibold" id="spec-reviews-count-text">Based on 18 client reviews</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reviews List Container -->
+            <div class="flex-grow overflow-y-auto space-y-3 pr-1 hide-scrollbar" id="spec-reviews-list-container">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Authentic Singapore Commercial Payment Gateway Modal (Airwallex / Stripe SG Style) -->
+    <div id="payment-gateway-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="bg-white max-w-sm w-full rounded-3xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col text-slate-800 animate-fade-in">
+            <!-- Header -->
+            <div class="bg-slate-900 text-white p-4 flex justify-between items-center border-b border-slate-800">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-7 h-7 rounded-lg bg-emerald-500 text-slate-900 flex items-center justify-center font-black text-xs shadow-sm">NF</div>
+                    <div class="text-left">
+                        <h3 class="text-xs font-bold tracking-tight text-white flex items-center gap-1">
+                            NutriFlow Secure Checkout <span class="material-symbols-outlined text-[14px] text-emerald-400">lock</span>
+                        </h3>
+                        <p class="text-[9px] text-slate-400 font-mono">Ref: TRX-SG-2026-98124 • SGD S$</p>
+                    </div>
+                </div>
+                <button onclick="closePaymentGatewayModal()" class="text-slate-400 hover:text-white cursor-pointer transition-colors p-1"><span class="material-symbols-outlined text-[18px]">close</span></button>
+            </div>
+
+            <!-- Body -->
+            <div class="p-5 space-y-4 text-center">
+                <!-- VIEW 1: PayNow QR (SG) -->
+                <div id="gateway-view-qr" class="flex flex-col items-center gap-3">
+                    <div class="w-full bg-[#7c1d4e]/10 border border-[#7c1d4e]/30 rounded-xl p-2.5 flex items-center justify-between text-left">
+                        <div class="flex items-center gap-2">
+                            <div class="bg-[#7c1d4e] text-white font-extrabold text-[10px] px-2 py-1 rounded">PayNow</div>
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-800 block">NutriFlow SG Pte. Ltd.</span>
+                                <span class="text-[9px] font-mono text-slate-500">UEN: 202688921N</span>
+                            </div>
+                        </div>
+                        <span class="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">VERIFIED</span>
+                    </div>
+                    
+                    <div class="bg-white p-3.5 rounded-2xl border-2 border-slate-200 shadow-md inline-block relative group">
+                        <!-- PayNow QR SVG -->
+                        <svg class="w-40 h-40" viewBox="0 0 100 100" fill="none">
+                            <rect width="100" height="100" fill="white"/>
+                            <rect x="10" y="10" width="25" height="25" fill="#7c1d4e"/>
+                            <rect x="15" y="15" width="15" height="15" fill="white"/>
+                            <rect x="18" y="18" width="9" height="9" fill="#7c1d4e"/>
+                            <rect x="65" y="10" width="25" height="25" fill="#7c1d4e"/>
+                            <rect x="70" y="15" width="15" height="15" fill="white"/>
+                            <rect x="73" y="18" width="9" height="9" fill="#7c1d4e"/>
+                            <rect x="10" y="65" width="25" height="25" fill="#7c1d4e"/>
+                            <rect x="15" y="70" width="15" height="15" fill="white"/>
+                            <rect x="18" y="73" width="9" height="9" fill="#7c1d4e"/>
+                            <rect x="42" y="10" width="10" height="10" fill="#0b1c30"/>
+                            <rect x="42" y="30" width="10" height="10" fill="#0b1c30"/>
+                            <rect x="10" y="42" width="10" height="10" fill="#0b1c30"/>
+                            <rect x="30" y="42" width="15" height="15" fill="#7c1d4e"/>
+                            <rect x="55" y="42" width="12" height="12" fill="#0b1c30"/>
+                            <rect x="75" y="42" width="15" height="15" fill="#7c1d4e"/>
+                            <rect x="42" y="65" width="12" height="12" fill="#0b1c30"/>
+                            <rect x="60" y="60" width="12" height="12" fill="#7c1d4e"/>
+                            <rect x="78" y="78" width="12" height="12" fill="#7c1d4e"/>
+                            <rect x="45" y="80" width="10" height="10" fill="#0b1c30"/>
+                        </svg>
+                    </div>
+
+                    <div class="text-[11px] text-slate-500 font-medium flex items-center justify-center gap-1.5 bg-slate-50 w-full py-1.5 rounded-lg border border-slate-200">
+                        <span class="material-symbols-outlined text-[15px] text-amber-600">timer</span>
+                        <span>Session expires in <strong class="text-slate-800 font-mono" id="paynow-timer-display">14:58</strong></span>
+                    </div>
+                </div>
+
+                <!-- VIEW 2: E-Wallet (GrabPay / DBS PayLah!) -->
+                <div id="gateway-view-ewallet" class="hidden flex-col gap-3 text-left">
+                    <div class="flex gap-2">
+                        <button type="button" class="flex-1 py-2 rounded-xl text-xs font-bold border-2 border-emerald-600 bg-emerald-50 text-emerald-800 text-center">GrabPay</button>
+                        <button type="button" class="flex-1 py-2 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-600 text-center">DBS PayLah!</button>
+                    </div>
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Registered SG Mobile Number</label>
+                        <div class="flex gap-2">
+                            <span class="bg-white border border-slate-200 px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-700 flex items-center">+65</span>
+                            <input type="tel" id="gateway-ewallet-phone" value="8123 4567" class="w-full bg-white border border-slate-200 rounded-lg text-xs font-bold px-3 py-1.5 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-slate-500 leading-relaxed text-center">You will receive an in-app push notification on your phone to complete the transaction.</p>
+                </div>
+
+                <!-- VIEW 3: FAST Bank Transfer (DBS / OCBC / UOB) -->
+                <div id="gateway-view-fpx" class="hidden flex-col gap-3 text-left">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Recipient Bank Account</span>
+                        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">DBS FAST</span>
+                    </div>
+                    <div class="bg-slate-900 text-white p-4 rounded-2xl space-y-2 text-xs relative overflow-hidden">
+                        <div class="flex justify-between border-b border-slate-800 pb-2">
+                            <span class="text-slate-400">Bank Name:</span>
+                            <span class="font-bold text-white">DBS Bank Singapore</span>
+                        </div>
+                        <div class="flex justify-between border-b border-slate-800 pb-2">
+                            <span class="text-slate-400">Account Name:</span>
+                            <span class="font-bold text-white">NutriFlow Health SG Pte. Ltd.</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-1">
+                            <div>
+                                <span class="text-slate-400 text-[10px] block uppercase">Virtual Account No.</span>
+                                <span class="font-bold text-emerald-400 font-mono text-sm tracking-wider">033-904819-2</span>
+                            </div>
+                            <button onclick="navigator.clipboard.writeText('0339048192'); showToast('Account number copied to clipboard!', 'info')" class="bg-slate-800 hover:bg-slate-700 text-xs font-bold px-2.5 py-1 rounded border border-slate-700 text-slate-200 cursor-pointer transition-all">Copy</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 4: Credit / Debit Card -->
+                <div id="gateway-view-card" class="hidden flex-col gap-2.5 text-left">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Card Details</span>
+                        <div class="flex gap-1 text-slate-400 text-xs font-bold">
+                            <span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded text-[10px]">VISA</span>
+                            <span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded text-[10px]">MC</span>
+                            <span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded text-[10px]">AMEX</span>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2.5 text-xs">
+                        <div>
+                            <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Card Number</label>
+                            <input type="text" value="4532 8819 0412 8892" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 font-mono font-bold text-xs focus:border-slate-900 focus:ring-1 focus:ring-slate-900">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Expiry Date</label>
+                                <input type="text" value="12/28" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 font-mono font-bold text-xs text-center focus:border-slate-900 focus:ring-1 focus:ring-slate-900">
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">CVV Code</label>
+                                <input type="password" value="882" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 font-mono font-bold text-xs text-center focus:border-slate-900 focus:ring-1 focus:ring-slate-900">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Amount Display -->
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex justify-between items-center">
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Total Amount</span>
+                    <span class="text-lg font-black text-slate-900" id="gateway-total-amount">S$150.00 SGD</span>
+                </div>
+
+                <!-- Action Button -->
+                <button id="gateway-submit-btn" onclick="processSimulatedPayment()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-3 rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span class="material-symbols-outlined text-[18px]">verified</span> Complete Payment (S$150.00)
+                </button>
+
+                <div class="flex items-center justify-center gap-1 text-[9px] text-slate-400 font-medium pt-1">
+                    <span class="material-symbols-outlined text-[12px] text-emerald-600">verified_user</span> Guaranteed 256-bit SSL Bank Security • Airwallex SG
+                </div>
+            </div>
         </div>
     </div>
 

@@ -5,9 +5,9 @@ const state = {
     activeView: 'admin-clients',
     appointments: [],
     clients: [
-        { name: 'Sarah Jenkins', email: 'sarah.j@email.com', goal: 'Weight Loss', lastCheckIn: 'Today, 9:00 AM', compliance: 92, weightTrend: [168, 169, 170, 173, 174, 176], avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150', therapist: 'Dr. Hasan', activeProgramId: 'prog-sarah' },
-        { name: 'Marcus Reid', email: 'm.reid@email.com', goal: 'Muscle Gain', lastCheckIn: '2 days ago', compliance: 78, weightTrend: [180, 182, 181, 183, 182, 185], avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150', therapist: 'Dr. Hasan', activeProgramId: 'prog-marcus' },
-        { name: 'Elena Lopez', email: 'elena.l@email.com', goal: 'Maintenance', lastCheckIn: 'Yesterday', compliance: 95, weightTrend: [142, 142, 141, 142, 142, 142], avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150', therapist: 'Dr. Amanda', activeProgramId: 'prog-elena' }
+        { name: 'Sarah Jenkins', email: 'sarah.j@email.com', goal: 'Weight Loss', lastCheckIn: 'Today, 9:00 AM', compliance: 92, weightTrend: [168, 169, 170, 173, 174, 176], avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150', therapist: 'Dr. Hasan', activeProgramId: 'prog-sarah', allergies: ['Peanuts', 'Seafood/Shellfish'], conditions: ['Diabetes Type 2'] },
+        { name: 'Marcus Reid', email: 'm.reid@email.com', goal: 'Muscle Gain', lastCheckIn: '2 days ago', compliance: 78, weightTrend: [180, 182, 181, 183, 182, 185], avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150', therapist: 'Dr. Hasan', activeProgramId: 'prog-marcus', allergies: ['Lactose/Dairy'], conditions: ['GERD/Maag'] },
+        { name: 'Elena Lopez', email: 'elena.l@email.com', goal: 'Maintenance', lastCheckIn: 'Yesterday', compliance: 95, weightTrend: [142, 142, 141, 142, 142, 142], avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150', therapist: 'Dr. Amanda', activeProgramId: 'prog-elena', allergies: [], conditions: ['High Cholesterol'] }
     ],
     foodLibrary: [
         { id: 'f-1', title: 'Avocado Egg Toast', type: 'Recipes', calories: 320, p: 14, c: 22, f: 18, image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=200', favorite: true, recipeIngredients: "2 slices whole wheat bread\n1 ripe avocado\n2 large eggs\n1 tsp lemon juice\nPinch of salt and black pepper", recipeSteps: "1. Toast 2 slices of whole wheat bread.\n2. Mash 1 avocado with lemon juice, salt, and pepper.\n3. Fry 2 eggs to your liking.\n4. Spread avocado on toast and top with eggs. Serve warm." },
@@ -471,6 +471,40 @@ function loadSpecialistProfileDetails() {
     document.getElementById('edit-practitioner-name').value = spec.name;
     document.getElementById('edit-practitioner-specialty').value = spec.specialty;
     document.getElementById('edit-practitioner-email').value = spec.email;
+
+    // Render Specialist Reviews
+    const allReviews = JSON.parse(localStorage.getItem('nutriflow_specialist_reviews') || '[]');
+    const specReviews = allReviews.filter(r => r.specialist.toLowerCase() === spec.name.toLowerCase());
+    
+    const ratingEl = document.getElementById('admin-profile-rating-num');
+    if (ratingEl) {
+        if (specReviews.length > 0) {
+            const sum = specReviews.reduce((acc, r) => acc + r.rating, 0);
+            ratingEl.innerText = (sum / specReviews.length).toFixed(1);
+        } else {
+            ratingEl.innerText = '5.0';
+        }
+    }
+
+    const reviewsListEl = document.getElementById('admin-profile-reviews-list');
+    if (reviewsListEl) {
+        if (specReviews.length === 0) {
+            reviewsListEl.innerHTML = `<div class="p-4 text-center text-xs text-on-surface-variant font-medium">No client reviews received yet.</div>`;
+        } else {
+            reviewsListEl.innerHTML = specReviews.map(r => `
+                <div class="bg-surface-container-low p-3 rounded-xl border border-outline-variant/15 flex flex-col gap-1 text-left">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-xs text-on-background">${r.clientName}</span>
+                        <span class="text-[9px] text-on-surface-variant">${r.date}</span>
+                    </div>
+                    <div class="text-amber-500 text-xs">
+                        ${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}
+                    </div>
+                    <p class="text-xs text-on-surface-variant leading-snug">${r.comment}</p>
+                </div>
+            `).join('');
+        }
+    }
 }
 
 function loadSpecialistServices() {
@@ -869,11 +903,22 @@ function renderAdminClientsList() {
                                 ${cli.avatar.startsWith('http') ? `<img class="w-full h-full object-cover" src="${cli.avatar}" alt="${cli.name}">` : cli.avatar}
                             </div>
                             <div class="text-left">
-                                <div class="font-bold text-on-background text-sm lg:text-xs">${cli.name}</div>
+                                <div class="font-bold text-on-background text-sm lg:text-xs flex items-center gap-1.5">
+                                    <span>${cli.name}</span>
+                                    ${(cli.allergies?.length || cli.conditions?.length) ? `<span class="material-symbols-outlined text-amber-600 text-[14px]" title="Has Medical Intake Data">warning</span>` : ''}
+                                </div>
                                 <div class="text-[10px] text-on-surface-variant/80">${cli.email}</div>
+                                <div class="flex flex-wrap gap-1 mt-1">
+                                    ${cli.allergies && cli.allergies.length ? `<span class="bg-red-50 text-red-700 border border-red-200/60 px-1.5 py-0.5 rounded text-[9px] font-bold flex items-center gap-0.5" title="Allergies"><span class="material-symbols-outlined text-[10px]">no_food</span> ${cli.allergies.join(', ')}</span>` : ''}
+                                    ${cli.conditions && cli.conditions.length ? `<span class="bg-amber-50 text-amber-700 border border-amber-200/60 px-1.5 py-0.5 rounded text-[9px] font-bold" title="Conditions">${cli.conditions.join(', ')}</span>` : ''}
+                                </div>
                             </div>
                         </div>
                         <div class="flex items-center gap-1">
+                            <!-- Medical Intake button on mobile -->
+                            <button onclick="event.stopPropagation(); openClientIntakeModal('${cli.email}')" class="lg:hidden p-2 bg-primary/5 hover:bg-primary/15 text-primary rounded-full transition-colors cursor-pointer" title="View Medical Intake">
+                                <span class="material-symbols-outlined text-[18px]">medical_information</span>
+                            </button>
                             <!-- Action chat button on mobile (hidden on desktop) -->
                             <button onclick="event.stopPropagation(); openClientProgramDiscussion('${cli.activeProgramId}', '${cli.name}')" class="lg:hidden p-2 bg-primary/5 hover:bg-primary/15 text-primary rounded-full transition-colors cursor-pointer" title="Send message">
                                 <span class="material-symbols-outlined text-[18px]">chat</span>
@@ -919,9 +964,14 @@ function renderAdminClientsList() {
                 
                 <!-- Actions Column (Desktop-only) -->
                 <td class="hidden lg:table-cell p-0 lg:p-4 pr-0 lg:pr-6 text-right">
-                    <button onclick="openClientProgramDiscussion('${cli.activeProgramId}', '${cli.name}')" class="p-2 hover:bg-surface-container hover:text-primary rounded-full transition-colors inline-block cursor-pointer" title="Send message">
-                        <span class="material-symbols-outlined text-[18px]">chat</span>
-                    </button>
+                    <div class="flex items-center justify-end gap-1">
+                        <button onclick="openClientIntakeModal('${cli.email}')" class="p-2 hover:bg-surface-container hover:text-primary text-on-surface-variant rounded-full transition-colors inline-block cursor-pointer" title="View/Edit Medical Intake">
+                            <span class="material-symbols-outlined text-[18px]">medical_information</span>
+                        </button>
+                        <button onclick="openClientProgramDiscussion('${cli.activeProgramId}', '${cli.name}')" class="p-2 hover:bg-surface-container hover:text-primary text-on-surface-variant rounded-full transition-colors inline-block cursor-pointer" title="Send message">
+                            <span class="material-symbols-outlined text-[18px]">chat</span>
+                        </button>
+                    </div>
                 </td>
             </tr>
         `;
@@ -1094,7 +1144,13 @@ window.handleAddNewClientSubmit = function(e) {
     const name = document.getElementById('new-client-name').value;
     const email = document.getElementById('new-client-email').value;
     const goal = document.getElementById('new-client-goal').value;
+    const allergiesRaw = document.getElementById('new-client-allergies')?.value || '';
+    const conditionsRaw = document.getElementById('new-client-conditions')?.value || '';
+    
+    const allergies = allergiesRaw ? allergiesRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const conditions = conditionsRaw ? conditionsRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
     const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+    const activeSpecialist = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
     
     state.clients.push({
         name: name,
@@ -1103,12 +1159,77 @@ window.handleAddNewClientSubmit = function(e) {
         lastCheckIn: 'Never',
         compliance: 100,
         weightTrend: [160, 160],
-        avatar: initials
+        avatar: initials,
+        therapist: activeSpecialist,
+        allergies: allergies,
+        conditions: conditions,
+        dietPref: 'None',
+        notes: ''
     });
 
+    saveState();
     closeAddNewClientModal();
     renderAdminClientsList();
-    showToast(`Added client ${name}!`, 'success');
+    showToast(`Added client ${name} with medical intake data!`, 'success');
+};
+
+window.openClientIntakeModal = function(clientEmail) {
+    const client = state.clients.find(c => c.email.toLowerCase() === clientEmail.toLowerCase());
+    if (!client) return;
+
+    document.getElementById('admin-intake-client-name').innerText = client.name;
+    document.getElementById('admin-intake-client-email').value = client.email;
+
+    const allergyCbs = document.querySelectorAll('input[name="admin-intake-allergies"]');
+    allergyCbs.forEach(cb => {
+        cb.checked = client.allergies && client.allergies.includes(cb.value);
+    });
+
+    const condCbs = document.querySelectorAll('input[name="admin-intake-conditions"]');
+    condCbs.forEach(cb => {
+        cb.checked = client.conditions && client.conditions.includes(cb.value);
+    });
+
+    const dietSelect = document.getElementById('admin-intake-diet');
+    if (dietSelect) dietSelect.value = client.dietPref || 'None';
+
+    const notesTa = document.getElementById('admin-intake-notes');
+    if (notesTa) notesTa.value = client.notes || '';
+
+    const modal = document.getElementById('client-intake-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+};
+
+window.closeClientIntakeModal = function() {
+    const modal = document.getElementById('client-intake-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+window.handleAdminSaveClientIntake = function(e) {
+    e.preventDefault();
+    const email = document.getElementById('admin-intake-client-email').value;
+    const client = state.clients.find(c => c.email.toLowerCase() === email.toLowerCase());
+    if (!client) return;
+
+    const allergyCbs = document.querySelectorAll('input[name="admin-intake-allergies"]:checked');
+    client.allergies = Array.from(allergyCbs).map(cb => cb.value);
+
+    const condCbs = document.querySelectorAll('input[name="admin-intake-conditions"]:checked');
+    client.conditions = Array.from(condCbs).map(cb => cb.value);
+
+    client.dietPref = document.getElementById('admin-intake-diet').value;
+    client.notes = document.getElementById('admin-intake-notes').value;
+
+    saveState();
+    closeClientIntakeModal();
+    renderAdminClientsList();
+    showToast(`Updated Medical Intake for ${client.name}!`, 'success');
 };
 
 // ==================== WEEKLY MEAL BUILDER ====================
@@ -1861,6 +1982,9 @@ window.renderAdminAppointmentsTable = function() {
                     <div class="text-left">
                         <div class="font-bold text-on-background text-sm lg:text-xs">${apt.clientName}</div>
                         <div class="text-[10px] font-mono text-on-surface-variant/80 mt-0.5">#${apt.id.toUpperCase()}</div>
+                        <div class="mt-1">
+                            ${apt.paymentStatus === 'paid' ? `<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-bold px-1.5 py-0.5 rounded-full inline-flex items-center gap-0.5"><span class="material-symbols-outlined text-[10px]">verified</span> Paid ($${apt.price})</span>` : `<span class="bg-amber-50 text-amber-700 border border-amber-200 text-[9px] font-bold px-1.5 py-0.5 rounded-full">Unpaid / Pending</span>`}
+                        </div>
                     </div>
                     <div class="flex items-center gap-2">
                         <!-- Status Badge on Mobile -->

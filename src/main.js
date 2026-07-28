@@ -636,10 +636,11 @@ function checkClientSession() {
 
 window.handleClientSignOut = function() {
     localStorage.removeItem('nutriflow_client_logged');
+    localStorage.removeItem('nutriflow_client_logged_name');
     showToast('Signed out of Client Portal.');
     setTimeout(() => {
         window.location.href = './login.html';
-    }, 1000);
+    }, 400);
 };
 
 // ==================== APP INITS ====================
@@ -647,11 +648,17 @@ document.addEventListener('DOMContentLoaded', () => {
     checkClientSession();
     loadState();
     
-    // Update greeting with dynamic logged-in client name
     const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
     const welcomeLabel = document.getElementById('client-welcome-name-label');
     if (welcomeLabel) {
         welcomeLabel.innerText = `Good morning, ${activeClient.split(' ')[0]}!`;
+    }
+
+    if (localStorage.getItem('nutriflow_trigger_onboarding') === 'true') {
+        localStorage.removeItem('nutriflow_trigger_onboarding');
+        setTimeout(() => {
+            showToast(`Welcome ${activeClient}! Your new patient account has been registered.`, 'success');
+        }, 600);
     }
 
     // Update dedicated practitioner card
@@ -797,6 +804,7 @@ window.navigateTo = function(viewId) {
         renderBookingWizard();
     } else if (viewId === 'profile') {
         setTimeout(initProfileCharts, 50);
+        if (window.loadClientIntakeProfile) window.loadClientIntakeProfile();
     } else if (viewId === 'chat') {
         loadState();
         renderProgramChat();
@@ -2325,6 +2333,13 @@ window.renderConsultationHistory = function() {
                             ${detail.prescription.map(p => `<li>${p}</li>`).join('')}
                         </ul>
                     </div>
+
+                    <!-- Rate Consultation Button -->
+                    <div class="flex justify-end pt-2 border-t border-slate-100">
+                        <button onclick="event.stopPropagation(); openLeaveReviewModal('${h.doc}')" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-3.5 py-1.5 rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-1 active:scale-95">
+                            <span class="material-symbols-outlined text-[15px]">star</span> Rate & Review Specialist
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
@@ -2579,13 +2594,41 @@ window.goBackToBookingStep = function(stepNum) {
 };
 
 function renderBookingStep3() {
-    const srv = (state.currentTherapistServices || []).find(s => s.id === state.bookingFlow.selectedServiceId);
+    if (!state.currentTherapistServices || state.currentTherapistServices.length === 0) {
+        const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+        const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
+        const clientDetails = clientsList.find(c => c.name === activeClient);
+        const assignedTherapist = clientDetails?.therapist || 'Dr. Hasan';
+        state.bookingFlow.selectedSpecialist = assignedTherapist;
+
+        const key = `nutriflow_services_${assignedTherapist}`;
+        state.currentTherapistServices = JSON.parse(localStorage.getItem(key)) || [
+            {
+                id: 'srv-hasan-1',
+                title: 'Weight Loss Consultation',
+                description: 'A dedicated session focusing on weight loss strategies, body composition targets, and custom macro ratios.',
+                duration: '60 min',
+                type: 'Virtual or In-Person',
+                price: 150,
+                image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=500'
+            }
+        ];
+    }
+
+    if (!state.bookingFlow.selectedServiceId) {
+        state.bookingFlow.selectedServiceId = state.currentTherapistServices[0]?.id || 'srv-hasan-1';
+    }
+    if (!state.bookingFlow.selectedMethod) {
+        state.bookingFlow.selectedMethod = 'Online';
+    }
+
+    const srv = (state.currentTherapistServices || []).find(s => s.id === state.bookingFlow.selectedServiceId) || state.currentTherapistServices[0];
     if (!srv) return;
     
-    document.getElementById('booking-summary-service-img').src = srv.image;
+    document.getElementById('booking-summary-service-img').src = srv.image || 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=500';
     document.getElementById('booking-summary-service-title').innerText = srv.title;
     document.getElementById('booking-summary-service-duration').innerText = srv.duration;
-    document.getElementById('booking-summary-service-therapist').innerText = state.bookingFlow.selectedSpecialist;
+    document.getElementById('booking-summary-service-therapist').innerText = state.bookingFlow.selectedSpecialist || 'Dr. Hasan';
     document.getElementById('booking-summary-service-method').innerText = `${state.bookingFlow.selectedMethod} Consultation`;
     document.getElementById('booking-summary-service-cost').innerText = `$${srv.price}.00`;
 
@@ -2719,15 +2762,22 @@ window.handleBookingFileSelected = function(e) {
 };
 
 window.handleDetailsSubmit = function(e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
     
-    const name = document.getElementById('details-name').value;
-    const email = document.getElementById('details-email').value;
-    const phone = document.getElementById('details-phone').value;
-    const concerns = document.getElementById('details-concerns').value;
+    const name = document.getElementById('details-name')?.value || 'Sarah Jenkins';
+    const email = document.getElementById('details-email')?.value || 'sarah.j@email.com';
+    const phone = document.getElementById('details-phone')?.value || '+65 8123 4567';
+    const concerns = document.getElementById('details-concerns')?.value || 'Nutritional Consultation';
     
-    const srv = (state.currentTherapistServices || []).find(s => s.id === state.bookingFlow.selectedServiceId);
-    if (!srv) return;
+    let srv = (state.currentTherapistServices || []).find(s => s.id === state.bookingFlow?.selectedServiceId);
+    if (!srv) {
+        srv = (state.currentTherapistServices && state.currentTherapistServices[0]) ? state.currentTherapistServices[0] : {
+            id: 'srv-default',
+            title: 'Weight Loss Consultation',
+            price: 150,
+            duration: '60 min'
+        };
+    }
     
     const newApt = {
         id: `apt-${Math.random().toString(36).substr(2, 9)}`,
@@ -2736,29 +2786,141 @@ window.handleDetailsSubmit = function(e) {
         clientPhone: phone,
         serviceId: srv.id,
         serviceTitle: srv.title,
-        price: srv.price,
-        duration: srv.duration,
-        therapist: state.bookingFlow.selectedSpecialist,
-        date: state.bookingFlow.selectedDate,
-        time: state.bookingFlow.selectedSlot,
+        price: srv.price || 150,
+        duration: srv.duration || '60 min',
+        therapist: state.bookingFlow?.selectedSpecialist || 'Dr. Hasan',
+        date: state.bookingFlow?.selectedDate || new Date().toISOString().split('T')[0],
+        time: state.bookingFlow?.selectedSlot || '10:00 AM',
         status: 'pending',
-        type: state.bookingFlow.selectedMethod,
+        paymentStatus: 'unpaid',
+        type: state.bookingFlow?.selectedMethod || 'Online',
         concerns: concerns,
-        uploadedFile: state.bookingFlow.uploadedFile
+        uploadedFile: state.bookingFlow?.uploadedFile || null
     };
     
-    state.appointments.push(newApt);
-    saveState();
+    openPaymentGatewayModal(newApt);
+};
 
-    document.getElementById('success-service-title').innerText = srv.title;
-    document.getElementById('success-date').innerText = new Date(state.bookingFlow.selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-    document.getElementById('success-time').innerText = state.bookingFlow.selectedSlot;
-    document.getElementById('success-practitioner').innerText = state.bookingFlow.selectedSpecialist;
-    document.getElementById('success-method').innerText = `${state.bookingFlow.selectedMethod} Session`;
-    document.getElementById('success-price').innerText = `$${srv.price}.00`;
+window.selectCheckoutPaymentMethod = function(methodKey) {
+    document.querySelectorAll('.pay-method-opt').forEach(el => {
+        el.className = 'pay-method-opt bg-surface border border-outline-variant/30 rounded-xl p-3 cursor-pointer hover:border-primary transition-all flex flex-col items-center text-center gap-1.5 active:scale-95';
+    });
+    const selectedOpt = document.getElementById(`pay-opt-${methodKey}`);
+    if (selectedOpt) {
+        selectedOpt.className = 'pay-method-opt bg-surface border-2 border-primary rounded-xl p-3 cursor-pointer hover:border-primary transition-all flex flex-col items-center text-center gap-1.5 active:scale-95 shadow-sm';
+    }
+    const hiddenInput = document.getElementById('selected-checkout-pay-method');
+    if (hiddenInput) hiddenInput.value = methodKey;
+};
 
-    advanceBookingStep(5);
-    showToast('Your booking request has been submitted!', 'success');
+let currentPendingAptForPayment = null;
+
+window.openPaymentGatewayModal = function(apt) {
+    currentPendingAptForPayment = apt;
+    const methodKey = document.getElementById('selected-checkout-pay-method')?.value || 'qr';
+
+    const amountEl = document.getElementById('gateway-total-amount');
+    if (amountEl) amountEl.innerText = `S$${apt.price}.00 SGD`;
+
+    // Hide all gateway views
+    ['qr', 'ewallet', 'fpx', 'card'].forEach(k => {
+        const v = document.getElementById(`gateway-view-${k}`);
+        if (v) {
+            v.classList.add('hidden');
+            v.classList.remove('flex');
+        }
+    });
+
+    // Show selected payment method view
+    const targetView = document.getElementById(`gateway-view-${methodKey}`) || document.getElementById('gateway-view-qr');
+    if (targetView) {
+        targetView.classList.remove('hidden');
+        targetView.classList.add('flex');
+    }
+
+    const submitBtn = document.getElementById('gateway-submit-btn');
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        const btnTexts = {
+            qr: '<span class="material-symbols-outlined text-[18px]">verified</span> I Have Paid via PayNow',
+            ewallet: '<span class="material-symbols-outlined text-[18px]">phone_iphone</span> Authorize Payment (S$' + apt.price + '.00)',
+            fpx: '<span class="material-symbols-outlined text-[18px]">account_balance</span> I Have Completed FAST Transfer',
+            card: `<span class="material-symbols-outlined text-[18px]">lock</span> Pay S$${apt.price}.00 SGD`
+        };
+        submitBtn.innerHTML = btnTexts[methodKey] || btnTexts.qr;
+    }
+
+    const modal = document.getElementById('payment-gateway-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+};
+
+window.closePaymentGatewayModal = function() {
+    const modal = document.getElementById('payment-gateway-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+window.processSimulatedPayment = function() {
+    if (!currentPendingAptForPayment) return;
+
+    const submitBtn = document.getElementById('gateway-submit-btn');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span> Verifying Instant Payment with Bank...`;
+    }
+
+    setTimeout(() => {
+        const methodKey = document.getElementById('selected-checkout-pay-method')?.value || 'qr';
+        const methodNames = {
+            qr: 'PayNow SG',
+            ewallet: 'GrabPay / DBS PayLah!',
+            fpx: 'DBS FAST Transfer',
+            card: 'Visa / Mastercard'
+        };
+
+        currentPendingAptForPayment.status = 'approved';
+        currentPendingAptForPayment.paymentStatus = 'paid';
+        currentPendingAptForPayment.paymentMethod = methodNames[methodKey] || 'PayNow SG';
+        currentPendingAptForPayment.paidAt = new Date().toISOString();
+
+        state.appointments.push(currentPendingAptForPayment);
+        saveState();
+
+        const transactions = JSON.parse(localStorage.getItem('nutriflow_payment_transactions') || '[]');
+        transactions.unshift({
+            id: `tx-${Date.now()}`,
+            appointmentId: currentPendingAptForPayment.id,
+            clientName: currentPendingAptForPayment.clientName,
+            clientEmail: currentPendingAptForPayment.clientEmail,
+            specialist: currentPendingAptForPayment.therapist,
+            serviceTitle: currentPendingAptForPayment.serviceTitle,
+            amount: currentPendingAptForPayment.price,
+            paymentMethod: methodNames[methodKey] || 'PayNow SG',
+            status: 'paid',
+            date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
+        });
+        localStorage.setItem('nutriflow_payment_transactions', JSON.stringify(transactions));
+
+        const srvTitle = currentPendingAptForPayment.serviceTitle;
+        const price = currentPendingAptForPayment.price;
+
+        closePaymentGatewayModal();
+
+        document.getElementById('success-service-title').innerText = srvTitle;
+        document.getElementById('success-date').innerText = new Date(state.bookingFlow.selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        document.getElementById('success-time').innerText = state.bookingFlow.selectedSlot;
+        document.getElementById('success-practitioner').innerText = state.bookingFlow.selectedSpecialist;
+        document.getElementById('success-method').innerText = `${state.bookingFlow.selectedMethod} Session`;
+        document.getElementById('success-price').innerText = `S$${price}.00 SGD (PAID via ${methodNames[methodKey]})`;
+
+        advanceBookingStep(5);
+        showToast(`Payment Successful! Receipt #${currentPendingAptForPayment.id.toUpperCase()} confirmed via ${methodNames[methodKey]}.`, 'success');
+    }, 800);
 };
 
 window.resetBookingWizardStateAndExit = function() {
@@ -3044,6 +3206,60 @@ window.handleStatsLogSubmit = function(e) {
     showToast('Saved health stats entry successfully!', 'success');
 };
 
+window.loadClientIntakeProfile = function() {
+    const rawData = localStorage.getItem('nutriflow_client_health_profile');
+    const profile = rawData ? JSON.parse(rawData) : {
+        allergies: ['Peanuts', 'Seafood/Shellfish'],
+        conditions: ['Diabetes Type 2'],
+        dietPref: 'Halal',
+        notes: 'Pre-diabetic management, allergic to peanuts.'
+    };
+
+    const allergyCbs = document.querySelectorAll('input[name="client-allergies"]');
+    allergyCbs.forEach(cb => {
+        cb.checked = profile.allergies && profile.allergies.includes(cb.value);
+    });
+
+    const condCbs = document.querySelectorAll('input[name="client-conditions"]');
+    condCbs.forEach(cb => {
+        cb.checked = profile.conditions && profile.conditions.includes(cb.value);
+    });
+
+    const dietSelect = document.getElementById('client-diet-pref');
+    if (dietSelect && profile.dietPref) dietSelect.value = profile.dietPref;
+
+    const notesTa = document.getElementById('client-intake-notes');
+    if (notesTa && profile.notes) notesTa.value = profile.notes;
+
+    const badge = document.getElementById('intake-status-badge');
+    if (badge) {
+        if ((profile.allergies && profile.allergies.length) || (profile.conditions && profile.conditions.length)) {
+            badge.innerText = 'Completed';
+            badge.className = 'bg-primary/10 text-primary text-[10px] font-bold px-2.5 py-1 rounded-full';
+        } else {
+            badge.innerText = 'Pending';
+            badge.className = 'bg-amber-500/10 text-amber-600 text-[10px] font-bold px-2.5 py-1 rounded-full';
+        }
+    }
+};
+
+window.handleClientIntakeSubmit = function(e) {
+    e.preventDefault();
+    const allergyCbs = document.querySelectorAll('input[name="client-allergies"]:checked');
+    const allergies = Array.from(allergyCbs).map(cb => cb.value);
+
+    const condCbs = document.querySelectorAll('input[name="client-conditions"]:checked');
+    const conditions = Array.from(condCbs).map(cb => cb.value);
+
+    const dietPref = document.getElementById('client-diet-pref').value;
+    const notes = document.getElementById('client-intake-notes').value;
+
+    const profileData = { allergies, conditions, dietPref, notes };
+    localStorage.setItem('nutriflow_client_health_profile', JSON.stringify(profileData));
+
+    showToast('Saved Medical Intake & Health Profile!', 'success');
+};
+
 window.openRegistrationModal = function() {
     const modal = document.getElementById('registration-modal');
     if (modal) {
@@ -3200,4 +3416,146 @@ window.filterHelpFAQ = function() {
             item.style.display = 'none';
         }
     });
+};
+
+// ==================== SPECIALIST REVIEWS LOGIC ====================
+window.initDefaultSpecialistReviews = function() {
+    if (!localStorage.getItem('nutriflow_specialist_reviews')) {
+        const defaultReviews = [
+            { id: 'rev-1', specialist: 'Dr. Hasan', clientName: 'Sarah Jenkins', rating: 5, date: '3 days ago', comment: 'Dr. Hasan sangat membantu membuat rencana diet yang lezat dan realistis. Berat badan saya turun 4kg dalam sebulan!' },
+            { id: 'rev-2', specialist: 'Dr. Hasan', clientName: 'Budi Santoso', rating: 5, date: '1 week ago', comment: 'Penjelasan nutrisinya sangat ilmiah dan mudah diikuti. Sesi telehealth lancar sekali.' },
+            { id: 'rev-3', specialist: 'Dr. Hasan', clientName: 'Rina Wijaya', rating: 4, date: '2 weeks ago', comment: 'Sangat responsif di chat program. Menu gizi yang disusun fleksibel dengan makanan lokal.' },
+            { id: 'rev-4', specialist: 'Dr. Amanda', clientName: 'Marcus Reid', rating: 5, date: '5 days ago', comment: 'Dr. Amanda mengerti betul target nutrisi untuk olahraga berat. Massa otot saya meningkat pesat!' },
+            { id: 'rev-5', specialist: 'Dr. Amanda', clientName: 'Elena Lopez', rating: 5, date: '2 weeks ago', comment: 'Konsultasi yang sangat membuka wawasan tentang gizi seimbang.' }
+        ];
+        localStorage.setItem('nutriflow_specialist_reviews', JSON.stringify(defaultReviews));
+    }
+};
+
+window.getSpecialistReviews = function(specialistName) {
+    initDefaultSpecialistReviews();
+    const all = JSON.parse(localStorage.getItem('nutriflow_specialist_reviews') || '[]');
+    if (!specialistName) return all;
+    return all.filter(r => r.specialist.toLowerCase() === specialistName.toLowerCase());
+};
+
+window.getSpecialistRatingData = function(specialistName) {
+    const reviews = getSpecialistReviews(specialistName);
+    if (reviews.length === 0) return { avg: '5.0', count: 0, reviews: [] };
+    const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
+    const avg = (sum / reviews.length).toFixed(1);
+    return { avg, count: reviews.length, reviews };
+};
+
+window.openLeaveReviewModal = function(specialistName, appointmentId = '') {
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
+    const clientDetails = clientsList.find(c => c.name === activeClient);
+    const targetSpec = specialistName || clientDetails?.therapist || 'Dr. Hasan';
+
+    document.getElementById('review-specialist-name').value = targetSpec;
+    document.getElementById('review-appointment-id').value = appointmentId;
+    document.getElementById('review-modal-specialist-title').innerText = targetSpec;
+    document.getElementById('review-comment-text').value = '';
+    setStarRating(5);
+
+    const modal = document.getElementById('leave-review-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+};
+
+window.closeLeaveReviewModal = function() {
+    const modal = document.getElementById('leave-review-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+window.setStarRating = function(ratingVal) {
+    document.getElementById('review-rating-value').value = ratingVal;
+    const picker = document.getElementById('star-rating-picker');
+    if (picker) {
+        const stars = picker.querySelectorAll('span');
+        stars.forEach((star, idx) => {
+            if (idx < ratingVal) {
+                star.className = 'material-symbols-outlined text-2xl text-amber-400 cursor-pointer transition-transform hover:scale-125';
+                star.style.fontVariationSettings = "'FILL' 1";
+            } else {
+                star.className = 'material-symbols-outlined text-2xl text-slate-300 cursor-pointer transition-transform hover:scale-125';
+                star.style.fontVariationSettings = "'FILL' 0";
+            }
+        });
+    }
+};
+
+window.handleReviewSubmit = function(e) {
+    e.preventDefault();
+    const specialist = document.getElementById('review-specialist-name').value || 'Dr. Hasan';
+    const rating = parseInt(document.getElementById('review-rating-value').value) || 5;
+    const comment = document.getElementById('review-comment-text').value;
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+
+    const reviews = getSpecialistReviews();
+    reviews.unshift({
+        id: `rev-${Date.now()}`,
+        specialist,
+        clientName: activeClient,
+        rating,
+        date: 'Just now',
+        comment
+    });
+
+    localStorage.setItem('nutriflow_specialist_reviews', JSON.stringify(reviews));
+    closeLeaveReviewModal();
+    showToast(`Thank you! Your ${rating}-star review for ${specialist} has been submitted.`, 'success');
+};
+
+window.openSpecialistReviewsModal = function(specialistName) {
+    const spec = specialistName || 'Dr. Hasan';
+    const data = getSpecialistRatingData(spec);
+
+    document.getElementById('spec-reviews-title').innerText = `Reviews for ${spec}`;
+    document.getElementById('spec-reviews-subtitle').innerText = `${data.count} client testimonials`;
+    document.getElementById('spec-reviews-avg-num').innerText = data.avg;
+    document.getElementById('spec-reviews-count-text').innerText = `Based on ${data.count} client reviews`;
+
+    const starsNum = Math.round(parseFloat(data.avg));
+    document.getElementById('spec-reviews-avg-stars').innerText = '★'.repeat(starsNum) + '☆'.repeat(5 - starsNum);
+
+    const container = document.getElementById('spec-reviews-list-container');
+    if (container) {
+        if (data.reviews.length === 0) {
+            container.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-semibold">No reviews yet for this specialist.</div>`;
+        } else {
+            container.innerHTML = data.reviews.map(r => `
+                <div class="bg-slate-50 border border-slate-100 rounded-xl p-3.5 flex flex-col gap-1.5 text-left">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-xs text-slate-800">${r.clientName}</span>
+                        <span class="text-[10px] text-slate-400 font-medium">${r.date}</span>
+                    </div>
+                    <div class="text-amber-400 text-xs">
+                        ${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}
+                    </div>
+                    <p class="text-xs text-slate-600 leading-relaxed">${r.comment}</p>
+                </div>
+            `).join('');
+        }
+    }
+
+    const modal = document.getElementById('view-specialist-reviews-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+};
+
+window.closeSpecialistReviewsModal = function() {
+    const modal = document.getElementById('view-specialist-reviews-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
 };
