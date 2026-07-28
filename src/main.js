@@ -683,6 +683,53 @@ window.openOnboardingModal = function() {
     if (welcomeEl) {
         welcomeEl.innerText = `Welcome ${activeClient}! Let's set up your profile for your specialist.`;
     }
+
+    const isSeedClient = ['Sarah Jenkins', 'Marcus Reid', 'Elena Lopez'].includes(activeClient);
+    const getSeedProfile = (client) => {
+        if (client === 'Sarah Jenkins') {
+            return {
+                name: 'Sarah Jenkins', dob: '1990-04-12', sex: 'Female', height: 165, weight: 72.5, targetWeight: 65.0,
+                goal: 'Weight Loss & Fat Reduction', allergies: ['Peanuts', 'Seafood/Shellfish'],
+                conditions: ['Diabetes Type 2'], dietPref: 'Halal', notes: 'Pre-diabetic management, allergic to peanuts.'
+            };
+        } else if (client === 'Marcus Reid') {
+            return {
+                name: 'Marcus Reid', dob: '1988-11-23', sex: 'Male', height: 182, weight: 85.0, targetWeight: 88.0,
+                goal: 'Muscle Building & Fitness', allergies: [], conditions: ['High Cholesterol'],
+                dietPref: 'Keto', notes: 'Focus on clean high-protein bulking.'
+            };
+        } else if (client === 'Elena Lopez') {
+            return {
+                name: 'Elena Lopez', dob: '1993-08-04', sex: 'Female', height: 160, weight: 58.0, targetWeight: 55.0,
+                goal: 'General Health Improvement', allergies: ['Lactose/Dairy'], conditions: ['GERD/Maag'],
+                dietPref: 'Vegetarian', notes: 'Frequent bloating, looking for gut-friendly diet.'
+            };
+        }
+        return null;
+    };
+
+    const rawData = localStorage.getItem(`nutriflow_client_health_profile_${activeClient}`);
+    const profile = rawData ? JSON.parse(rawData) : (isSeedClient ? getSeedProfile(activeClient) : {
+        name: activeClient, dob: '', sex: 'Female', height: '', weight: '', targetWeight: '',
+        goal: 'Weight Loss & Fat Reduction', allergies: [], conditions: [], dietPref: 'None', notes: ''
+    });
+
+    // Populate modal inputs
+    if (document.getElementById('onboard-name')) document.getElementById('onboard-name').value = profile.name || activeClient;
+    if (document.getElementById('onboard-dob')) document.getElementById('onboard-dob').value = profile.dob || '';
+    if (document.getElementById('onboard-sex')) document.getElementById('onboard-sex').value = profile.sex || 'Female';
+    if (document.getElementById('onboard-height')) document.getElementById('onboard-height').value = profile.height || '';
+    if (document.getElementById('onboard-weight')) document.getElementById('onboard-weight').value = profile.weight || '';
+    if (document.getElementById('onboard-target-weight')) document.getElementById('onboard-target-weight').value = profile.targetWeight || '';
+    if (document.getElementById('onboard-goal')) document.getElementById('onboard-goal').value = profile.goal || 'Weight Loss & Fat Reduction';
+    if (document.getElementById('onboard-diet')) document.getElementById('onboard-diet').value = profile.dietPref || 'None';
+    if (document.getElementById('onboard-notes')) document.getElementById('onboard-notes').value = profile.notes || '';
+
+    // Checkboxes
+    document.querySelectorAll('input[name="onboard-allergy"]').forEach(cb => {
+        cb.checked = profile.allergies && profile.allergies.includes(cb.value);
+    });
+
     const modal = document.getElementById('client-onboarding-modal');
     if (modal) {
         modal.classList.remove('hidden');
@@ -701,52 +748,72 @@ window.closeOnboardingModal = function() {
 window.handleOnboardingSubmit = function(e) {
     if (e) e.preventDefault();
     const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
-    const weight = parseFloat(document.getElementById('onboard-weight')?.value || 72);
-    const targetWeight = parseFloat(document.getElementById('onboard-target-weight')?.value || 65);
-    const goal = document.getElementById('onboard-goal')?.value || 'Weight Loss';
-    const diet = document.getElementById('onboard-diet')?.value || 'Balanced';
-    const notes = document.getElementById('onboard-notes')?.value || '';
+    
+    const name = document.getElementById('onboard-name').value;
+    const dob = document.getElementById('onboard-dob').value;
+    const sex = document.getElementById('onboard-sex').value;
+    const height = parseFloat(document.getElementById('onboard-height').value) || 0;
+    const weight = parseFloat(document.getElementById('onboard-weight').value) || 0;
+    const targetWeight = parseFloat(document.getElementById('onboard-target-weight').value) || 0;
+    const goal = document.getElementById('onboard-goal').value;
+    const dietPref = document.getElementById('onboard-diet').value;
+    const notes = document.getElementById('onboard-notes').value;
 
     const allergies = [];
     document.querySelectorAll('input[name="onboard-allergy"]:checked').forEach(cb => {
         allergies.push(cb.value);
     });
 
-    // Save client intake data to localStorage
+    const profileData = { name, dob, sex, height, weight, targetWeight, goal, allergies, conditions: [], dietPref, notes };
+    localStorage.setItem(`nutriflow_client_health_profile_${activeClient}`, JSON.stringify(profileData));
+
+    // Update active client logged name if modified
+    if (name && name !== activeClient) {
+        localStorage.setItem('nutriflow_client_logged_name', name);
+        const welcomeLabel = document.getElementById('client-welcome-name-label');
+        if (welcomeLabel) {
+            welcomeLabel.innerText = `Good morning, ${name.split(' ')[0]}!`;
+        }
+    }
+
+    // Also update nutriflow_client_intakes for compatibility
     const intakeMap = JSON.parse(localStorage.getItem('nutriflow_client_intakes') || '{}');
     intakeMap[activeClient] = {
         weight: weight,
         targetWeight: targetWeight,
         goal: goal,
-        diet: diet,
+        diet: dietPref,
         allergies: allergies,
         notes: notes,
         updatedAt: new Date().toISOString()
     };
     localStorage.setItem('nutriflow_client_intakes', JSON.stringify(intakeMap));
 
-    // Update weight history with the submitted initial weight
-    const initialWeightHistory = [
-        { month: new Date().toLocaleDateString('en-US', { month: 'short' }), weight: weight }
-    ];
-    state.profileStats.weightHistory = initialWeightHistory;
-    localStorage.setItem(`nutriflow_weight_history_${activeClient}`, JSON.stringify(initialWeightHistory));
-
-    // Update body measurements with base data
-    const initialMeasurements = [
-        { label: 'Today', waist: 30.0, hip: 36.0 }
-    ];
-    state.profileStats.bodyMeasurements = initialMeasurements;
-    localStorage.setItem(`nutriflow_measurements_history_${activeClient}`, JSON.stringify(initialMeasurements));
+    // Update weight history with the submitted weight
+    if (weight > 0) {
+        let weightHistory = JSON.parse(localStorage.getItem(`nutriflow_weight_history_${activeClient}`)) || [];
+        const dateStr = new Date().toLocaleDateString('en-US', { month: 'short' });
+        const existingEntry = weightHistory.find(h => h.month === dateStr);
+        if (existingEntry) {
+            existingEntry.weight = weight;
+        } else {
+            weightHistory.push({ month: dateStr, weight: weight });
+        }
+        state.profileStats.weightHistory = weightHistory;
+        localStorage.setItem(`nutriflow_weight_history_${activeClient}`, JSON.stringify(weightHistory));
+    }
 
     // Refresh charts
     if (window.updateWeightTrendChart) window.updateWeightTrendChart();
     if (window.updateMeasurementsChart) window.updateMeasurementsChart();
 
+    // Reload the Profile Header card values
+    if (window.loadClientIntakeProfile) window.loadClientIntakeProfile();
+
     closeOnboardingModal();
     const banner = document.getElementById('onboarding-incomplete-banner');
     if (banner) banner.classList.add('hidden');
-    showToast(`Health Profile Saved! Welcome to NutriFlow, ${activeClient.split(' ')[0]}.`, 'success');
+    showToast(`Health Profile Saved! Welcome to NutriFlow, ${(name || activeClient).split(' ')[0]}.`, 'success');
 };
 
 // ==================== APP INITS ====================
@@ -3445,6 +3512,39 @@ window.loadClientIntakeProfile = function() {
             badge.className = 'bg-amber-500/10 text-amber-600 text-[10px] font-bold px-2.5 py-1 rounded-full';
         }
     }
+
+    // Update Profile Header Card
+    const avatarLarge = document.getElementById('profile-avatar-large');
+    if (avatarLarge) {
+        avatarLarge.innerText = (profile.name || activeClient).split(' ').map(s => s[0]).join('').substring(0, 2).toUpperCase();
+    }
+
+    const nameLabel = document.getElementById('profile-name-label');
+    if (nameLabel) {
+        nameLabel.innerText = profile.name || activeClient;
+    }
+
+    const emailLabel = document.getElementById('profile-email-label');
+    if (emailLabel) {
+        const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
+        const found = clientsList.find(c => c.name === activeClient);
+        emailLabel.innerText = found ? found.email : `${(profile.name || activeClient).toLowerCase().replace(/\s+/g, '')}@email.com`;
+    }
+
+    const heightBadge = document.getElementById('profile-badge-height');
+    if (heightBadge) {
+        heightBadge.innerText = profile.height ? `${profile.height} cm` : '-- cm';
+    }
+
+    const weightBadge = document.getElementById('profile-badge-weight');
+    if (weightBadge) {
+        weightBadge.innerText = profile.weight ? `${profile.weight} kg` : '-- kg';
+    }
+
+    const goalBadge = document.getElementById('profile-badge-goal');
+    if (goalBadge) {
+        goalBadge.innerText = profile.goal || 'Weight Loss';
+    }
 };
 
 window.handleClientIntakeSubmit = function(e) {
@@ -3516,6 +3616,9 @@ window.handleClientIntakeSubmit = function(e) {
     // Refresh charts
     if (window.updateWeightTrendChart) window.updateWeightTrendChart();
     if (window.updateMeasurementsChart) window.updateMeasurementsChart();
+
+    // Reload the Profile Header card values
+    window.loadClientIntakeProfile();
 
     showToast('Saved Medical Intake & Health Profile!', 'success');
 };
