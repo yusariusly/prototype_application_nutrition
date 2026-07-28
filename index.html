@@ -92,42 +92,23 @@
       </script>
     <link href="/src/style.css" rel="stylesheet">
     <script>
-        // ===== BULLETPROOF MODAL OPEN/CLOSE =====
-        // This runs immediately in <head>, before anything else
-        function _showModal() {
-            try {
-                var m = document.getElementById('client-onboarding-modal');
-                if (!m) { setTimeout(_showModal, 100); return; }
-                m.style.display = 'flex';
-                m.classList.remove('hidden');
-                m.classList.add('flex');
-                console.log('[NutriFlow] Modal opened successfully');
-            } catch(e) { console.error('[NutriFlow] Error opening modal:', e); }
-        }
-        function _hideModal() {
-            var m = document.getElementById('client-onboarding-modal');
-            if (m) {
-                m.style.display = '';
-                m.classList.add('hidden');
-                m.classList.remove('flex');
+        // Inline helper to navigate to dedicated patient intake page
+        window.openOnboardingModal = function() {
+            if (window.navigateTo) {
+                window.navigateTo('patient-intake');
+            } else {
+                document.querySelectorAll('.view-section').forEach(function(sec) {
+                    sec.classList.add('hidden');
+                });
+                var sec = document.getElementById('view-patient-intake');
+                if (sec) sec.classList.remove('hidden');
             }
-        }
-        window.openOnboardingModal = function() { _showModal(); };
-        window.closeOnboardingModal = function() { _hideModal(); };
-
-        // Attach via event delegation on document (catches any button with data-action or id)
-        document.addEventListener('click', function(e) {
-            var t = e.target;
-            // Walk up to find the button (in case icon inside button was clicked)
-            while (t && t !== document) {
-                if (t.id === 'btn-patient-intake-form' || t.getAttribute('data-action') === 'open-intake') {
-                    e.preventDefault();
-                    _showModal();
-                    return;
-                }
-                t = t.parentElement;
+        };
+        window.closeOnboardingModal = function() {
+            if (window.navigateTo) {
+                window.navigateTo('profile');
             }
-        });
+        };
     </script>
 </head>
 <body class="bg-background text-on-background font-body-md min-h-screen flex flex-col antialiased">
@@ -770,7 +751,7 @@
                 
                 <!-- Action Button for Patient Data -->
                 <div class="z-10 shrink-0 w-full md:w-auto">
-                    <button id="btn-patient-intake-form" data-action="open-intake" onclick="_showModal(); return false;" class="w-full sm:w-auto bg-primary hover:bg-[#005321] text-white font-extrabold text-xs sm:text-sm px-6 py-3 rounded-2xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+                    <button id="btn-patient-intake-form" onclick="navigateTo('patient-intake')" class="w-full sm:w-auto bg-primary hover:bg-[#005321] text-white font-extrabold text-xs sm:text-sm px-6 py-3 rounded-2xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
                         <span class="material-symbols-outlined text-[18px]">assignment_ind</span> Patient Intake Form
                     </button>
                 </div>
@@ -867,6 +848,176 @@
                     </div>
                 </div>
             </div>
+        </section>
+
+        <!-- ==================== VIEW 5.5: DEDICATED PATIENT INTAKE FORM ==================== -->
+        <section id="view-patient-intake" class="view-section hidden flex flex-col gap-gutter">
+            <!-- Header banner with back button -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left pb-4 border-b border-outline-variant/30">
+                <div class="flex items-center gap-3">
+                    <button onclick="navigateTo('profile')" class="p-2.5 hover:bg-surface-container-low rounded-xl transition-all border border-outline-variant/30 text-on-surface-variant flex items-center justify-center cursor-pointer active:scale-95 shadow-sm bg-surface animate-pulse" title="Back to Profile">
+                        <span class="material-symbols-outlined text-lg">arrow_back</span>
+                    </button>
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-on-surface">Patient Medical Intake & Health Profile</h1>
+                        <p class="text-xs sm:text-sm text-on-surface-variant mt-0.5">Please provide complete and accurate details to customize your clinical nutrition program.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Intake Form Grid -->
+            <form id="dedicated-intake-form" onsubmit="handleDedicatedIntakeSubmit(event)" class="space-y-gutter max-w-4xl">
+                
+                <!-- Card 1: Personal & Bio Data -->
+                <div class="bg-surface-container-lowest rounded-3xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4 text-left">
+                    <h3 class="text-base sm:text-lg font-bold text-primary flex items-center gap-2 pb-2 border-b border-outline-variant/20">
+                        <span class="material-symbols-outlined">person</span> Personal & Biological Data
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        <div class="sm:col-span-2 md:col-span-1">
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Full Name</label>
+                            <input type="text" id="intake-page-name" required class="w-full rounded-xl border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-4 py-3 bg-surface font-semibold text-on-surface">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Birth Date</label>
+                            <input type="date" id="intake-page-dob" required class="w-full rounded-xl border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-4 py-3 bg-surface font-semibold text-on-surface">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Biological Sex</label>
+                            <select id="intake-page-sex" class="w-full rounded-xl border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-4 py-3 bg-surface font-bold text-on-surface">
+                                <option value="Female">Female</option>
+                                <option value="Male">Male</option>
+                                <option value="Other">Other / Rather Not Say</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Physical Metrics & Targets -->
+                <div class="bg-surface-container-lowest rounded-3xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4 text-left">
+                    <h3 class="text-base sm:text-lg font-bold text-primary flex items-center gap-2 pb-2 border-b border-outline-variant/20">
+                        <span class="material-symbols-outlined">straighten</span> Physical Metrics (Anthropometrics)
+                    </h3>
+                    
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-[10px] sm:text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Height (cm)</label>
+                            <input type="number" id="intake-page-height" required class="w-full rounded-xl border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-4 py-3 bg-surface font-bold text-center text-on-surface">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] sm:text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Current Weight (kg)</label>
+                            <input type="number" step="0.1" id="intake-page-weight" required class="w-full rounded-xl border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-4 py-3 bg-surface font-bold text-center text-on-surface">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] sm:text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Target Weight (kg)</label>
+                            <input type="number" step="0.1" id="intake-page-target-weight" required class="w-full rounded-xl border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-4 py-3 bg-surface font-bold text-center text-emerald-700">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Goals & Dietary Restrictions -->
+                <div class="bg-surface-container-lowest rounded-3xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4 text-left">
+                    <h3 class="text-base sm:text-lg font-bold text-primary flex items-center gap-2 pb-2 border-b border-outline-variant/20">
+                        <span class="material-symbols-outlined">flag</span> Focus Goals & Food Preferences
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Primary Health Focus</label>
+                            <select id="intake-page-goal" class="w-full rounded-xl border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-4 py-3 bg-surface font-bold text-on-surface">
+                                <option value="Weight Loss & Fat Reduction">Weight Loss & Fat Reduction</option>
+                                <option value="Muscle Building & Fitness">Muscle Building & Fitness</option>
+                                <option value="Diabetes & Cholesterol Care">Diabetes & Cholesterol Care</option>
+                                <option value="General Health Improvement">General Health Improvement</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Dietary Preference</label>
+                            <select id="intake-page-diet" class="w-full rounded-xl border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-4 py-3 bg-surface font-bold text-on-surface">
+                                <option value="None">Balanced / No Restriction</option>
+                                <option value="Halal">Halal</option>
+                                <option value="Vegetarian">Vegetarian</option>
+                                <option value="Vegan">Vegan</option>
+                                <option value="Keto">Keto / Low Carb</option>
+                                <option value="Low Sodium">Low Sodium (Darah Tinggi)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Allergies & Medical Conditions -->
+                <div class="bg-surface-container-lowest rounded-3xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4 text-left">
+                    <h3 class="text-base sm:text-lg font-bold text-primary flex items-center gap-2 pb-2 border-b border-outline-variant/20">
+                        <span class="material-symbols-outlined">medical_information</span> Health Risks, Allergies & Diseases
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Food Allergies & Intolerances</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs font-bold text-on-surface bg-surface p-4 rounded-xl border border-outline-variant/20">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="intake-page-allergies" value="Peanuts" class="rounded text-primary focus:ring-primary w-4 h-4"> Peanuts
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="intake-page-allergies" value="Seafood/Shellfish" class="rounded text-primary focus:ring-primary w-4 h-4"> Seafood
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="intake-page-allergies" value="Lactose/Dairy" class="rounded text-primary focus:ring-primary w-4 h-4"> Dairy / Milk
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="intake-page-allergies" value="Gluten/Wheat" class="rounded text-primary focus:ring-primary w-4 h-4"> Gluten
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="intake-page-allergies" value="Eggs" class="rounded text-primary focus:ring-primary w-4 h-4"> Eggs
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="intake-page-allergies" value="Soy" class="rounded text-primary focus:ring-primary w-4 h-4"> Soy
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Diagnosed Medical Conditions</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-bold text-on-surface bg-surface p-4 rounded-xl border border-outline-variant/20">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="intake-page-conditions" value="Diabetes Type 2" class="rounded text-primary focus:ring-primary w-4 h-4"> Diabetes Tipe 2
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="intake-page-conditions" value="Hypertension" class="rounded text-primary focus:ring-primary w-4 h-4"> Hipertensi
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="intake-page-conditions" value="High Cholesterol" class="rounded text-primary focus:ring-primary w-4 h-4"> Kolesterol Tinggi
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="intake-page-conditions" value="GERD/Maag" class="rounded text-primary focus:ring-primary w-4 h-4"> GERD / Asam Lambung
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 5: Notes & Medications -->
+                <div class="bg-surface-container-lowest rounded-3xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4 text-left">
+                    <h3 class="text-base sm:text-lg font-bold text-primary flex items-center gap-2 pb-2 border-b border-outline-variant/20">
+                        <span class="material-symbols-outlined">edit_note</span> Clinical Notes & Routine Medications
+                    </h3>
+                    <div>
+                        <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Describe symptoms, active medication dose, health constraints, etc.</label>
+                        <textarea id="intake-page-notes" rows="4" placeholder="e.g. Diagnosed with Diabetes Type 2 since 2024. Currently taking Metformin 500mg daily..." class="w-full rounded-xl border border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-4 py-3 bg-surface resize-none text-on-surface font-medium"></textarea>
+                    </div>
+                </div>
+
+                <!-- Form Action Buttons -->
+                <div class="flex items-center gap-4 pt-2">
+                    <button type="submit" class="bg-primary hover:bg-[#005321] text-white font-extrabold text-sm py-4 px-8 rounded-2xl shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-2">
+                        <span class="material-symbols-outlined">save</span> Save Patient Intake
+                    </button>
+                    <button type="button" onclick="navigateTo('profile')" class="bg-surface hover:bg-surface-container-low text-on-surface font-extrabold text-sm py-4 px-8 rounded-2xl shadow-sm border border-outline-variant/30 transition-all active:scale-95 cursor-pointer">
+                        Cancel
+                    </button>
+                </div>
+            </form>
         </section>
 
         <!-- ==================== VIEW 6: DEDICATED CHAT VIEW ==================== -->
@@ -1687,109 +1838,7 @@
                 </div>
             </div>
         </div>
-    <!-- New Patient Onboarding Intake Modal -->
-    <div id="client-onboarding-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-md hidden items-center justify-center p-4">
-        <div class="bg-white max-w-lg w-full rounded-3xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col text-slate-800 animate-fade-in max-h-[90vh]">
-            <!-- Header -->
-            <div class="bg-gradient-to-r from-primary to-secondary text-white p-5 flex justify-between items-center shrink-0">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-white/20 text-white flex items-center justify-center font-bold text-lg">📋</div>
-                    <div class="text-left">
-                        <h3 class="text-base font-bold">New Patient Health Intake</h3>
-                        <p class="text-[11px] text-white/80 font-medium" id="onboarding-modal-welcome">Welcome! Let's set up your profile for your specialist.</p>
-                    </div>
-                </div>
-                <button type="button" onclick="closeOnboardingModal()" class="text-white/70 hover:text-white cursor-pointer"><span class="material-symbols-outlined text-[20px]">close</span></button>
-            </div>
-
-            <!-- Form Body -->
-            <form onsubmit="handleOnboardingSubmit(event)" class="p-6 space-y-4 overflow-y-auto text-left">
-                <!-- Row 0: Name, DOB, Sex -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Full Name</label>
-                        <input type="text" id="onboard-name" required class="w-full rounded-xl border-slate-200 text-xs px-3 py-2 bg-slate-50 font-bold focus:border-primary">
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Birth Date</label>
-                            <input type="date" id="onboard-dob" class="w-full rounded-xl border-slate-200 text-xs px-2 py-2 bg-slate-50 font-bold focus:border-primary">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Sex</label>
-                            <select id="onboard-sex" class="w-full rounded-xl border-slate-200 text-xs px-2 py-2 bg-slate-50 font-bold focus:border-primary">
-                                <option value="Female">Female</option>
-                                <option value="Male">Male</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Row 1: Height, Weight & Target -->
-                <div class="grid grid-cols-3 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Height (cm)</label>
-                        <input type="number" id="onboard-height" required value="168" class="w-full rounded-xl border-slate-200 text-xs px-3 py-2 bg-slate-50 font-bold focus:border-primary text-center">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Weight (kg)</label>
-                        <input type="number" step="0.1" id="onboard-weight" required value="72.5" class="w-full rounded-xl border-slate-200 text-xs px-3 py-2 bg-slate-50 font-bold focus:border-primary text-center">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Target (kg)</label>
-                        <input type="number" step="0.1" id="onboard-target-weight" required value="65.0" class="w-full rounded-xl border-slate-200 text-xs px-3 py-2 bg-slate-50 font-bold focus:border-primary text-emerald-700 text-center">
-                    </div>
-                </div>
-
-                <!-- Goal & Diet -->
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Primary Goal</label>
-                        <select id="onboard-goal" class="w-full rounded-xl border-slate-200 text-xs px-3 py-2 bg-slate-50 font-bold focus:border-primary">
-                            <option value="Weight Loss & Fat Reduction">Weight Loss & Fat Reduction</option>
-                            <option value="Muscle Building & Fitness">Muscle Building & Fitness</option>
-                            <option value="Diabetes & Cholesterol Care">Diabetes & Cholesterol Care</option>
-                            <option value="General Health Improvement">General Health Improvement</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Dietary Preference</label>
-                        <select id="onboard-diet" class="w-full rounded-xl border-slate-200 text-xs px-3 py-2 bg-slate-50 font-bold focus:border-primary">
-                            <option value="Balanced / No Restrictions">Balanced / No Restrictions</option>
-                            <option value="Halal">Halal</option>
-                            <option value="Vegetarian">Vegetarian</option>
-                            <option value="Vegan">Vegan</option>
-                            <option value="Keto / Low-Carb">Keto / Low-Carb</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Food Allergies -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Food Allergies (Check All That Apply)</label>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-medium bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="onboard-allergy" value="Peanuts" class="rounded text-primary focus:ring-primary"> Peanuts</label>
-                        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="onboard-allergy" value="Seafood/Shellfish" class="rounded text-primary focus:ring-primary"> Seafood</label>
-                        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="onboard-allergy" value="Lactose/Dairy" class="rounded text-primary focus:ring-primary"> Dairy/Milk</label>
-                        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="onboard-allergy" value="Gluten/Wheat" class="rounded text-primary focus:ring-primary"> Gluten</label>
-                        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="onboard-allergy" value="Eggs" class="rounded text-primary focus:ring-primary"> Eggs</label>
-                        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="onboard-allergy" value="Soy" class="rounded text-primary focus:ring-primary"> Soy</label>
-                    </div>
-                </div>
-
-                <!-- Medical Conditions & Notes -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Medical Conditions or Notes for Dietitian</label>
-                    <textarea id="onboard-notes" rows="2" placeholder="e.g. History of GERD, taking Vitamin D supplements..." class="w-full rounded-xl border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary resize-none"></textarea>
-                </div>
-
-                <button type="submit" class="w-full bg-primary hover:bg-[#005321] text-white font-extrabold text-xs py-3 rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer">
-                    <span class="material-symbols-outlined text-[18px]">check_circle</span> Save Profile & Start My Journey
-                </button>
-            </form>
-        </div>
-    </div>
+    <!-- Removed onboarding modal and replaced with a dedicated page view -->
 
     <!-- Core App logic -->
     <script type="module" src="/src/main.js"></script>

@@ -1009,6 +1009,8 @@ window.navigateTo = function(viewId) {
     } else if (viewId === 'profile') {
         setTimeout(initProfileCharts, 50);
         if (window.loadClientIntakeProfile) window.loadClientIntakeProfile();
+    } else if (viewId === 'patient-intake') {
+        if (window.loadClientIntakeProfile) window.loadClientIntakeProfile();
     } else if (viewId === 'chat') {
         loadState();
         renderProgramChat();
@@ -3476,54 +3478,25 @@ window.loadClientIntakeProfile = function() {
         notes: ''
     });
 
-    // Populate inputs
-    const nameInput = document.getElementById('client-intake-name');
-    if (nameInput) nameInput.value = profile.name || activeClient;
+    // Populate dedicated page inputs
+    const setIntakeVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+    setIntakeVal('intake-page-name', profile.name || activeClient);
+    setIntakeVal('intake-page-dob', profile.dob || '');
+    setIntakeVal('intake-page-sex', profile.sex || 'Female');
+    setIntakeVal('intake-page-height', profile.height || '');
+    setIntakeVal('intake-page-weight', profile.weight || '');
+    setIntakeVal('intake-page-target-weight', profile.targetWeight || '');
+    setIntakeVal('intake-page-goal', profile.goal || 'Weight Loss & Fat Reduction');
+    setIntakeVal('intake-page-diet', profile.dietPref || 'None');
+    setIntakeVal('intake-page-notes', profile.notes || '');
 
-    const dobInput = document.getElementById('client-intake-dob');
-    if (dobInput) dobInput.value = profile.dob || '';
-
-    const sexSelect = document.getElementById('client-intake-sex');
-    if (sexSelect) sexSelect.value = profile.sex || 'Female';
-
-    const heightInput = document.getElementById('client-intake-height');
-    if (heightInput) heightInput.value = profile.height || '';
-
-    const weightInput = document.getElementById('client-intake-weight');
-    if (weightInput) weightInput.value = profile.weight || '';
-
-    const targetWeightInput = document.getElementById('client-intake-target-weight');
-    if (targetWeightInput) targetWeightInput.value = profile.targetWeight || '';
-
-    const goalSelect = document.getElementById('client-intake-goal');
-    if (goalSelect) goalSelect.value = profile.goal || 'Weight Loss & Fat Reduction';
-
-    const allergyCbs = document.querySelectorAll('input[name="client-allergies"]');
-    allergyCbs.forEach(cb => {
+    document.querySelectorAll('input[name="intake-page-allergies"]').forEach(cb => {
         cb.checked = profile.allergies && profile.allergies.includes(cb.value);
     });
 
-    const condCbs = document.querySelectorAll('input[name="client-conditions"]');
-    condCbs.forEach(cb => {
+    document.querySelectorAll('input[name="intake-page-conditions"]').forEach(cb => {
         cb.checked = profile.conditions && profile.conditions.includes(cb.value);
     });
-
-    const dietSelect = document.getElementById('client-diet-pref');
-    if (dietSelect) dietSelect.value = profile.dietPref || 'None';
-
-    const notesTa = document.getElementById('client-intake-notes');
-    if (notesTa) notesTa.value = profile.notes || '';
-
-    const badge = document.getElementById('intake-status-badge');
-    if (badge) {
-        if ((profile.allergies && profile.allergies.length) || (profile.conditions && profile.conditions.length) || profile.notes || profile.weight) {
-            badge.innerText = 'Completed';
-            badge.className = 'bg-primary/10 text-primary text-[10px] font-bold px-2.5 py-1 rounded-full';
-        } else {
-            badge.innerText = 'Pending';
-            badge.className = 'bg-amber-500/10 text-amber-600 text-[10px] font-bold px-2.5 py-1 rounded-full';
-        }
-    }
 
     // Update Profile Header Card
     const avatarLarge = document.getElementById('profile-avatar-large');
@@ -3559,25 +3532,29 @@ window.loadClientIntakeProfile = function() {
     }
 };
 
-window.handleClientIntakeSubmit = function(e) {
-    e.preventDefault();
+window.handleDedicatedIntakeSubmit = function(e) {
+    if (e) e.preventDefault();
     const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
 
-    const name = document.getElementById('client-intake-name').value;
-    const dob = document.getElementById('client-intake-dob').value;
-    const sex = document.getElementById('client-intake-sex').value;
-    const height = parseFloat(document.getElementById('client-intake-height').value) || 0;
-    const weight = parseFloat(document.getElementById('client-intake-weight').value) || 0;
-    const targetWeight = parseFloat(document.getElementById('client-intake-target-weight').value) || 0;
-    const goal = document.getElementById('client-intake-goal').value;
-    const dietPref = document.getElementById('client-diet-pref').value;
-    const notes = document.getElementById('client-intake-notes').value;
+    const name = document.getElementById('intake-page-name').value;
+    const dob = document.getElementById('intake-page-dob').value;
+    const sex = document.getElementById('intake-page-sex').value;
+    const height = parseFloat(document.getElementById('intake-page-height').value) || 0;
+    const weight = parseFloat(document.getElementById('intake-page-weight').value) || 0;
+    const targetWeight = parseFloat(document.getElementById('intake-page-target-weight').value) || 0;
+    const goal = document.getElementById('intake-page-goal').value;
+    const dietPref = document.getElementById('intake-page-diet').value;
+    const notes = document.getElementById('intake-page-notes').value;
 
-    const allergyCbs = document.querySelectorAll('input[name="client-allergies"]:checked');
-    const allergies = Array.from(allergyCbs).map(cb => cb.value);
+    const allergies = [];
+    document.querySelectorAll('input[name="intake-page-allergies"]:checked').forEach(cb => {
+        allergies.push(cb.value);
+    });
 
-    const condCbs = document.querySelectorAll('input[name="client-conditions"]:checked');
-    const conditions = Array.from(condCbs).map(cb => cb.value);
+    const conditions = [];
+    document.querySelectorAll('input[name="intake-page-conditions"]:checked').forEach(cb => {
+        conditions.push(cb.value);
+    });
 
     const profileData = { name, dob, sex, height, weight, targetWeight, goal, allergies, conditions, dietPref, notes };
     localStorage.setItem(`nutriflow_client_health_profile_${activeClient}`, JSON.stringify(profileData));
@@ -3585,6 +3562,10 @@ window.handleClientIntakeSubmit = function(e) {
     // Update active client logged name if modified
     if (name && name !== activeClient) {
         localStorage.setItem('nutriflow_client_logged_name', name);
+        const welcomeLabel = document.getElementById('client-welcome-name-label');
+        if (welcomeLabel) {
+            welcomeLabel.innerText = `Good morning, ${name.split(' ')[0]}!`;
+        }
     }
 
     // Also update nutriflow_client_intakes for compatibility
@@ -3614,25 +3595,21 @@ window.handleClientIntakeSubmit = function(e) {
         localStorage.setItem(`nutriflow_weight_history_${activeClient}`, JSON.stringify(weightHistory));
     }
 
-    // Refresh badge status
-    const badge = document.getElementById('intake-status-badge');
-    if (badge) {
-        badge.innerText = 'Completed';
-        badge.className = 'bg-primary/10 text-primary text-[10px] font-bold px-2.5 py-1 rounded-full';
-    }
-
-    // Hide dashboard warning banner
-    const banner = document.getElementById('onboarding-incomplete-banner');
-    if (banner) banner.classList.add('hidden');
-
     // Refresh charts
     if (window.updateWeightTrendChart) window.updateWeightTrendChart();
     if (window.updateMeasurementsChart) window.updateMeasurementsChart();
 
     // Reload the Profile Header card values
-    window.loadClientIntakeProfile();
+    if (window.loadClientIntakeProfile) window.loadClientIntakeProfile();
 
-    showToast('Saved Medical Intake & Health Profile!', 'success');
+    // Hide dashboard warning banner
+    const banner = document.getElementById('onboarding-incomplete-banner');
+    if (banner) banner.classList.add('hidden');
+
+    showToast('Saved Medical Intake & Health Profile successfully!', 'success');
+    
+    // Redirect back to profile page
+    navigateTo('profile');
 };
 
 window.openRegistrationModal = function() {
