@@ -80,12 +80,55 @@
                 <input type="email" id="reg-email" required placeholder="alex.tan@email.com" class="w-full rounded-xl border-slate-200 text-xs px-3 py-2.5 focus:border-primary focus:ring-primary bg-slate-50">
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Select Your Specialist / Dietitian</label>
-                <select id="reg-therapist" class="w-full rounded-xl border-slate-200 text-xs px-3 py-2.5 focus:border-primary focus:ring-primary bg-slate-50 font-semibold text-slate-800">
-                    <option value="Dr. Hasan">👨‍⚕️ Dr. Hasan — Weight Management & Fat Loss (4.9★)</option>
-                    <option value="Dr. Amanda">👩‍⚕️ Dr. Amanda — Sports Nutrition & Muscle Building (4.8★)</option>
-                    <option value="Dr. Eleanor Vance, RD">👩‍⚕️ Dr. Eleanor Vance, RD — Clinical Care & Diabetes (4.9★)</option>
-                </select>
+                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Assigned Specialist / Dietitian</label>
+                <input type="hidden" id="reg-therapist" value="Dr. Hasan">
+                
+                <div class="space-y-2" id="spec-select-container">
+                    <!-- Option 1: Dr. Hasan -->
+                    <div onclick="selectRegisterSpecialist('Dr. Hasan')" id="spec-opt-Dr. Hasan" class="spec-reg-opt border-2 border-primary bg-emerald-50/50 rounded-xl p-2.5 cursor-pointer flex items-center justify-between transition-all shadow-sm">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-full bg-primary text-white font-bold text-xs flex items-center justify-center shrink-0">DH</div>
+                            <div class="text-left">
+                                <h4 class="font-bold text-xs text-slate-800 leading-tight">Dr. Hasan</h4>
+                                <span class="text-[10px] text-slate-500 font-medium block">Weight Loss & Wellness</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">★ 4.9</span>
+                            <span class="material-symbols-outlined text-primary text-lg check-icon">check_circle</span>
+                        </div>
+                    </div>
+
+                    <!-- Option 2: Dr. Amanda -->
+                    <div onclick="selectRegisterSpecialist('Dr. Amanda')" id="spec-opt-Dr. Amanda" class="spec-reg-opt border border-slate-200 bg-white rounded-xl p-2.5 cursor-pointer flex items-center justify-between hover:border-slate-300 transition-all">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-full bg-teal-100 text-teal-800 font-bold text-xs flex items-center justify-center shrink-0">DA</div>
+                            <div class="text-left">
+                                <h4 class="font-bold text-xs text-slate-800 leading-tight">Dr. Amanda</h4>
+                                <span class="text-[10px] text-slate-500 font-medium block">Sports & Muscle Building</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">★ 4.8</span>
+                            <span class="material-symbols-outlined text-slate-300 text-lg check-icon hidden">check_circle</span>
+                        </div>
+                    </div>
+
+                    <!-- Option 3: Dr. Eleanor Vance -->
+                    <div onclick="selectRegisterSpecialist('Dr. Eleanor Vance, RD')" id="spec-opt-Dr. Eleanor Vance, RD" class="spec-reg-opt border border-slate-200 bg-white rounded-xl p-2.5 cursor-pointer flex items-center justify-between hover:border-slate-300 transition-all">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-800 font-bold text-xs flex items-center justify-center shrink-0">EV</div>
+                            <div class="text-left">
+                                <h4 class="font-bold text-xs text-slate-800 leading-tight">Dr. Eleanor Vance, RD</h4>
+                                <span class="text-[10px] text-slate-500 font-medium block">Clinical Care & Diabetes</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">★ 4.9</span>
+                            <span class="material-symbols-outlined text-slate-300 text-lg check-icon hidden">check_circle</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <button type="submit" class="w-full bg-primary hover:bg-[#005321] text-white font-bold text-xs py-3 rounded-xl transition-all shadow-md mt-2 flex items-center justify-center gap-1 cursor-pointer">
@@ -95,6 +138,25 @@
     </div>
 
     <script>
+        function selectRegisterSpecialist(name) {
+            document.querySelectorAll('.spec-reg-opt').forEach(el => {
+                el.className = 'spec-reg-opt border border-slate-200 bg-white rounded-xl p-2.5 cursor-pointer flex items-center justify-between hover:border-slate-300 transition-all';
+                const icon = el.querySelector('.check-icon');
+                if (icon) {
+                    icon.className = 'material-symbols-outlined text-slate-300 text-lg check-icon hidden';
+                }
+            });
+            const target = document.getElementById(`spec-opt-${name}`);
+            if (target) {
+                target.className = 'spec-reg-opt border-2 border-primary bg-emerald-50/50 rounded-xl p-2.5 cursor-pointer flex items-center justify-between transition-all shadow-sm';
+                const icon = target.querySelector('.check-icon');
+                if (icon) {
+                    icon.className = 'material-symbols-outlined text-primary text-lg check-icon';
+                }
+            }
+            document.getElementById('reg-therapist').value = name;
+        }
+
         function switchLoginTab(tab) {
             const formLogin = document.getElementById('form-login');
             const formRegister = document.getElementById('form-register');
