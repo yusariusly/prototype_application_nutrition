@@ -643,24 +643,6 @@ window.handleClientSignOut = function() {
     }, 400);
 };
 
-// ==================== APP INITS ====================
-document.addEventListener('DOMContentLoaded', () => {
-    checkClientSession();
-    loadState();
-    
-    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
-    const welcomeLabel = document.getElementById('client-welcome-name-label');
-    if (welcomeLabel) {
-        welcomeLabel.innerText = `Good morning, ${activeClient.split(' ')[0]}!`;
-    }
-
-    if (localStorage.getItem('nutriflow_trigger_onboarding') === 'true') {
-        localStorage.removeItem('nutriflow_trigger_onboarding');
-        setTimeout(() => {
-            openOnboardingModal();
-        }, 500);
-    }
-
 window.openOnboardingModal = function() {
     const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Patient';
     const welcomeEl = document.getElementById('onboarding-modal-welcome');
@@ -712,6 +694,24 @@ window.handleOnboardingSubmit = function(e) {
     closeOnboardingModal();
     showToast(`Health Profile Saved! Welcome to NutriFlow, ${activeClient.split(' ')[0]}.`, 'success');
 };
+
+// ==================== APP INITS ====================
+document.addEventListener('DOMContentLoaded', () => {
+    checkClientSession();
+    loadState();
+    
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const welcomeLabel = document.getElementById('client-welcome-name-label');
+    if (welcomeLabel) {
+        welcomeLabel.innerText = `Good morning, ${activeClient.split(' ')[0]}!`;
+    }
+
+    if (localStorage.getItem('nutriflow_trigger_onboarding') === 'true') {
+        localStorage.removeItem('nutriflow_trigger_onboarding');
+        setTimeout(() => {
+            openOnboardingModal();
+        }, 500);
+    }
 
     // Update dedicated practitioner card
     const clients = JSON.parse(localStorage.getItem('nutriflow_clients')) || [
