@@ -80,8 +80,12 @@
                 <input type="email" id="reg-email" required placeholder="alex.tan@email.com" class="w-full rounded-xl border-slate-200 text-xs px-3 py-2.5 focus:border-primary focus:ring-primary bg-slate-50">
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Password</label>
-                <input type="password" id="reg-password" required placeholder="Create password" value="password" class="w-full rounded-xl border-slate-200 text-xs px-3 py-2.5 focus:border-primary focus:ring-primary bg-slate-50">
+                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Select Your Specialist / Dietitian</label>
+                <select id="reg-therapist" class="w-full rounded-xl border-slate-200 text-xs px-3 py-2.5 focus:border-primary focus:ring-primary bg-slate-50 font-semibold text-slate-800">
+                    <option value="Dr. Hasan">👨‍⚕️ Dr. Hasan — Weight Management & Fat Loss (4.9★)</option>
+                    <option value="Dr. Amanda">👩‍⚕️ Dr. Amanda — Sports Nutrition & Muscle Building (4.8★)</option>
+                    <option value="Dr. Eleanor Vance, RD">👩‍⚕️ Dr. Eleanor Vance, RD — Clinical Care & Diabetes (4.9★)</option>
+                </select>
             </div>
 
             <button type="submit" class="w-full bg-primary hover:bg-[#005321] text-white font-bold text-xs py-3 rounded-xl transition-all shadow-md mt-2 flex items-center justify-center gap-1 cursor-pointer">
@@ -138,7 +142,7 @@
             e.preventDefault();
             const name = document.getElementById('reg-name').value;
             const email = document.getElementById('reg-email').value;
-            const password = document.getElementById('reg-password').value;
+            const chosenTherapist = document.getElementById('reg-therapist')?.value || 'Dr. Hasan';
 
             if (!name || !email) return;
 
@@ -148,7 +152,7 @@
                 id: `pat-${Date.now()}`,
                 name: name,
                 email: email,
-                therapist: 'Dr. Hasan',
+                therapist: chosenTherapist,
                 goal: 'Health Improvement',
                 compliance: 100,
                 registered: true
