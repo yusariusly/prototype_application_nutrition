@@ -679,6 +679,16 @@ window.handleClientSignOut = function() {
 
 window.openOnboardingModal = function() {
     const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Patient';
+
+    // Show modal FIRST so DOM elements are accessible
+    const modal = document.getElementById('client-onboarding-modal');
+    if (!modal) {
+        console.error('[NutriFlow] client-onboarding-modal not found in DOM!');
+        return;
+    }
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
     const welcomeEl = document.getElementById('onboarding-modal-welcome');
     if (welcomeEl) {
         welcomeEl.innerText = `Welcome ${activeClient}! Let's set up your profile for your specialist.`;
@@ -714,27 +724,23 @@ window.openOnboardingModal = function() {
         goal: 'Weight Loss & Fat Reduction', allergies: [], conditions: [], dietPref: 'None', notes: ''
     });
 
-    // Populate modal inputs
-    if (document.getElementById('onboard-name')) document.getElementById('onboard-name').value = profile.name || activeClient;
-    if (document.getElementById('onboard-dob')) document.getElementById('onboard-dob').value = profile.dob || '';
-    if (document.getElementById('onboard-sex')) document.getElementById('onboard-sex').value = profile.sex || 'Female';
-    if (document.getElementById('onboard-height')) document.getElementById('onboard-height').value = profile.height || '';
-    if (document.getElementById('onboard-weight')) document.getElementById('onboard-weight').value = profile.weight || '';
-    if (document.getElementById('onboard-target-weight')) document.getElementById('onboard-target-weight').value = profile.targetWeight || '';
-    if (document.getElementById('onboard-goal')) document.getElementById('onboard-goal').value = profile.goal || 'Weight Loss & Fat Reduction';
-    if (document.getElementById('onboard-diet')) document.getElementById('onboard-diet').value = profile.dietPref || 'None';
-    if (document.getElementById('onboard-notes')) document.getElementById('onboard-notes').value = profile.notes || '';
+    // Populate modal inputs (modal is now visible so elements exist)
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+    setVal('onboard-name', profile.name || activeClient);
+    setVal('onboard-dob', profile.dob || '');
+    setVal('onboard-height', profile.height || '');
+    setVal('onboard-weight', profile.weight || '');
+    setVal('onboard-target-weight', profile.targetWeight || '');
+    setVal('onboard-goal', profile.goal || 'Weight Loss & Fat Reduction');
+    setVal('onboard-diet', profile.dietPref || 'None');
+    setVal('onboard-notes', profile.notes || '');
 
-    // Checkboxes
+    const sexEl = document.getElementById('onboard-sex');
+    if (sexEl) sexEl.value = profile.sex || 'Female';
+
     document.querySelectorAll('input[name="onboard-allergy"]').forEach(cb => {
         cb.checked = profile.allergies && profile.allergies.includes(cb.value);
     });
-
-    const modal = document.getElementById('client-onboarding-modal');
-    if (modal) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
 };
 
 window.closeOnboardingModal = function() {

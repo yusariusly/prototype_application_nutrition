@@ -92,13 +92,13 @@
       </script>
     <link href="/src/style.css" rel="stylesheet">
     <script>
-        // Inline fallback script to make sure clicking works immediately
+        // Inline helper to open/close onboarding modal - delegates to main.js when ready
+        window._pendingOpenModal = false;
         window.openOnboardingModal = function() {
             const modal = document.getElementById('client-onboarding-modal');
-            if (modal) {
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-            }
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
         };
         window.closeOnboardingModal = function() {
             const modal = document.getElementById('client-onboarding-modal');
