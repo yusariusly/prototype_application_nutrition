@@ -752,18 +752,80 @@
                         </div>
 
                         <form id="client-intake-form" onsubmit="handleClientIntakeSubmit(event)" class="space-y-4">
+                            <!-- Basic Bio Row -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+                                <div>
+                                    <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Full Name</label>
+                                    <input type="text" id="client-intake-name" required class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-xs px-3 py-2 bg-surface text-on-surface font-semibold">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Birth Date</label>
+                                        <input type="date" id="client-intake-dob" class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-xs px-2 py-2 bg-surface text-on-surface font-semibold">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Sex</label>
+                                        <select id="client-intake-sex" class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-xs px-2 py-2 bg-surface text-on-surface font-semibold">
+                                            <option value="Female">Female</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Anthropometrics Row -->
+                            <div class="grid grid-cols-3 gap-2.5 text-left">
+                                <div>
+                                    <label class="block text-[10px] sm:text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Height (cm)</label>
+                                    <input type="number" id="client-intake-height" required value="168" class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-xs px-3 py-2 bg-surface text-on-surface font-bold text-center">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] sm:text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Weight (kg)</label>
+                                    <input type="number" step="0.1" id="client-intake-weight" required value="72.5" class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-xs px-3 py-2 bg-surface text-on-surface font-bold text-center">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] sm:text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Target (kg)</label>
+                                    <input type="number" step="0.1" id="client-intake-target-weight" required value="65.0" class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-xs px-3 py-2 bg-surface text-emerald-700 font-bold text-center">
+                                </div>
+                            </div>
+
+                            <!-- Goals & Diet Row -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+                                <div>
+                                    <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Primary Health Goal</label>
+                                    <select id="client-intake-goal" class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-xs px-3 py-2 bg-surface font-semibold text-on-surface">
+                                        <option value="Weight Loss & Fat Reduction">Weight Loss & Fat Reduction</option>
+                                        <option value="Muscle Building & Fitness">Muscle Building & Fitness</option>
+                                        <option value="Diabetes & Cholesterol Care">Diabetes & Cholesterol Care</option>
+                                        <option value="General Health Improvement">General Health Improvement</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Dietary Preference</label>
+                                    <select id="client-diet-pref" class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-xs px-3 py-2 bg-surface font-semibold text-on-surface">
+                                        <option value="None">Balanced / No Restriction</option>
+                                        <option value="Halal">Halal</option>
+                                        <option value="Vegetarian">Vegetarian</option>
+                                        <option value="Vegan">Vegan</option>
+                                        <option value="Keto">Keto / Low Carb</option>
+                                        <option value="Low Sodium">Low Sodium (Darah Tinggi)</option>
+                                    </select>
+                                </div>
+                            </div>
+
                             <!-- Food Allergies -->
-                            <div>
+                            <div class="text-left">
                                 <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Food Allergies & Intolerances</label>
-                                <div class="grid grid-cols-2 gap-2 text-xs font-medium text-on-surface">
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-medium text-on-surface bg-surface p-2.5 rounded-lg border border-outline-variant/20">
                                     <label class="flex items-center gap-1.5 cursor-pointer">
                                         <input type="checkbox" name="client-allergies" value="Peanuts" class="rounded text-primary focus:ring-primary"> Peanuts
                                     </label>
                                     <label class="flex items-center gap-1.5 cursor-pointer">
-                                        <input type="checkbox" name="client-allergies" value="Seafood/Shellfish" class="rounded text-primary focus:ring-primary"> Seafood / Shellfish
+                                        <input type="checkbox" name="client-allergies" value="Seafood/Shellfish" class="rounded text-primary focus:ring-primary"> Seafood
                                     </label>
                                     <label class="flex items-center gap-1.5 cursor-pointer">
-                                        <input type="checkbox" name="client-allergies" value="Lactose/Dairy" class="rounded text-primary focus:ring-primary"> Lactose / Dairy
+                                        <input type="checkbox" name="client-allergies" value="Lactose/Dairy" class="rounded text-primary focus:ring-primary"> Dairy / Milk
                                     </label>
                                     <label class="flex items-center gap-1.5 cursor-pointer">
                                         <input type="checkbox" name="client-allergies" value="Gluten/Wheat" class="rounded text-primary focus:ring-primary"> Gluten / Wheat
@@ -778,9 +840,9 @@
                             </div>
 
                             <!-- Medical Conditions -->
-                            <div>
+                            <div class="text-left">
                                 <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Medical Conditions</label>
-                                <div class="grid grid-cols-2 gap-2 text-xs font-medium text-on-surface">
+                                <div class="grid grid-cols-2 gap-2 text-xs font-medium text-on-surface bg-surface p-2.5 rounded-lg border border-outline-variant/20">
                                     <label class="flex items-center gap-1.5 cursor-pointer">
                                         <input type="checkbox" name="client-conditions" value="Diabetes Type 2" class="rounded text-primary focus:ring-primary"> Diabetes Tipe 2
                                     </label>
@@ -796,21 +858,8 @@
                                 </div>
                             </div>
 
-                            <!-- Dietary Preference -->
-                            <div>
-                                <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Dietary Preference</label>
-                                <select id="client-diet-pref" class="w-full rounded-lg border border-outline-variant/40 focus:border-primary focus:ring-primary text-xs px-3 py-2 bg-surface font-semibold text-on-surface">
-                                    <option value="None">Balanced / No Restriction</option>
-                                    <option value="Halal">Halal</option>
-                                    <option value="Vegetarian">Vegetarian</option>
-                                    <option value="Vegan">Vegan</option>
-                                    <option value="Keto">Keto / Low Carb</option>
-                                    <option value="Low Sodium">Low Sodium (Darah Tinggi)</option>
-                                </select>
-                            </div>
-
                             <!-- Notes / Medications -->
-                            <div>
+                            <div class="text-left">
                                 <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Notes & Medications</label>
                                 <textarea id="client-intake-notes" rows="2" placeholder="e.g. Taking Metformin, allergic to penicillin..." class="w-full rounded-lg border border-outline-variant/40 focus:border-primary focus:ring-primary text-xs px-3 py-2 bg-surface resize-none"></textarea>
                             </div>

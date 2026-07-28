@@ -3335,18 +3335,89 @@ window.loadClientIntakeProfile = function() {
     const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
     const isSeedClient = ['Sarah Jenkins', 'Marcus Reid', 'Elena Lopez'].includes(activeClient);
     
+    const getSeedProfile = (client) => {
+        if (client === 'Sarah Jenkins') {
+            return {
+                name: 'Sarah Jenkins',
+                dob: '1990-04-12',
+                sex: 'Female',
+                height: 165,
+                weight: 72.5,
+                targetWeight: 65.0,
+                goal: 'Weight Loss & Fat Reduction',
+                allergies: ['Peanuts', 'Seafood/Shellfish'],
+                conditions: ['Diabetes Type 2'],
+                dietPref: 'Halal',
+                notes: 'Pre-diabetic management, allergic to peanuts.'
+            };
+        } else if (client === 'Marcus Reid') {
+            return {
+                name: 'Marcus Reid',
+                dob: '1988-11-23',
+                sex: 'Male',
+                height: 182,
+                weight: 85.0,
+                targetWeight: 88.0,
+                goal: 'Muscle Building & Fitness',
+                allergies: [],
+                conditions: ['High Cholesterol'],
+                dietPref: 'Keto',
+                notes: 'Focus on clean high-protein bulking.'
+            };
+        } else if (client === 'Elena Lopez') {
+            return {
+                name: 'Elena Lopez',
+                dob: '1993-08-04',
+                sex: 'Female',
+                height: 160,
+                weight: 58.0,
+                targetWeight: 55.0,
+                goal: 'General Health Improvement',
+                allergies: ['Lactose/Dairy'],
+                conditions: ['GERD/Maag'],
+                dietPref: 'Vegetarian',
+                notes: 'Frequent bloating, looking for gut-friendly diet.'
+            };
+        }
+        return null;
+    };
+
     const rawData = localStorage.getItem(`nutriflow_client_health_profile_${activeClient}`);
-    const profile = rawData ? JSON.parse(rawData) : (isSeedClient ? {
-        allergies: ['Peanuts', 'Seafood/Shellfish'],
-        conditions: ['Diabetes Type 2'],
-        dietPref: 'Halal',
-        notes: 'Pre-diabetic management, allergic to peanuts.'
-    } : {
+    const profile = rawData ? JSON.parse(rawData) : (isSeedClient ? getSeedProfile(activeClient) : {
+        name: activeClient,
+        dob: '',
+        sex: 'Female',
+        height: '',
+        weight: '',
+        targetWeight: '',
+        goal: 'Weight Loss & Fat Reduction',
         allergies: [],
         conditions: [],
         dietPref: 'None',
         notes: ''
     });
+
+    // Populate inputs
+    const nameInput = document.getElementById('client-intake-name');
+    if (nameInput) nameInput.value = profile.name || activeClient;
+
+    const dobInput = document.getElementById('client-intake-dob');
+    if (dobInput) dobInput.value = profile.dob || '';
+
+    const sexSelect = document.getElementById('client-intake-sex');
+    if (sexSelect) sexSelect.value = profile.sex || 'Female';
+
+    const heightInput = document.getElementById('client-intake-height');
+    if (heightInput) heightInput.value = profile.height || '';
+
+    const weightInput = document.getElementById('client-intake-weight');
+    if (weightInput) weightInput.value = profile.weight || '';
+
+    const targetWeightInput = document.getElementById('client-intake-target-weight');
+    if (targetWeightInput) targetWeightInput.value = profile.targetWeight || '';
+
+    const goalSelect = document.getElementById('client-intake-goal');
+    if (goalSelect) goalSelect.value = profile.goal || 'Weight Loss & Fat Reduction';
 
     const allergyCbs = document.querySelectorAll('input[name="client-allergies"]');
     allergyCbs.forEach(cb => {
@@ -3366,7 +3437,7 @@ window.loadClientIntakeProfile = function() {
 
     const badge = document.getElementById('intake-status-badge');
     if (badge) {
-        if ((profile.allergies && profile.allergies.length) || (profile.conditions && profile.conditions.length) || profile.notes) {
+        if ((profile.allergies && profile.allergies.length) || (profile.conditions && profile.conditions.length) || profile.notes || profile.weight) {
             badge.innerText = 'Completed';
             badge.className = 'bg-primary/10 text-primary text-[10px] font-bold px-2.5 py-1 rounded-full';
         } else {
@@ -3379,30 +3450,57 @@ window.loadClientIntakeProfile = function() {
 window.handleClientIntakeSubmit = function(e) {
     e.preventDefault();
     const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+
+    const name = document.getElementById('client-intake-name').value;
+    const dob = document.getElementById('client-intake-dob').value;
+    const sex = document.getElementById('client-intake-sex').value;
+    const height = parseFloat(document.getElementById('client-intake-height').value) || 0;
+    const weight = parseFloat(document.getElementById('client-intake-weight').value) || 0;
+    const targetWeight = parseFloat(document.getElementById('client-intake-target-weight').value) || 0;
+    const goal = document.getElementById('client-intake-goal').value;
+    const dietPref = document.getElementById('client-diet-pref').value;
+    const notes = document.getElementById('client-intake-notes').value;
+
     const allergyCbs = document.querySelectorAll('input[name="client-allergies"]:checked');
     const allergies = Array.from(allergyCbs).map(cb => cb.value);
 
     const condCbs = document.querySelectorAll('input[name="client-conditions"]:checked');
     const conditions = Array.from(condCbs).map(cb => cb.value);
 
-    const dietPref = document.getElementById('client-diet-pref').value;
-    const notes = document.getElementById('client-intake-notes').value;
-
-    const profileData = { allergies, conditions, dietPref, notes };
+    const profileData = { name, dob, sex, height, weight, targetWeight, goal, allergies, conditions, dietPref, notes };
     localStorage.setItem(`nutriflow_client_health_profile_${activeClient}`, JSON.stringify(profileData));
 
-    // Also update nutriflow_client_intakes for banner detection compatibility
+    // Update active client logged name if modified
+    if (name && name !== activeClient) {
+        localStorage.setItem('nutriflow_client_logged_name', name);
+    }
+
+    // Also update nutriflow_client_intakes for compatibility
     const intakeMap = JSON.parse(localStorage.getItem('nutriflow_client_intakes') || '{}');
     intakeMap[activeClient] = {
-        weight: 0,
-        targetWeight: 0,
-        goal: 'Health Improvement',
+        weight: weight,
+        targetWeight: targetWeight,
+        goal: goal,
         diet: dietPref,
         allergies: allergies,
         notes: notes,
         updatedAt: new Date().toISOString()
     };
     localStorage.setItem('nutriflow_client_intakes', JSON.stringify(intakeMap));
+
+    // Update weight history with the submitted weight
+    if (weight > 0) {
+        let weightHistory = JSON.parse(localStorage.getItem(`nutriflow_weight_history_${activeClient}`)) || [];
+        const dateStr = new Date().toLocaleDateString('en-US', { month: 'short' });
+        const existingEntry = weightHistory.find(h => h.month === dateStr);
+        if (existingEntry) {
+            existingEntry.weight = weight;
+        } else {
+            weightHistory.push({ month: dateStr, weight: weight });
+        }
+        state.profileStats.weightHistory = weightHistory;
+        localStorage.setItem(`nutriflow_weight_history_${activeClient}`, JSON.stringify(weightHistory));
+    }
 
     // Refresh badge status
     const badge = document.getElementById('intake-status-badge');
@@ -3414,6 +3512,10 @@ window.handleClientIntakeSubmit = function(e) {
     // Hide dashboard warning banner
     const banner = document.getElementById('onboarding-incomplete-banner');
     if (banner) banner.classList.add('hidden');
+
+    // Refresh charts
+    if (window.updateWeightTrendChart) window.updateWeightTrendChart();
+    if (window.updateMeasurementsChart) window.updateMeasurementsChart();
 
     showToast('Saved Medical Intake & Health Profile!', 'success');
 };
