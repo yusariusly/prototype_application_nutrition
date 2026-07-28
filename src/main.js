@@ -3478,7 +3478,7 @@ window.loadClientIntakeProfile = function() {
         notes: ''
     });
 
-    // Populate dedicated page inputs
+    // Populate EDIT form inputs
     const setIntakeVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
     setIntakeVal('intake-page-name', profile.name || activeClient);
     setIntakeVal('intake-page-dob', profile.dob || '');
@@ -3497,6 +3497,31 @@ window.loadClientIntakeProfile = function() {
     document.querySelectorAll('input[name="intake-page-conditions"]').forEach(cb => {
         cb.checked = profile.conditions && profile.conditions.includes(cb.value);
     });
+
+    // Populate VIEW mode read-only text fields
+    const setText = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val || '—'; };
+    setText('view-name', profile.name || activeClient);
+    setText('view-dob', profile.dob ? new Date(profile.dob).toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'}) : null);
+    setText('view-sex', profile.sex);
+    setText('view-height', profile.height ? `${profile.height} cm` : null);
+    setText('view-weight', profile.weight ? `${profile.weight} kg` : null);
+    setText('view-target-weight', profile.targetWeight ? `${profile.targetWeight} kg` : null);
+    setText('view-goal', profile.goal);
+    setText('view-diet', profile.dietPref === 'None' ? 'Balanced / No Restriction' : profile.dietPref);
+    setText('view-notes', profile.notes);
+
+    // Render allergy & condition badges
+    const renderBadges = (containerId, items, colorClass) => {
+        const el = document.getElementById(containerId);
+        if (!el) return;
+        if (!items || items.length === 0) {
+            el.innerHTML = '<span class="text-xs text-on-surface-variant italic">None reported</span>';
+            return;
+        }
+        el.innerHTML = items.map(item => `<span class="${colorClass} text-xs font-bold px-3 py-1 rounded-full">${item}</span>`).join('');
+    };
+    renderBadges('view-allergies', profile.allergies, 'bg-amber-100 text-amber-800');
+    renderBadges('view-conditions', profile.conditions, 'bg-red-100 text-red-700');
 
     // Update Profile Header Card
     const avatarLarge = document.getElementById('profile-avatar-large');
@@ -3517,19 +3542,45 @@ window.loadClientIntakeProfile = function() {
     }
 
     const heightBadge = document.getElementById('profile-badge-height');
-    if (heightBadge) {
-        heightBadge.innerText = profile.height ? `${profile.height} cm` : '-- cm';
-    }
+    if (heightBadge) heightBadge.innerText = profile.height ? `${profile.height} cm` : '-- cm';
 
     const weightBadge = document.getElementById('profile-badge-weight');
-    if (weightBadge) {
-        weightBadge.innerText = profile.weight ? `${profile.weight} kg` : '-- kg';
-    }
+    if (weightBadge) weightBadge.innerText = profile.weight ? `${profile.weight} kg` : '-- kg';
 
     const goalBadge = document.getElementById('profile-badge-goal');
-    if (goalBadge) {
-        goalBadge.innerText = profile.goal || 'Weight Loss';
+    if (goalBadge) goalBadge.innerText = profile.goal || 'Weight Loss';
+
+    // Auto toggle mode based on whether profile has been created yet
+    const hasSavedIntake = !!rawData;
+    if (!hasSavedIntake && !isSeedClient) {
+        if (window.openIntakeEditMode) window.openIntakeEditMode();
+    } else {
+        if (window.closeIntakeEditMode) window.closeIntakeEditMode();
     }
+};
+
+// Open intake edit mode — show form, hide view panel
+window.openIntakeEditMode = function() {
+    const viewPanel = document.getElementById('intake-view-panel');
+    const editPanel = document.getElementById('intake-edit-panel');
+    const editBtn = document.getElementById('intake-edit-btn');
+    const subtitle = document.getElementById('intake-page-subtitle');
+    if (viewPanel) viewPanel.classList.add('hidden');
+    if (editPanel) editPanel.classList.remove('hidden');
+    if (editBtn) editBtn.classList.add('hidden');
+    if (subtitle) subtitle.innerText = 'Edit and update your health profile below.';
+};
+
+// Close edit mode — show view panel, hide form
+window.closeIntakeEditMode = function() {
+    const viewPanel = document.getElementById('intake-view-panel');
+    const editPanel = document.getElementById('intake-edit-panel');
+    const editBtn = document.getElementById('intake-edit-btn');
+    const subtitle = document.getElementById('intake-page-subtitle');
+    if (viewPanel) viewPanel.classList.remove('hidden');
+    if (editPanel) editPanel.classList.add('hidden');
+    if (editBtn) editBtn.classList.remove('hidden');
+    if (subtitle) subtitle.innerText = 'View your registered health data.';
 };
 
 window.handleDedicatedIntakeSubmit = function(e) {
@@ -3606,10 +3657,10 @@ window.handleDedicatedIntakeSubmit = function(e) {
     const banner = document.getElementById('onboarding-incomplete-banner');
     if (banner) banner.classList.add('hidden');
 
-    showToast('Saved Medical Intake & Health Profile successfully!', 'success');
+    showToast('Health profile saved successfully!', 'success');
     
-    // Redirect back to profile page
-    navigateTo('profile');
+    // Switch back to view mode (don't navigate away)
+    if (window.closeIntakeEditMode) window.closeIntakeEditMode();
 };
 
 window.openRegistrationModal = function() {

@@ -850,26 +850,123 @@
             </div>
         </section>
 
-        <!-- ==================== VIEW 5.5: DEDICATED PATIENT INTAKE FORM ==================== -->
+        <!-- ==================== VIEW 5.5: PATIENT INTAKE — VIEW & EDIT MODE ==================== -->
         <section id="view-patient-intake" class="view-section hidden flex flex-col gap-4">
 
-
-            <!-- Header -->
-            <div class="flex items-center gap-3 text-left">
-                <button onclick="navigateTo('profile')" id="intake-back-btn" class="p-2.5 hover:bg-surface-container-low rounded-xl transition-all border border-outline-variant/30 text-on-surface-variant flex items-center justify-center cursor-pointer active:scale-95 shadow-sm bg-surface" title="Back to Profile">
-                    <span class="material-symbols-outlined text-lg">arrow_back</span>
+            <!-- Page Header -->
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <button onclick="navigateTo('profile')" class="p-2.5 hover:bg-surface-container-low rounded-xl transition-all border border-outline-variant/30 text-on-surface-variant flex items-center justify-center cursor-pointer active:scale-95 shadow-sm bg-surface">
+                        <span class="material-symbols-outlined text-lg">arrow_back</span>
+                    </button>
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-black tracking-tight text-on-surface">Patient Intake & Health Profile</h1>
+                        <p id="intake-page-subtitle" class="text-xs text-on-surface-variant">View your registered health data.</p>
+                    </div>
+                </div>
+                <!-- Edit button — visible in view mode only -->
+                <button id="intake-edit-btn" onclick="openIntakeEditMode()" class="flex items-center gap-1.5 bg-primary hover:bg-[#005321] text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer shadow-sm">
+                    <span class="material-symbols-outlined text-[16px]">edit</span> Edit Profile
                 </button>
-                <div>
-                    <h1 class="text-xl sm:text-2xl font-black tracking-tight text-on-surface">Patient Medical Intake & Health Profile</h1>
-                    <p class="text-xs text-on-surface-variant">Please fill in accurate details so your specialist can build a personalized nutrition program.</p>
+            </div>
+
+            <!-- ===== VIEW MODE PANEL ===== -->
+            <div id="intake-view-panel" class="bg-surface-container-lowest rounded-3xl border border-outline-variant/30 shadow-sm overflow-hidden">
+
+                <!-- Section: Personal -->
+                <div class="p-6 border-b border-outline-variant/20">
+                    <h3 class="text-xs font-extrabold text-primary flex items-center gap-2 mb-4 uppercase tracking-wider">
+                        <span class="material-symbols-outlined text-[16px]">person</span> Personal & Biological Data
+                    </h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <div>
+                            <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Full Name</p>
+                            <p id="view-name" class="text-sm font-bold text-on-surface">—</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Birth Date</p>
+                            <p id="view-dob" class="text-sm font-bold text-on-surface">—</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Biological Sex</p>
+                            <p id="view-sex" class="text-sm font-bold text-on-surface">—</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Physical -->
+                <div class="p-6 border-b border-outline-variant/20">
+                    <h3 class="text-xs font-extrabold text-primary flex items-center gap-2 mb-4 uppercase tracking-wider">
+                        <span class="material-symbols-outlined text-[16px]">straighten</span> Physical Metrics
+                    </h3>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Height</p>
+                            <p id="view-height" class="text-sm font-bold text-on-surface">—</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Current Weight</p>
+                            <p id="view-weight" class="text-sm font-bold text-on-surface">—</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Target Weight</p>
+                            <p id="view-target-weight" class="text-sm font-bold text-emerald-600">—</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Goals -->
+                <div class="p-6 border-b border-outline-variant/20">
+                    <h3 class="text-xs font-extrabold text-primary flex items-center gap-2 mb-4 uppercase tracking-wider">
+                        <span class="material-symbols-outlined text-[16px]">flag</span> Goals & Dietary Preference
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Primary Health Focus</p>
+                            <p id="view-goal" class="text-sm font-bold text-on-surface">—</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Dietary Preference</p>
+                            <p id="view-diet" class="text-sm font-bold text-on-surface">—</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Allergies & Conditions -->
+                <div class="p-6 border-b border-outline-variant/20">
+                    <h3 class="text-xs font-extrabold text-primary flex items-center gap-2 mb-4 uppercase tracking-wider">
+                        <span class="material-symbols-outlined text-[16px]">medical_information</span> Allergies & Medical Conditions
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">Food Allergies</p>
+                            <div id="view-allergies" class="flex flex-wrap gap-1.5 min-h-[24px]">
+                                <span class="text-xs text-on-surface-variant italic">None reported</span>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">Medical Conditions</p>
+                            <div id="view-conditions" class="flex flex-wrap gap-1.5 min-h-[24px]">
+                                <span class="text-xs text-on-surface-variant italic">None reported</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Notes -->
+                <div class="p-6">
+                    <h3 class="text-xs font-extrabold text-primary flex items-center gap-2 mb-3 uppercase tracking-wider">
+                        <span class="material-symbols-outlined text-[16px]">edit_note</span> Clinical Notes & Medications
+                    </h3>
+                    <p id="view-notes" class="text-sm text-on-surface leading-relaxed whitespace-pre-line">—</p>
                 </div>
             </div>
 
-            <!-- Single Big Container wrapping the full form -->
-            <div class="bg-surface-container-lowest rounded-3xl border border-outline-variant/30 shadow-sm overflow-hidden">
+            <!-- ===== EDIT MODE PANEL (hidden by default) ===== -->
+            <div id="intake-edit-panel" class="hidden bg-surface-container-lowest rounded-3xl border border-outline-variant/30 shadow-sm overflow-hidden">
                 <form id="dedicated-intake-form" onsubmit="handleDedicatedIntakeSubmit(event)">
 
-                    <!-- Section 1: Personal & Biological Data -->
+                    <!-- Section 1: Personal -->
                     <div class="p-6 border-b border-outline-variant/20">
                         <h3 class="text-sm font-extrabold text-primary flex items-center gap-2 mb-4">
                             <span class="material-symbols-outlined text-[18px]">person</span> Personal & Biological Data
@@ -894,10 +991,10 @@
                         </div>
                     </div>
 
-                    <!-- Section 2: Physical Metrics -->
+                    <!-- Section 2: Physical -->
                     <div class="p-6 border-b border-outline-variant/20">
                         <h3 class="text-sm font-extrabold text-primary flex items-center gap-2 mb-4">
-                            <span class="material-symbols-outlined text-[18px]">straighten</span> Physical Metrics (Anthropometrics)
+                            <span class="material-symbols-outlined text-[18px]">straighten</span> Physical Metrics
                         </h3>
                         <div class="grid grid-cols-3 gap-4">
                             <div>
@@ -915,10 +1012,10 @@
                         </div>
                     </div>
 
-                    <!-- Section 3: Focus Goals & Dietary -->
+                    <!-- Section 3: Goals -->
                     <div class="p-6 border-b border-outline-variant/20">
                         <h3 class="text-sm font-extrabold text-primary flex items-center gap-2 mb-4">
-                            <span class="material-symbols-outlined text-[18px]">flag</span> Focus Goals & Food Preferences
+                            <span class="material-symbols-outlined text-[18px]">flag</span> Goals & Food Preferences
                         </h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
@@ -947,7 +1044,7 @@
                     <!-- Section 4: Allergies & Conditions -->
                     <div class="p-6 border-b border-outline-variant/20">
                         <h3 class="text-sm font-extrabold text-primary flex items-center gap-2 mb-4">
-                            <span class="material-symbols-outlined text-[18px]">medical_information</span> Health Risks, Allergies & Medical Conditions
+                            <span class="material-symbols-outlined text-[18px]">medical_information</span> Allergies & Medical Conditions
                         </h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
@@ -993,21 +1090,21 @@
                         </div>
                     </div>
 
-                    <!-- Section 5: Clinical Notes -->
+                    <!-- Section 5: Notes -->
                     <div class="p-6 border-b border-outline-variant/20">
-                        <h3 class="text-sm font-extrabold text-primary flex items-center gap-2 mb-4">
+                        <h3 class="text-sm font-extrabold text-primary flex items-center gap-2 mb-3">
                             <span class="material-symbols-outlined text-[18px]">edit_note</span> Clinical Notes & Active Medications
                         </h3>
                         <label class="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Describe symptoms, current medications, health constraints, etc.</label>
-                        <textarea id="intake-page-notes" rows="3" placeholder="e.g. Diagnosed with Diabetes Type 2 since 2024. Currently taking Metformin 500mg daily. Frequent fatigue after meals..." class="w-full rounded-xl border border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-3 py-2.5 bg-background resize-none text-on-surface font-medium"></textarea>
+                        <textarea id="intake-page-notes" rows="3" placeholder="e.g. Diagnosed with Diabetes Type 2 since 2024. Currently taking Metformin 500mg daily..." class="w-full rounded-xl border border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-3 py-2.5 bg-background resize-none text-on-surface font-medium"></textarea>
                     </div>
 
                     <!-- Form Actions -->
                     <div class="p-6 flex items-center gap-3 bg-surface">
                         <button type="submit" class="bg-primary hover:bg-[#005321] text-white font-extrabold text-sm py-3 px-8 rounded-2xl shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-2">
-                            <span class="material-symbols-outlined text-[18px]">save</span> Save Patient Intake
+                            <span class="material-symbols-outlined text-[18px]">save</span> Save Changes
                         </button>
-                        <button type="button" id="intake-cancel-btn" onclick="navigateTo('profile')" class="bg-transparent hover:bg-surface-container-low text-on-surface-variant font-bold text-sm py-3 px-6 rounded-2xl border border-outline-variant/30 transition-all active:scale-95 cursor-pointer">
+                        <button type="button" onclick="closeIntakeEditMode()" class="bg-transparent hover:bg-surface-container-low text-on-surface-variant font-bold text-sm py-3 px-6 rounded-2xl border border-outline-variant/30 transition-all active:scale-95 cursor-pointer">
                             Cancel
                         </button>
                     </div>
@@ -1015,6 +1112,7 @@
                 </form>
             </div>
         </section>
+
 
         <!-- ==================== VIEW 6: DEDICATED CHAT VIEW ==================== -->
         <section id="view-chat" class="view-section hidden flex-col h-[calc(100vh-180px)] md:h-[calc(100vh-160px)] w-full">
