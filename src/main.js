@@ -577,6 +577,9 @@ function loadState() {
     // Ensure all days are populated for all active clients
     const targetClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
     const allClientsList = ['Sarah Jenkins', 'Marcus Reid', 'Elena Lopez'];
+    if (!allClientsList.includes(targetClient)) {
+        allClientsList.push(targetClient);
+    }
     let changed = false;
     
     const daysList = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -616,7 +619,11 @@ function loadState() {
         }
 
         daysList.forEach(day => {
-            if (!state.clientMealPlans[clientName][day] || state.clientMealPlans[clientName][day].length === 0) {
+            const isSeed = ['Sarah Jenkins', 'Marcus Reid', 'Elena Lopez'].includes(clientName);
+            if (!state.clientMealPlans[clientName][day]) {
+                state.clientMealPlans[clientName][day] = isSeed ? JSON.parse(JSON.stringify(defaults[day])) : [];
+                changed = true;
+            } else if (isSeed && state.clientMealPlans[clientName][day].length === 0) {
                 state.clientMealPlans[clientName][day] = JSON.parse(JSON.stringify(defaults[day]));
                 changed = true;
             }
