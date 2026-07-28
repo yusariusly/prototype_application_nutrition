@@ -847,13 +847,19 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.removeItem('nutriflow_trigger_onboarding');
         setTimeout(() => {
             if (window.navigateTo) window.navigateTo('profile');
-            showToast('Welcome! Please complete your Medical Intake Profile below.', 'info');
+            setTimeout(() => {
+                if (window.openOnboardingModal) window.openOnboardingModal();
+            }, 500);
+            showToast('Welcome! Please complete your Medical Intake Profile.', 'info');
         }, 400);
     } else if (isTriggered) {
         localStorage.removeItem('nutriflow_trigger_onboarding');
         setTimeout(() => {
             if (window.navigateTo) window.navigateTo('profile');
-            showToast('Welcome! Please complete your Medical Intake Profile below.', 'info');
+            setTimeout(() => {
+                if (window.openOnboardingModal) window.openOnboardingModal();
+            }, 500);
+            showToast('Welcome! Please complete your Medical Intake Profile.', 'info');
         }, 400);
     } else {
         if (banner) banner.classList.add('hidden');
