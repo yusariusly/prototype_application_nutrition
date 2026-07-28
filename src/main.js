@@ -657,9 +657,61 @@ document.addEventListener('DOMContentLoaded', () => {
     if (localStorage.getItem('nutriflow_trigger_onboarding') === 'true') {
         localStorage.removeItem('nutriflow_trigger_onboarding');
         setTimeout(() => {
-            showToast(`Welcome ${activeClient}! Your new patient account has been registered.`, 'success');
-        }, 600);
+            openOnboardingModal();
+        }, 500);
     }
+
+window.openOnboardingModal = function() {
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Patient';
+    const welcomeEl = document.getElementById('onboarding-modal-welcome');
+    if (welcomeEl) {
+        welcomeEl.innerText = `Welcome ${activeClient}! Let's set up your profile for your specialist.`;
+    }
+    const modal = document.getElementById('client-onboarding-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+};
+
+window.closeOnboardingModal = function() {
+    const modal = document.getElementById('client-onboarding-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+window.handleOnboardingSubmit = function(e) {
+    if (e) e.preventDefault();
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const weight = parseFloat(document.getElementById('onboard-weight')?.value || 72);
+    const targetWeight = parseFloat(document.getElementById('onboard-target-weight')?.value || 65);
+    const goal = document.getElementById('onboard-goal')?.value || 'Weight Loss';
+    const diet = document.getElementById('onboard-diet')?.value || 'Balanced';
+    const notes = document.getElementById('onboard-notes')?.value || '';
+
+    const allergies = [];
+    document.querySelectorAll('input[name="onboard-allergy"]:checked').forEach(cb => {
+        allergies.push(cb.value);
+    });
+
+    // Save client intake data to localStorage
+    const intakeMap = JSON.parse(localStorage.getItem('nutriflow_client_intakes') || '{}');
+    intakeMap[activeClient] = {
+        weight: weight,
+        targetWeight: targetWeight,
+        goal: goal,
+        diet: diet,
+        allergies: allergies,
+        notes: notes,
+        updatedAt: new Date().toISOString()
+    };
+    localStorage.setItem('nutriflow_client_intakes', JSON.stringify(intakeMap));
+
+    closeOnboardingModal();
+    showToast(`Health Profile Saved! Welcome to NutriFlow, ${activeClient.split(' ')[0]}.`, 'success');
+};
 
     // Update dedicated practitioner card
     const clients = JSON.parse(localStorage.getItem('nutriflow_clients')) || [

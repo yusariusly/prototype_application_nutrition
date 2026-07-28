@@ -1671,6 +1671,82 @@
                 </div>
             </div>
         </div>
+    <!-- New Patient Onboarding Intake Modal -->
+    <div id="client-onboarding-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="bg-white max-w-lg w-full rounded-3xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col text-slate-800 animate-fade-in max-h-[90vh]">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-primary to-secondary text-white p-5 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-white/20 text-white flex items-center justify-center font-bold text-lg">📋</div>
+                    <div class="text-left">
+                        <h3 class="text-base font-bold">New Patient Health Intake</h3>
+                        <p class="text-[11px] text-white/80 font-medium" id="onboarding-modal-welcome">Welcome! Let's set up your profile for your specialist.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeOnboardingModal()" class="text-white/70 hover:text-white cursor-pointer"><span class="material-symbols-outlined text-[20px]">close</span></button>
+            </div>
+
+            <!-- Form Body -->
+            <form onsubmit="handleOnboardingSubmit(event)" class="p-6 space-y-4 overflow-y-auto text-left">
+                <!-- Row 1: Weight & Target -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Current Weight (kg)</label>
+                        <input type="number" step="0.1" id="onboard-weight" required value="72.5" class="w-full rounded-xl border-slate-200 text-xs px-3 py-2 bg-slate-50 font-bold focus:border-primary">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Target Weight (kg)</label>
+                        <input type="number" step="0.1" id="onboard-target-weight" required value="65.0" class="w-full rounded-xl border-slate-200 text-xs px-3 py-2 bg-slate-50 font-bold focus:border-primary text-emerald-700">
+                    </div>
+                </div>
+
+                <!-- Goal & Diet -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Primary Goal</label>
+                        <select id="onboard-goal" class="w-full rounded-xl border-slate-200 text-xs px-3 py-2 bg-slate-50 font-bold focus:border-primary">
+                            <option value="Weight Loss & Fat Reduction">Weight Loss & Fat Reduction</option>
+                            <option value="Muscle Building & Fitness">Muscle Building & Fitness</option>
+                            <option value="Diabetes & Cholesterol Care">Diabetes & Cholesterol Care</option>
+                            <option value="General Health Improvement">General Health Improvement</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Dietary Preference</label>
+                        <select id="onboard-diet" class="w-full rounded-xl border-slate-200 text-xs px-3 py-2 bg-slate-50 font-bold focus:border-primary">
+                            <option value="Balanced / No Restrictions">Balanced / No Restrictions</option>
+                            <option value="Halal">Halal</option>
+                            <option value="Vegetarian">Vegetarian</option>
+                            <option value="Vegan">Vegan</option>
+                            <option value="Keto / Low-Carb">Keto / Low-Carb</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Food Allergies -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Food Allergies (Check All That Apply)</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-medium bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="onboard-allergy" value="Peanuts" class="rounded text-primary focus:ring-primary"> Peanuts</label>
+                        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="onboard-allergy" value="Seafood/Shellfish" class="rounded text-primary focus:ring-primary"> Seafood</label>
+                        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="onboard-allergy" value="Lactose/Dairy" class="rounded text-primary focus:ring-primary"> Dairy/Milk</label>
+                        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="onboard-allergy" value="Gluten/Wheat" class="rounded text-primary focus:ring-primary"> Gluten</label>
+                        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="onboard-allergy" value="Eggs" class="rounded text-primary focus:ring-primary"> Eggs</label>
+                        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="onboard-allergy" value="Soy" class="rounded text-primary focus:ring-primary"> Soy</label>
+                    </div>
+                </div>
+
+                <!-- Medical Conditions & Notes -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Medical Conditions or Notes for Dietitian</label>
+                    <textarea id="onboard-notes" rows="2" placeholder="e.g. History of GERD, taking Vitamin D supplements..." class="w-full rounded-xl border-slate-200 text-xs px-3 py-2 bg-slate-50 focus:border-primary resize-none"></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-primary hover:bg-[#005321] text-white font-extrabold text-xs py-3 rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span class="material-symbols-outlined text-[18px]">check_circle</span> Save Profile & Start My Journey
+                </button>
+            </form>
+        </div>
     </div>
 
     <!-- Core App logic -->
