@@ -692,6 +692,8 @@ window.handleOnboardingSubmit = function(e) {
     localStorage.setItem('nutriflow_client_intakes', JSON.stringify(intakeMap));
 
     closeOnboardingModal();
+    const banner = document.getElementById('onboarding-incomplete-banner');
+    if (banner) banner.classList.add('hidden');
     showToast(`Health Profile Saved! Welcome to NutriFlow, ${activeClient.split(' ')[0]}.`, 'success');
 };
 
@@ -706,11 +708,24 @@ document.addEventListener('DOMContentLoaded', () => {
         welcomeLabel.innerText = `Good morning, ${activeClient.split(' ')[0]}!`;
     }
 
-    if (localStorage.getItem('nutriflow_trigger_onboarding') === 'true') {
+    const intakes = JSON.parse(localStorage.getItem('nutriflow_client_intakes') || '{}');
+    const isTriggered = localStorage.getItem('nutriflow_trigger_onboarding') === 'true';
+    const hasIntake = !!intakes[activeClient];
+
+    const banner = document.getElementById('onboarding-incomplete-banner');
+    if (!hasIntake && activeClient !== 'Sarah Jenkins' && activeClient !== 'Marcus Reid' && activeClient !== 'Elena Lopez') {
+        if (banner) banner.classList.remove('hidden');
         localStorage.removeItem('nutriflow_trigger_onboarding');
         setTimeout(() => {
             openOnboardingModal();
-        }, 500);
+        }, 300);
+    } else if (isTriggered) {
+        localStorage.removeItem('nutriflow_trigger_onboarding');
+        setTimeout(() => {
+            openOnboardingModal();
+        }, 300);
+    } else {
+        if (banner) banner.classList.add('hidden');
     }
 
     // Update dedicated practitioner card

@@ -147,6 +147,20 @@
 
         <!-- ==================== VIEW 1: CLIENT DASHBOARD ==================== -->
         <section id="view-dashboard" class="view-section hidden flex flex-col gap-gutter">
+            <!-- Onboarding Intake Warning Banner -->
+            <div id="onboarding-incomplete-banner" class="bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-2xl p-4 shadow-md flex items-center justify-between gap-3 animate-fade-in hidden">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-white/20 text-white font-bold flex items-center justify-center text-lg shrink-0">📋</div>
+                    <div class="text-left">
+                        <h4 class="font-bold text-xs sm:text-sm text-white">Complete Your Medical Intake Profile</h4>
+                        <p class="text-[10px] sm:text-xs text-white/90">Please fill out your health goals, allergies, and target weight so your specialist can customize your program.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="openOnboardingModal()" class="bg-white text-amber-800 hover:bg-amber-50 text-xs font-extrabold px-4 py-2 rounded-xl transition-all shadow-sm shrink-0 cursor-pointer flex items-center gap-1">
+                    <span>Fill Intake</span> <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                </button>
+            </div>
+
             <div class="bg-surface-container-lowest rounded-2xl p-4 md:p-lg border border-outline-variant/30 shadow-sm relative overflow-hidden flex flex-row items-center justify-between gap-4">
                 <div class="absolute -top-24 -right-24 w-64 h-64 bg-surface-container-high rounded-full opacity-40 blur-3xl pointer-events-none"></div>
                 
