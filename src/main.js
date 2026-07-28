@@ -373,17 +373,43 @@ function loadState() {
         localStorage.setItem('nutriflow_client_meal_plans', JSON.stringify(initialMealPlans));
     }
 
-    if (localStorage.getItem('nutriflow_water_glasses')) {
-        state.waterGlasses = parseInt(localStorage.getItem('nutriflow_water_glasses'));
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const isSeedClient = ['Sarah Jenkins', 'Marcus Reid', 'Elena Lopez'].includes(activeClient);
+
+    if (localStorage.getItem(`nutriflow_water_glasses_${activeClient}`)) {
+        state.waterGlasses = parseInt(localStorage.getItem(`nutriflow_water_glasses_${activeClient}`));
+    } else {
+        state.waterGlasses = isSeedClient ? 5 : 0;
     }
-    if (localStorage.getItem('nutriflow_streak_days')) {
-        state.streakDays = parseInt(localStorage.getItem('nutriflow_streak_days'));
+    
+    if (localStorage.getItem(`nutriflow_streak_days_${activeClient}`)) {
+        state.streakDays = parseInt(localStorage.getItem(`nutriflow_streak_days_${activeClient}`));
+    } else {
+        state.streakDays = isSeedClient ? 12 : 0;
     }
-    if (localStorage.getItem('nutriflow_logged_meals')) {
-        state.loggedMeals = JSON.parse(localStorage.getItem('nutriflow_logged_meals'));
+    
+    if (localStorage.getItem(`nutriflow_logged_meals_${activeClient}`)) {
+        state.loggedMeals = JSON.parse(localStorage.getItem(`nutriflow_logged_meals_${activeClient}`));
+    } else {
+        state.loggedMeals = {
+            breakfast: false,
+            lunch: false,
+            snack: false,
+            dinner: false
+        };
     }
-    state.profileStats.weightHistory = getOrGenerateWeightHistory();
-    state.profileStats.bodyMeasurements = getOrGenerateMeasurementsHistory();
+    
+    if (localStorage.getItem(`nutriflow_weight_history_${activeClient}`)) {
+        state.profileStats.weightHistory = JSON.parse(localStorage.getItem(`nutriflow_weight_history_${activeClient}`));
+    } else {
+        state.profileStats.weightHistory = isSeedClient ? getOrGenerateWeightHistory() : [];
+    }
+    
+    if (localStorage.getItem(`nutriflow_measurements_history_${activeClient}`)) {
+        state.profileStats.bodyMeasurements = JSON.parse(localStorage.getItem(`nutriflow_measurements_history_${activeClient}`));
+    } else {
+        state.profileStats.bodyMeasurements = isSeedClient ? getOrGenerateMeasurementsHistory() : [];
+    }
 
     if (localStorage.getItem('nutriflow_logged_status')) {
         state.loggedStatus = JSON.parse(localStorage.getItem('nutriflow_logged_status'));
@@ -606,11 +632,12 @@ function loadState() {
 }
 
 function saveState() {
-    localStorage.setItem('nutriflow_water_glasses', state.waterGlasses);
-    localStorage.setItem('nutriflow_streak_days', state.streakDays);
-    localStorage.setItem('nutriflow_logged_meals', JSON.stringify(state.loggedMeals));
-    localStorage.setItem('nutriflow_weight_history', JSON.stringify(state.profileStats.weightHistory));
-    localStorage.setItem('nutriflow_measurements_history', JSON.stringify(state.profileStats.bodyMeasurements));
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    localStorage.setItem(`nutriflow_water_glasses_${activeClient}`, state.waterGlasses);
+    localStorage.setItem(`nutriflow_streak_days_${activeClient}`, state.streakDays);
+    localStorage.setItem(`nutriflow_logged_meals_${activeClient}`, JSON.stringify(state.loggedMeals));
+    localStorage.setItem(`nutriflow_weight_history_${activeClient}`, JSON.stringify(state.profileStats.weightHistory));
+    localStorage.setItem(`nutriflow_measurements_history_${activeClient}`, JSON.stringify(state.profileStats.bodyMeasurements));
     localStorage.setItem('nutriflow_appointments', JSON.stringify(state.appointments));
     localStorage.setItem('nutriflow_logged_status', JSON.stringify(state.loggedStatus));
 }
@@ -691,6 +718,24 @@ window.handleOnboardingSubmit = function(e) {
     };
     localStorage.setItem('nutriflow_client_intakes', JSON.stringify(intakeMap));
 
+    // Update weight history with the submitted initial weight
+    const initialWeightHistory = [
+        { month: new Date().toLocaleDateString('en-US', { month: 'short' }), weight: weight }
+    ];
+    state.profileStats.weightHistory = initialWeightHistory;
+    localStorage.setItem(`nutriflow_weight_history_${activeClient}`, JSON.stringify(initialWeightHistory));
+
+    // Update body measurements with base data
+    const initialMeasurements = [
+        { label: 'Today', waist: 30.0, hip: 36.0 }
+    ];
+    state.profileStats.bodyMeasurements = initialMeasurements;
+    localStorage.setItem(`nutriflow_measurements_history_${activeClient}`, JSON.stringify(initialMeasurements));
+
+    // Refresh charts
+    if (window.updateWeightTrendChart) window.updateWeightTrendChart();
+    if (window.updateMeasurementsChart) window.updateMeasurementsChart();
+
     closeOnboardingModal();
     const banner = document.getElementById('onboarding-incomplete-banner');
     if (banner) banner.classList.add('hidden');
@@ -706,6 +751,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const welcomeLabel = document.getElementById('client-welcome-name-label');
     if (welcomeLabel) {
         welcomeLabel.innerText = `Good morning, ${activeClient.split(' ')[0]}!`;
+    }
+    const streakLabel = document.getElementById('client-streak-label');
+    if (streakLabel) {
+        streakLabel.innerText = `Streak: ${state.streakDays} Days`;
     }
 
     const intakes = JSON.parse(localStorage.getItem('nutriflow_client_intakes') || '{}');
