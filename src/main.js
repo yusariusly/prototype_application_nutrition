@@ -766,12 +766,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (banner) banner.classList.remove('hidden');
         localStorage.removeItem('nutriflow_trigger_onboarding');
         setTimeout(() => {
-            openOnboardingModal();
+            if (window.openOnboardingModal) window.openOnboardingModal();
         }, 300);
     } else if (isTriggered) {
         localStorage.removeItem('nutriflow_trigger_onboarding');
         setTimeout(() => {
-            openOnboardingModal();
+            if (window.openOnboardingModal) window.openOnboardingModal();
         }, 300);
     } else {
         if (banner) banner.classList.add('hidden');
