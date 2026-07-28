@@ -3714,12 +3714,12 @@ window.handleRegistrationSubmit = function(e) {
     
     closeRegistrationModal();
     
-    // Reload components so log buttons are active and navigate to dashboard
+    // Reload components and navigate to patient intake for new users
     renderMealPlans();
     renderDashboardMeals();
-    navigateTo('dashboard');
+    navigateTo('patient-intake');
     
-    showToast(`Welcome ${clientName.split(' ')[0]}! Your tracking account is now active.`, 'success');
+    showToast(`Welcome ${clientName.split(' ')[0]}! Please complete your health profile below.`, 'success');
 };
 
 // ==================== HELP CENTER & LEGAL PAGES HELPERS ====================
