@@ -1029,7 +1029,7 @@ window.navigateTo = function(viewId) {
     const mobileNavEl = document.getElementById('mobile-bottom-nav');
     const mainContainerEl = document.getElementById('client-main-container');
     
-    if (viewId === 'chat') {
+    if (viewId === 'chat' || viewId === 'food-chat') {
         document.documentElement.classList.add('overflow-hidden');
         document.body.classList.add('overflow-hidden');
         if (footerEl) footerEl.classList.add('hidden');
@@ -1038,11 +1038,11 @@ window.navigateTo = function(viewId) {
         if (mainContainerEl) {
             mainContainerEl.className = 'flex-grow w-full relative flex flex-col p-0 m-0 max-w-full';
         }
-        const chatSection = document.getElementById('view-chat');
+        const chatSection = document.getElementById(viewId === 'chat' ? 'view-chat' : 'view-food-chat');
         if (chatSection) {
-            chatSection.className = 'view-section flex flex-col fixed inset-0 z-40 bg-surface w-full p-0 m-0';
+            chatSection.className = 'view-section flex flex-col fixed inset-0 z-40 bg-surface w-full p-0 m-0 h-full';
         }
-        const chatWindow = chatSection?.querySelector('.flex-grow');
+        const chatWindow = chatSection?.querySelector('.flex-col');
         if (chatWindow) {
             chatWindow.classList.remove('rounded-2xl', 'border', 'shadow-sm');
             chatWindow.classList.add('border-0', 'rounded-none');
@@ -1065,6 +1065,8 @@ window.navigateTo = function(viewId) {
         if (mainContainerEl) {
             mainContainerEl.className = 'flex-grow w-full max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-lg relative';
         }
+        
+        // Reset view-chat styles
         const chatSection = document.getElementById('view-chat');
         if (chatSection) {
             chatSection.className = 'view-section hidden flex-col h-[calc(100vh-180px)] md:h-[calc(100vh-160px)] w-full';
@@ -1073,6 +1075,17 @@ window.navigateTo = function(viewId) {
         if (chatWindow) {
             chatWindow.classList.add('rounded-2xl', 'border', 'shadow-sm');
             chatWindow.classList.remove('border-0', 'rounded-none');
+        }
+
+        // Reset view-food-chat styles
+        const foodChatSection = document.getElementById('view-food-chat');
+        if (foodChatSection) {
+            foodChatSection.className = 'view-section hidden flex-col h-[calc(100vh-180px)] md:h-[calc(100vh-160px)] w-full';
+        }
+        const foodChatWindow = foodChatSection?.querySelector('.flex-col');
+        if (foodChatWindow) {
+            foodChatWindow.classList.add('rounded-2xl', 'border', 'shadow-sm');
+            foodChatWindow.classList.remove('border-0', 'rounded-none');
         }
     }
 };
