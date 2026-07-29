@@ -4999,20 +4999,12 @@ window.renderClientScanLog = function() {
 
 window.openClientFoodChatModal = function() {
     migrateScansToChat();
-    const modal = document.getElementById('client-food-chat-modal');
-    if (modal) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
+    navigateTo('food-chat');
     renderClientFoodChatMessages();
 };
 
 window.closeClientFoodChatModal = function() {
-    const modal = document.getElementById('client-food-chat-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }
+    navigateTo('dashboard');
     const input = document.getElementById('client-food-chat-input');
     if (input) input.value = '';
 };
@@ -5046,10 +5038,32 @@ window.submitClientFoodChatMessage = function() {
 
     input.value = '';
     renderClientFoodChatMessages();
+
+    // Trigger auto-reply simulation
+    setTimeout(() => {
+        const reply = {
+            id: 'msg_reply_' + Date.now(),
+            clientId: clientId,
+            clientName: clientName,
+            sender: 'specialist',
+            senderName: 'Specialist',
+            timestamp: new Date().toISOString(),
+            type: 'text',
+            text: `Hi ${clientName.split(' ')[0]}, thank you for your input. I will review your recent meals and give you feedback shortly!`
+        };
+        const updated = JSON.parse(localStorage.getItem('nutriflow_food_chat_messages') || '[]');
+        updated.push(reply);
+        localStorage.setItem('nutriflow_food_chat_messages', JSON.stringify(updated));
+        
+        if (state.activeView === 'food-chat') {
+            renderClientFoodChatMessages();
+        }
+    }, 1500);
     renderClientScanLog();
 };
 
 window.renderClientFoodChatMessages = function() {
+    migrateScansToChat();
     const container = document.getElementById('client-food-chat-messages-container');
     if (!container) return;
 
@@ -5078,6 +5092,7 @@ window.renderClientFoodChatMessages = function() {
             const fs = msg.foodScan;
             contentHtml = `
                 <div style="background:#fff;border:1px solid #e2e8f0;border-radius:0.75rem;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.05);margin-top:0.25rem;max-width:240px;">
+                    ${fs.imageUrl ? `<img src="${fs.imageUrl}" style="width:100%;height:100px;object-fit:cover;">` : ''}
                     <div style="padding:0.75rem;text-align:left;">
                         <h4 style="font-weight:800;font-size:0.75rem;color:#1e293b;margin:0 0 0.25rem;">${fs.foodName}</h4>
                         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.375rem;">

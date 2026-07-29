@@ -3704,6 +3704,7 @@ function renderAdminFoodChatMessages(client) {
             const fs = msg.foodScan;
             contentHtml = `
                 <div style="background:#fff;border:1px solid #e2e8f0;border-radius:0.75rem;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.05);margin-top:0.25rem;max-width:240px;">
+                    ${fs.imageUrl ? `<img src="${fs.imageUrl}" style="width:100%;height:100px;object-fit:cover;">` : ''}
                     <div style="padding:0.75rem;text-align:left;">
                         <h4 style="font-weight:800;font-size:0.75rem;color:#1e293b;margin:0 0 0.25rem;">${fs.foodName}</h4>
                         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.375rem;">
