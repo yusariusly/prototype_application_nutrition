@@ -4963,8 +4963,8 @@ window.sendScanToSpecialist = function() {
     }
     window._scannerMode = null;
     
-    if (typeof showToastNotification === 'function') {
-        showToastNotification(`📸 "${message.foodScan.foodName}" dikirim ke specialist!`);
+    if (typeof showToast === 'function') {
+        showToast(`📸 "${message.foodScan.foodName}" sent to specialist!`);
     }
 };
 
