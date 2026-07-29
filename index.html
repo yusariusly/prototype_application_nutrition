@@ -134,8 +134,9 @@
 
         <!-- Right Side Icons -->
         <div id="nav-right-container" class="flex items-center gap-xs md:gap-sm relative">
-            <button onclick="toggleClientNotifications(event)" id="client-notifications-btn" class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-full transition-colors active:scale-95">
+            <button onclick="toggleClientNotifications(event)" id="client-notifications-btn" class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-full transition-colors active:scale-95 relative">
                 <span class="material-symbols-outlined">notifications</span>
+                <span id="client-notifications-badge" class="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white rounded-full border border-surface flex items-center justify-center text-[9px] font-bold">4</span>
             </button>
             
             <!-- Notifications Dropdown -->
@@ -230,8 +231,37 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
                 <!-- Meals -->
                 <div class="lg:col-span-8 flex flex-col gap-sm">
-                    <h2 class="text-2xl font-bold text-on-background">Today's Meals</h2>
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-on-background">Today's Meals</h2>
+                        <button onclick="openFoodScannerModal()" class="flex items-center gap-1.5 bg-primary hover:bg-[#005321] text-white font-bold text-xs px-4 py-2.5 rounded-full shadow-md transition-all active:scale-95 cursor-pointer">
+                            <span class="material-symbols-outlined text-[16px]">center_focus_strong</span>
+                            Scan Food
+                        </button>
+                    </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-sm" id="dashboard-meals-grid"></div>
+
+                    <!-- Scan Log: Client scan history & Discussion -->
+                    <div id="client-scan-log-section" class="flex flex-col gap-3 mt-2">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Nutrition Chat & Food Scans</h3>
+                            <button onclick="openClientFoodChatModal()" class="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer">
+                                <span class="material-symbols-outlined text-sm">chat</span> Open Nutrition Chat
+                            </button>
+                        </div>
+                        <!-- Chat Preview card -->
+                        <div id="client-food-chat-preview" onclick="openClientFoodChatModal()" class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md cursor-pointer transition-all flex items-center justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-xl">forum</span>
+                                </div>
+                                <div class="text-left">
+                                    <p class="text-xs font-bold text-slate-700" id="client-food-chat-preview-sender">Nutrition Specialist</p>
+                                    <p class="text-[11px] text-slate-400 font-medium truncate max-w-[200px] sm:max-w-[300px]" id="client-food-chat-preview-text">No recent nutrition discussions.</p>
+                                </div>
+                            </div>
+                            <span class="material-symbols-outlined text-slate-300">chevron_right</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Stats & Hydration -->
@@ -635,10 +665,29 @@
                                     <span>Processing & Admin Fee</span>
                                     <span class="text-emerald-700 font-bold">FREE ($0.00)</span>
                                 </div>
+                                <!-- Discount Line (hidden by default) -->
+                                <div id="promo-discount-line" class="hidden flex justify-between items-center text-[11px]">
+                                    <span class="text-emerald-700 font-semibold flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[13px]">local_offer</span>
+                                        Promo: <span id="applied-promo-code-label" class="font-mono font-bold"></span>
+                                    </span>
+                                    <span class="text-emerald-700 font-bold" id="promo-discount-amount">-$0.00</span>
+                                </div>
                                 <div class="border-t border-outline-variant/20 pt-2 flex justify-between items-center font-extrabold text-sm text-primary">
                                     <span>Total Payable</span>
                                     <span id="checkout-total-price">$150.00 SGD</span>
                                 </div>
+                            </div>
+
+                            <!-- Promo Code Input -->
+                            <div class="flex gap-2 items-center">
+                                <input type="text" id="promo-code-input" placeholder="Promo code (e.g. WELCOME10)" class="flex-1 rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-xs px-3 py-2 bg-surface uppercase" style="text-transform:uppercase">
+                                <button type="button" onclick="applyPromoCode()" class="bg-primary hover:bg-[#005321] text-white font-bold text-xs px-4 py-2 rounded-lg transition-all cursor-pointer shrink-0 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">redeem</span> Apply
+                                </button>
+                                <button type="button" id="remove-promo-btn" onclick="removePromoCode()" class="hidden text-red-500 hover:text-red-700 font-bold text-xs px-2 py-2 rounded-lg transition-all cursor-pointer">
+                                    <span class="material-symbols-outlined text-[16px]">close</span>
+                                </button>
                             </div>
 
                             <!-- Payment Options Grid -->
@@ -701,16 +750,24 @@
                         <div class="flex justify-between"><span class="font-bold text-on-surface-variant">Method:</span><span class="font-bold text-on-background" id="success-method">-</span></div>
                         <div class="flex justify-between border-t border-surface-variant/30 pt-2"><span class="font-bold text-[#006e2f]">Total Paid:</span><span class="font-bold text-[#006e2f]" id="success-price">-</span></div>
                     </div>
-                    <button onclick="resetBookingWizardStateAndExit()" class="w-full bg-primary hover:bg-[#005321] text-white font-bold text-sm py-3 px-6 rounded-lg shadow-sm transition-all mt-4">Back to Appointments</button>
+                    <button id="success-invoice-btn" onclick="downloadLatestInvoicePDF()" class="w-full bg-surface border border-outline-variant/30 hover:bg-slate-50 text-slate-800 font-bold text-sm py-3 px-6 rounded-lg shadow-sm transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer mt-2">
+                        <span class="material-symbols-outlined text-[18px]">download_for_offline</span> Download Official Invoice (PDF)
+                    </button>
+                    <button onclick="resetBookingWizardStateAndExit()" class="w-full bg-primary hover:bg-[#005321] text-white font-bold text-sm py-3 px-6 rounded-lg shadow-sm transition-all mt-3">Back to Appointments</button>
                 </div>
             </div>
         </section>
 
         <!-- ==================== VIEW 5: CLIENT PROFILE & PROGRESS ==================== -->
         <section id="view-profile" class="view-section hidden flex flex-col gap-gutter">
-            <div class="flex flex-col gap-2 text-left">
-                <h1 class="text-3xl font-bold tracking-tight text-on-surface">Your Progress Journey</h1>
-                <p class="text-body-md text-on-surface-variant mt-1">Track your consistency and celebrate your milestones.</p>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left">
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight text-on-surface">Your Progress Journey</h1>
+                    <p class="text-body-md text-on-surface-variant mt-1">Track your consistency and celebrate your milestones.</p>
+                </div>
+                <button onclick="downloadProgressReportPDF()" class="bg-primary hover:bg-[#005321] text-white font-extrabold text-xs px-4 py-3 rounded-xl shadow-sm transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 self-start sm:self-auto">
+                    <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span> Export Progress Report (PDF)
+                </button>
             </div>
 
             <!-- Profile Header Card (Profile Picture, Bio, and Patient Data Button) -->
@@ -745,6 +802,9 @@
                             <span class="bg-tertiary-container/30 text-on-tertiary-container text-[10px] sm:text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
                                 <span class="material-symbols-outlined text-[12px] sm:text-[14px]">flag</span> <span id="profile-badge-goal">Weight Loss</span>
                             </span>
+                            <span id="membership-badge" class="text-[10px] sm:text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 bg-amber-100 text-amber-700">
+                                <span class="material-symbols-outlined text-[12px] sm:text-[14px]">workspace_premium</span> <span id="membership-badge-label">Free Plan</span>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -753,6 +813,32 @@
                 <div class="z-10 shrink-0 w-full md:w-auto">
                     <button id="btn-patient-intake-form" onclick="navigateTo('patient-intake')" class="w-full sm:w-auto bg-primary hover:bg-[#005321] text-white font-extrabold text-xs sm:text-sm px-6 py-3 rounded-2xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
                         <span class="material-symbols-outlined text-[18px]">assignment_ind</span> Patient Intake Form
+                    </button>
+                </div>
+            </div>
+
+            <!-- ===== CARE PACKAGE CARD (B2C) ===== -->
+            <div id="membership-plan-section" class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 border border-slate-700 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 relative overflow-hidden">
+                <!-- Background decoration -->
+                <div class="absolute -top-10 -right-10 w-40 h-40 bg-amber-400/10 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-primary/10 rounded-full blur-2xl pointer-events-none"></div>
+
+                <div class="z-10 flex items-center gap-4">
+                    <div id="membership-plan-icon" class="w-14 h-14 rounded-2xl bg-amber-400/20 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-amber-400 text-3xl" style="font-variation-settings:'FILL' 1">workspace_premium</span>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Active Care Package</p>
+                        <h3 id="membership-plan-name" class="text-white text-2xl font-black tracking-tight">Pay-Per-Session</h3>
+                        <p id="membership-plan-desc" class="text-slate-400 text-xs mt-0.5">Upgrade to a continuous care package for better results.</p>
+                    </div>
+                </div>
+
+                <div class="z-10 flex flex-col sm:items-end gap-2 w-full sm:w-auto">
+                    <div id="membership-plan-price" class="text-white font-black text-xl">S$0<span class="text-slate-400 text-xs font-normal">/month</span></div>
+                    <div id="membership-plan-status" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400">● Active</div>
+                    <button onclick="openMembershipModal()" class="mt-1 bg-amber-400 hover:bg-amber-300 text-slate-900 font-extrabold text-xs px-5 py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 shadow-md">
+                        <span class="material-symbols-outlined text-[16px]">upgrade</span> Upgrade / Change Plan
                     </button>
                 </div>
             </div>
@@ -1161,12 +1247,6 @@
                 <!-- Chat Footer Input Area -->
                 <div class="p-3 bg-surface border-t border-outline-variant/30 shrink-0">
                     <form onsubmit="handleProgramChatSubmit(event)" class="flex gap-2 items-center">
-                        <input type="file" id="program-chat-file" class="hidden" onchange="handleProgramChatFileSelected(event)">
-                        
-                        <button type="button" onclick="document.getElementById('program-chat-file').click()" class="bg-surface-container-low hover:bg-surface-container text-on-surface-variant p-3 rounded-full border border-outline-variant/30 transition-all active:scale-95 flex items-center justify-center cursor-pointer" title="Attach file or image">
-                            <span class="material-symbols-outlined text-base">attach_file</span>
-                        </button>
-                        
                         <input type="text" id="program-chat-input" placeholder="Type a message..." class="flex-1 bg-surface-container-low border border-outline-variant/30 text-xs px-4 py-3 rounded-full focus:outline-none focus:border-primary/50 text-slate-800 transition-all">
                         
                         <button type="submit" class="bg-primary hover:bg-[#005321] text-white p-3 rounded-full shadow-md transition-all active:scale-95 flex items-center justify-center cursor-pointer">
@@ -1715,6 +1795,31 @@
         </div>
     </div>
 
+    <!-- ===== MEMBERSHIP PLAN MODAL ===== -->
+    <div id="membership-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-surface w-full max-w-3xl rounded-3xl shadow-2xl border border-outline-variant/30 flex flex-col animate-fade-in overflow-hidden max-h-[90vh] overflow-y-auto">
+            <!-- Header -->
+            <div class="px-8 pt-8 pb-6 border-b border-outline-variant/20 flex justify-between items-start">
+                <div>
+                    <h2 class="text-2xl font-black text-on-surface tracking-tight">Care & Coaching Packages</h2>
+                    <p class="text-sm text-on-surface-variant mt-1">Select a continuous care package to reach your goals faster.</p>
+                </div>
+                <button onclick="closeMembershipModal()" class="text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer mt-1">
+                    <span class="material-symbols-outlined text-[22px]">close</span>
+                </button>
+            </div>
+
+            <!-- Plan Cards Grid -->
+            <div id="membership-plans-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-8">
+                <!-- Populated dynamically by JS -->
+            </div>
+
+            <div class="px-8 pb-6 text-center text-[11px] text-on-surface-variant">
+                All plans are billed monthly. Cancel anytime. Prototype simulation — no actual charges.
+            </div>
+        </div>
+    </div>
+
     <!-- Leave Review Modal -->
     <div id="leave-review-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
         <div class="bg-surface max-w-sm w-full rounded-2xl p-6 border border-slate-100 shadow-2xl flex flex-col gap-4 text-slate-800">
@@ -1932,9 +2037,113 @@
                 </div>
             </div>
         </div>
+    </div>
     <!-- Removed onboarding modal and replaced with a dedicated page view -->
 
     <!-- Core App logic -->
     <script type="module" src="/src/main.js"></script>
+
+    <!-- AI Food Scanner Modal — plain CSS, no Tailwind for visibility -->
+    <div id="ai-food-scanner-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div id="ai-scanner-modal-card" class="bg-white max-w-sm w-full rounded-2xl p-6 border border-slate-100 shadow-2xl flex flex-col gap-4 text-center relative overflow-hidden">
+            
+            <button onclick="closeFoodScannerModal()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;cursor:pointer;color:#94a3b8;font-size:1.5rem;line-height:1;z-index:10;" title="Close">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            
+            <div style="z-index:10;">
+                <div style="width:3rem;height:3rem;border-radius:0.75rem;background:rgba(20,131,60,0.1);color:#14833c;margin:0 auto 0.5rem;display:flex;align-items:center;justify-content:center;border:1px solid rgba(20,131,60,0.2);">
+                    <span class="material-symbols-outlined" style="font-size:1.5rem;">center_focus_strong</span>
+                </div>
+                <h3 style="font-size:1.125rem;font-weight:900;color:#1e293b;letter-spacing:-0.02em;margin:0 0 0.25rem;">AI Food Scanner</h3>
+                <p style="font-size:0.625rem;color:#64748b;font-weight:500;padding:0 1rem;line-height:1.6;margin:0;">Upload a photo of a meal and our AI will estimate its nutritional values instantly.</p>
+            </div>
+            
+            <div id="ai-scanner-upload-area" class="border-2 border-dashed border-primary/35 rounded-2xl p-6 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer flex flex-col items-center justify-center gap-2 relative h-40">
+                <input type="file" id="ai-scanner-file-input" accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:20;" onchange="processFoodScan(event)">
+                <span class="material-symbols-outlined" style="font-size:2rem;color:rgba(20,131,60,0.6);">cloud_upload</span>
+                <span style="font-size:0.75rem;font-weight:700;color:#14833c;">Tap to upload photo</span>
+            </div>
+            
+            <!-- Loading State -->
+            <div id="ai-scanner-loading" class="hidden flex-col items-center justify-center gap-3 h-40">
+                <div class="animate-spin rounded-full h-10 w-10 border-4 border-primary/20 border-t-primary"></div>
+                <p style="font-size:0.75rem;font-weight:700;color:#14833c;margin:0;animation:pulse 1.5s ease-in-out infinite;">Analyzing image...</p>
+            </div>
+            
+            <!-- Result State -->
+            <div id="ai-scanner-result" class="hidden flex-col text-left border border-slate-100 rounded-xl overflow-hidden bg-white shadow-sm mt-2">
+                <div style="height:8rem;background:#f1f5f9;position:relative;">
+                    <img id="ai-scanner-preview-img" src="" style="width:100%;height:100%;object-fit:cover;">
+                    <div style="position:absolute;top:0.5rem;right:0.5rem;background:rgba(15,23,42,0.8);color:#fff;font-size:0.5625rem;font-weight:900;padding:0.125rem 0.5rem;border-radius:0.25rem;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:0.25rem;">
+                        <span class="material-symbols-outlined" style="font-size:0.75rem;color:#14833c;">auto_awesome</span> AI Verified
+                    </div>
+                </div>
+                <div style="padding:1rem;">
+                    <h4 id="ai-scanner-food-name" style="font-weight:900;font-size:1rem;color:#1e293b;margin:0 0 0.25rem;">Avocado Toast</h4>
+                    <div style="display:flex;align-items:baseline;gap:0.25rem;margin-bottom:0.75rem;">
+                        <span id="ai-scanner-calories" style="font-size:1.25rem;font-weight:900;color:#14833c;line-height:1;">320</span>
+                        <span style="font-size:0.625rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">kcal</span>
+                    </div>
+                    
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-bottom:1rem;">
+                        <div style="background:#f8fafc;border-radius:0.5rem;padding:0.5rem;text-align:center;border:1px solid #f1f5f9;">
+                            <div style="font-size:0.5625rem;font-weight:900;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;">Pro</div>
+                            <div id="ai-scanner-protein" style="font-size:0.75rem;font-weight:700;color:#334155;">14g</div>
+                        </div>
+                        <div style="background:#f8fafc;border-radius:0.5rem;padding:0.5rem;text-align:center;border:1px solid #f1f5f9;">
+                            <div style="font-size:0.5625rem;font-weight:900;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;">Carb</div>
+                            <div id="ai-scanner-carbs" style="font-size:0.75rem;font-weight:700;color:#334155;">28g</div>
+                        </div>
+                        <div style="background:#f8fafc;border-radius:0.5rem;padding:0.5rem;text-align:center;border:1px solid #f1f5f9;">
+                            <div style="font-size:0.5625rem;font-weight:900;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;">Fat</div>
+                            <div id="ai-scanner-fat" style="font-size:0.75rem;font-weight:700;color:#334155;">18g</div>
+                        </div>
+                    </div>
+                    
+                    <button id="ai-scanner-send-btn" onclick="sendScanToSpecialist()" style="width:100%;background:#14833c;color:#fff;font-size:0.75rem;font-weight:700;padding:0.625rem;border-radius:0.75rem;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.375rem;transition:background 0.2s;" onmouseover="this.style.background='#005321'" onmouseout="this.style.background='#14833c'">
+                        <span class="material-symbols-outlined" style="font-size:1rem;">send</span>
+                        Kirim ke Specialist
+                    </button>
+                </div>
+             </div>
+            
+        </div>
+    </div>
+
+    <!-- Client Food Scans & Chat Modal -->
+    <div id="client-food-chat-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white max-w-md w-full rounded-3xl p-6 border border-slate-100 shadow-2xl flex flex-col gap-4 relative max-h-[85vh] min-h-[450px]">
+            <button onclick="closeClientFoodChatModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition-colors z-10 cursor-pointer">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            
+            <div class="flex items-center gap-3 border-b border-slate-100 pb-3 shrink-0 text-left">
+                <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
+                    NS
+                </div>
+                <div>
+                    <h3 class="text-sm font-black text-slate-800 tracking-tight">Nutrition Chat & Food Scans</h3>
+                    <p class="text-[10px] text-slate-400 font-semibold">Chat directly with your Nutrition Specialist</p>
+                </div>
+            </div>
+
+            <!-- Scrollable Chat Stream -->
+            <div id="client-food-chat-messages-container" class="flex-grow overflow-y-auto py-2 flex flex-col gap-4 bg-slate-50/50 rounded-2xl p-3 border border-slate-100/50 min-h-0">
+                <!-- Populated by JS -->
+            </div>
+
+            <!-- Footer: Text input + Scan camera button -->
+            <div class="flex gap-2 items-center shrink-0">
+                <button onclick="triggerClientChatScanner()" class="bg-primary/10 hover:bg-primary/20 text-primary p-3 rounded-xl transition-all active:scale-95 flex items-center justify-center cursor-pointer border border-primary/10" title="Scan Food">
+                    <span class="material-symbols-outlined text-base">center_focus_strong</span>
+                </button>
+                <input type="text" id="client-food-chat-input" placeholder="Ask or reply in the nutrition chat..." class="flex-grow border border-slate-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-primary text-slate-800 transition-all font-medium" onkeydown="if(event.key === 'Enter') submitClientFoodChatMessage()">
+                <button onclick="submitClientFoodChatMessage()" class="bg-primary hover:bg-[#005321] text-white p-3 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center cursor-pointer min-w-[3.5rem]">
+                    <span class="material-symbols-outlined text-base">send</span>
+                </button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

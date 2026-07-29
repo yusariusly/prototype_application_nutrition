@@ -324,7 +324,128 @@ function saveAdminState() {
 
 // ==================== INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', () => {
-    checkAdminSession();
+    initAdminApp();
+});
+
+// ==================== SAAS BILLING / SUBSCRIPTION ====================
+window.openSaaSUpgradeModal = function() {
+    const modal = document.getElementById('saas-upgrade-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    renderSaaSPlansGrid();
+};
+
+window.closeSaaSUpgradeModal = function() {
+    const modal = document.getElementById('saas-upgrade-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+window.renderSaaSPlansGrid = function() {
+    const grid = document.getElementById('saas-plans-grid');
+    if (!grid) return;
+    
+    // Read B2B SaaS plans set by Control Center
+    let plans = JSON.parse(localStorage.getItem('nutriflow_subscription_plans') || '[]');
+    
+    // FALLBACK if plans are empty (Control Center hasn't been visited yet)
+    if (!plans || plans.length === 0) {
+        plans = [
+            { id: 'plan-free',    name: 'Basic EHR',    price: 0,  color: 'slate',   icon: 'badge',             description: 'Start your private practice with zero overhead.',          features: ['Standard EHR & Charting', 'Client Portal Access', 'Up to 3 Active Clients', 'Manual Insurance Billing'] },
+            { id: 'plan-pro',     name: 'Pro SaaS',     price: 49, color: 'primary', icon: 'auto_awesome',      description: 'The ultimate tool for independent specialists.',           features: ['Unlimited Clients', 'AI ADIME Scribe (Unlimited)', '0% Aggregator Commission', 'Direct-to-Insurance Billing', 'Custom Branding'], recommended: true },
+            { id: 'plan-clinic',  name: 'Clinic Team',  price: 149, color: 'amber',   icon: 'domain',            description: 'Scale your practice with multiple practitioners.',        features: ['Up to 5 Practitioners', 'Advanced Analytics', 'Multi-Specialist Routing', 'All Pro SaaS Features'] }
+        ];
+        localStorage.setItem('nutriflow_subscription_plans', JSON.stringify(plans));
+    }
+
+    const sub = JSON.parse(localStorage.getItem('nutriflow_specialist_sub') || '{"planId":"plan-free"}');
+
+    const PLAN_STYLES = {
+        'slate':   { badge: 'bg-slate-100 text-slate-600',    card: 'border-slate-200',           btn: 'bg-slate-800 hover:bg-slate-700 text-white',  icon: 'text-slate-500',   iconBg: 'bg-slate-500/20' },
+        'blue':    { badge: 'bg-blue-100 text-blue-700',      card: 'border-blue-200',             btn: 'bg-blue-600 hover:bg-blue-500 text-white',    icon: 'text-blue-500',    iconBg: 'bg-blue-500/20' },
+        'primary': { badge: 'bg-primary/10 text-primary',     card: 'border-primary ring-2 ring-primary/30', btn: 'bg-primary hover:bg-[#005321] text-white', icon: 'text-primary', iconBg: 'bg-primary/20' },
+        'amber':   { badge: 'bg-amber-100 text-amber-700',    card: 'border-amber-300',            btn: 'bg-amber-500 hover:bg-amber-400 text-white',  icon: 'text-amber-500',   iconBg: 'bg-amber-400/20' }
+    };
+
+    grid.innerHTML = plans.map(plan => {
+        const style = PLAN_STYLES[plan.color] || PLAN_STYLES['slate'];
+        const isActive = plan.id === sub.planId;
+        const isRec = plan.recommended;
+        
+        const featList = plan.features.map(f => 
+            `<li class="flex items-start gap-1.5 text-[11px] text-on-surface-variant"><span class="material-symbols-outlined text-emerald-500 text-[14px] mt-px" style="font-variation-settings:'FILL' 1">check_circle</span>${f}</li>`
+        ).join('');
+
+        const btnLabel = isActive ? '✓ Current SaaS Plan' : (plan.price === 0 ? 'Switch to Free' : `Upgrade to ${plan.name} — S$${plan.price}/mo`);
+        const btnClass = isActive 
+            ? 'w-full font-bold text-xs py-2.5 rounded-xl bg-emerald-500 text-white cursor-default' 
+            : `w-full font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer active:scale-95 ${style.btn}`;
+
+        return `<div class="relative flex flex-col rounded-2xl border-2 p-5 gap-4 ${style.card}${isActive ? ' shadow-lg' : ''}">
+            ${isRec ? '<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-black px-3 py-0.5 rounded-full uppercase tracking-wider shadow">Most Popular</div>' : ''}
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${style.iconBg}">
+                    <span class="material-symbols-outlined text-xl ${style.icon}" style="font-variation-settings:'FILL' 1">${plan.icon}</span>
+                </div>
+                <div>
+                    <h4 class="font-black text-on-surface text-base">${plan.name}</h4>
+                    <p class="text-[11px] text-on-surface-variant">${plan.price === 0 ? 'Free forever' : 'S$' + plan.price + '/mo'}</p>
+                </div>
+            </div>
+            <p class="text-xs text-on-surface-variant">${plan.description}</p>
+            <ul class="flex flex-col gap-1.5 flex-grow">${featList}</ul>
+            <button onclick="confirmSaaSUpgrade('${plan.id}')" class="${btnClass}">${btnLabel}</button>
+        </div>`;
+    }).join('');
+}
+
+window.confirmSaaSUpgrade = function(planId) {
+    const sub = JSON.parse(localStorage.getItem('nutriflow_specialist_sub') || '{"planId":"plan-free"}');
+    if (sub.planId === planId) {
+        showToast('You are already on this plan.', 'info');
+        return;
+    }
+    
+    localStorage.setItem('nutriflow_specialist_sub', JSON.stringify({ planId: planId }));
+    closeSaaSUpgradeModal();
+    renderBillingTab();
+    showToast('SaaS Subscription updated successfully! 🚀', 'success');
+};
+
+window.renderBillingTab = function() {
+    const sub = JSON.parse(localStorage.getItem('nutriflow_specialist_sub') || '{"planId":"plan-free"}');
+    let plans = JSON.parse(localStorage.getItem('nutriflow_subscription_plans') || '[]');
+    
+    // Default fallback to Basic EHR if no plans found
+    let activePlan = { id: 'plan-free', name: 'Basic EHR', price: 0, color: 'slate', icon: 'badge' };
+    if (plans.length > 0) {
+        const found = plans.find(p => p.id === sub.planId);
+        if (found) activePlan = found;
+    }
+
+    const nameEl = document.getElementById('sp-plan-name');
+    const priceEl = document.getElementById('sp-plan-price');
+    const btn = document.getElementById('btn-upgrade-saas');
+    const icon = document.getElementById('sp-plan-icon');
+    const desc = document.getElementById('billing-status-desc');
+
+    if (nameEl) nameEl.innerText = activePlan.name;
+    if (priceEl) priceEl.innerHTML = `S$${activePlan.price}<span class="text-slate-400 text-sm font-normal">/mo</span>`;
+    if (desc) desc.innerText = `You are currently on the ${activePlan.name} plan. Next billing cycle: 1st of next month.`;
+
+    if (icon) {
+        const iconBgs = { 'slate': 'bg-slate-700/50 border-slate-600', 'blue': 'bg-blue-500/20 border-blue-500/50', 'primary': 'bg-primary/20 border-primary/50', 'amber': 'bg-amber-500/20 border-amber-500/50' };
+        const iconColors = { 'slate': 'text-white', 'blue': 'text-blue-400', 'primary': 'text-primary', 'amber': 'text-amber-400' };
+        
+        icon.className = `w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${iconBgs[activePlan.color] || iconBgs['slate']}`;
+        icon.querySelector('span').className = `material-symbols-outlined text-2xl ${iconColors[activePlan.color] || iconColors['slate']}`;
+        icon.querySelector('span').innerText = activePlan.icon || 'badge';
+    }
+}
+function initAdminApp() {
     loadAdminState();
     
     // Set subtitle welcome message with specialist name
@@ -342,7 +463,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     navigateTo('admin-clients');
-});
+}
 
 // ==================== TOASTS ====================
 window.showToast = function(message, type = 'success') {
@@ -433,6 +554,9 @@ window.navigateTo = function(viewId) {
         loadSpecialistServices();
     } else if (viewId === 'admin-profile') {
         loadSpecialistProfileDetails();
+    } else if (viewId === 'admin-food-scans') {
+        renderAdminScanHub();
+        updateScanBadge();
     }
 };
 
@@ -504,6 +628,10 @@ function loadSpecialistProfileDetails() {
                 </div>
             `).join('');
         }
+    }
+
+    if (typeof renderBillingTab === 'function') {
+        renderBillingTab();
     }
 }
 
@@ -892,7 +1020,26 @@ function renderAdminClientsList() {
     const startIdx = state.clientsPage * pageSize;
     const pageItems = filtered.slice(startIdx, startIdx + pageSize);
 
+    // Fetch subscription data
+    const globalSub = JSON.parse(localStorage.getItem('nutriflow_client_care_sub') || '{"planId":"plan-free"}');
+    const plans = JSON.parse(localStorage.getItem('nutriflow_care_packages') || '[]');
+    const colorClasses = {
+        'slate': 'bg-slate-100 text-slate-700 border-slate-200/60',
+        'blue': 'bg-blue-50 text-blue-700 border-blue-200/60',
+        'primary': 'bg-primary/10 text-primary border-primary/20',
+        'amber': 'bg-amber-50 text-amber-700 border-amber-200/60'
+    };
+
     tbody.innerHTML = pageItems.map(cli => {
+        // Assign the actual subscription to Sarah, others default to Pay-Per-Session
+        let planName = 'Pay-Per-Session';
+        let planColor = 'slate';
+        if (cli.name === 'Sarah Jenkins' && plans.length > 0) {
+            const p = plans.find(x => x.id === globalSub.planId);
+            if (p) { planName = p.name; planColor = p.color; }
+        }
+        const badgeClass = colorClasses[planColor] || colorClasses['slate'];
+
         return `
             <tr class="flex flex-col lg:table-row bg-surface-container-lowest border border-outline-variant/30 lg:border-0 rounded-2xl p-4 lg:p-0 gap-3 mb-4 lg:mb-0 hover:bg-surface-container-low/30 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.02)] lg:shadow-none">
                 <!-- Client Card Header (Click to Expand on Mobile) -->
@@ -908,7 +1055,8 @@ function renderAdminClientsList() {
                                     ${(cli.allergies?.length || cli.conditions?.length) ? `<span class="material-symbols-outlined text-amber-600 text-[14px]" title="Has Medical Intake Data">warning</span>` : ''}
                                 </div>
                                 <div class="text-[10px] text-on-surface-variant/80">${cli.email}</div>
-                                <div class="flex flex-wrap gap-1 mt-1">
+                                <div class="flex flex-wrap gap-1 mt-1.5">
+                                    <span class="${badgeClass} px-1.5 py-0.5 rounded text-[9px] font-bold border flex items-center gap-0.5" title="Care Package Subscription"><span class="material-symbols-outlined text-[10px]">card_membership</span> ${planName}</span>
                                     ${cli.allergies && cli.allergies.length ? `<span class="bg-red-50 text-red-700 border border-red-200/60 px-1.5 py-0.5 rounded text-[9px] font-bold flex items-center gap-0.5" title="Allergies"><span class="material-symbols-outlined text-[10px]">no_food</span> ${cli.allergies.join(', ')}</span>` : ''}
                                     ${cli.conditions && cli.conditions.length ? `<span class="bg-amber-50 text-amber-700 border border-amber-200/60 px-1.5 py-0.5 rounded text-[9px] font-bold" title="Conditions">${cli.conditions.join(', ')}</span>` : ''}
                                 </div>
@@ -1042,26 +1190,91 @@ window.openAdminChatModal = function(name) {
         }
     }
     
-    // Load chat messages
+    // Sync with global program chats
     const chatContainer = document.getElementById('chat-messages-container');
     if (!chatContainer) return;
     
-    let chatHistory = JSON.parse(localStorage.getItem(`nutriflow_chat_${name}`)) || defaultChats[name] || [
-        { sender: 'client', text: 'Hello! Can we check my daily protein limits?' }
-    ];
+    const progId = clientObj?.activeProgramId || 'prog-sarah';
+    const allProgramChats = JSON.parse(localStorage.getItem('nutriflow_program_chats')) || [];
+    const chatKey = `${progId}_${name}`;
+    let chatEntry = allProgramChats.find(c => c.id === chatKey);
     
-    chatContainer.innerHTML = chatHistory.map(msg => {
+    if (!chatEntry) {
+        chatEntry = {
+            id: chatKey,
+            programId: progId,
+            clientName: name,
+            chatHistory: [
+                {
+                    sender: 'doctor',
+                    senderName: 'Dr. Hasan',
+                    text: `Welcome to your customized nutrition program. Feel free to ask me any questions or request adjustments directly in this private chat thread!`,
+                    time: '10:00 AM'
+                }
+            ]
+        };
+        allProgramChats.push(chatEntry);
+        localStorage.setItem('nutriflow_program_chats', JSON.stringify(allProgramChats));
+    }
+    
+    chatContainer.innerHTML = chatEntry.chatHistory.map(msg => {
         const isClient = msg.sender === 'client';
-        return `
-            <div class="flex flex-col ${isClient ? 'items-start' : 'items-end'} w-full">
-                <div class="px-3.5 py-2.5 rounded-2xl max-w-[80%] text-xs font-semibold ${isClient ? 'bg-surface-variant text-on-surface' : 'bg-primary text-white'} shadow-sm">
-                    ${msg.text}
+        const bubbleBg = isClient ? 'bg-surface-variant text-on-surface' : 'bg-primary text-white';
+        const align = isClient ? 'items-start' : 'items-end';
+        
+        let attachmentHtml = '';
+        if (msg.type === 'ai_food_scan' && msg.scanData) {
+            const sd = msg.scanData;
+            attachmentHtml = `
+                <div class="mt-2 rounded-xl overflow-hidden border border-outline-variant/30 shadow-md bg-surface text-slate-800 w-[240px] max-w-full flex flex-col font-sans text-left">
+                    <div class="relative h-32 bg-slate-100 flex items-center justify-center overflow-hidden">
+                        <img src="${sd.imageUrl}" class="w-full h-full object-cover">
+                        <div class="absolute top-2 right-2 bg-slate-900/80 backdrop-blur-sm text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider flex items-center gap-1 shadow-sm border border-white/10">
+                            <span class="material-symbols-outlined text-[12px] text-primary">auto_awesome</span> AI Verified
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h4 class="font-black text-sm text-on-surface truncate leading-tight">${sd.foodName}</h4>
+                        <div class="flex items-baseline gap-1 mt-0.5 mb-2">
+                            <span class="text-lg font-black text-primary leading-none">${sd.calories}</span>
+                            <span class="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">kcal</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-1.5 mb-3">
+                            <div class="bg-surface-container-low rounded-lg p-1.5 text-center border border-outline-variant/20">
+                                <div class="text-[9px] font-black text-slate-500 uppercase tracking-wide">Pro</div>
+                                <div class="text-[11px] font-bold text-slate-700">${sd.protein}g</div>
+                            </div>
+                            <div class="bg-surface-container-low rounded-lg p-1.5 text-center border border-outline-variant/20">
+                                <div class="text-[9px] font-black text-slate-500 uppercase tracking-wide">Carb</div>
+                                <div class="text-[11px] font-bold text-slate-700">${sd.carbs}g</div>
+                            </div>
+                            <div class="bg-surface-container-low rounded-lg p-1.5 text-center border border-outline-variant/20">
+                                <div class="text-[9px] font-black text-slate-500 uppercase tracking-wide">Fat</div>
+                                <div class="text-[11px] font-bold text-slate-700">${sd.fat}g</div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="approveAndAddToDiary('${sd.foodName}', ${sd.calories}, ${sd.protein}, ${sd.carbs}, ${sd.fat})" class="w-full bg-primary hover:bg-[#005321] text-white text-[11px] font-bold py-2 rounded-lg transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1.5">
+                            <span class="material-symbols-outlined text-[14px]">add_circle</span>
+                            Add to Meal Plan
+                        </button>
+                    </div>
                 </div>
+            `;
+        }
+        
+        const messageText = msg.text ? `<div class="px-3.5 py-2.5 rounded-2xl max-w-[80%] text-xs font-semibold ${bubbleBg} shadow-sm">${msg.text}</div>` : '';
+
+        return `
+            <div class="flex flex-col ${align} w-full mt-2">
+                <div class="text-[9px] text-slate-400 mb-1 mx-1 font-semibold">${msg.time || ''}</div>
+                ${messageText}
+                ${attachmentHtml}
             </div>
         `;
     }).join('');
     
-    // Scroll to bottom
     setTimeout(() => { chatContainer.scrollTop = chatContainer.scrollHeight; }, 50);
 
     const modal = document.getElementById('admin-chat-modal');
@@ -1082,51 +1295,27 @@ window.handleSendAdminChatMessage = function(e) {
 
     const messageText = input.value.trim();
     input.value = '';
-
-    const chatContainer = document.getElementById('chat-messages-container');
     
-    let chatHistory = JSON.parse(localStorage.getItem(`nutriflow_chat_${activeChatClient}`)) || defaultChats[activeChatClient] || [
-        { sender: 'client', text: 'Hello! Can we check my daily protein limits?' }
-    ];
-
-    // Push doctor message
-    chatHistory.push({ sender: 'doctor', text: messageText });
-    localStorage.setItem(`nutriflow_chat_${activeChatClient}`, JSON.stringify(chatHistory));
-
-    // Render doctor message
-    const docMsgHtml = `
-        <div class="flex flex-col items-end w-full">
-            <div class="px-3.5 py-2.5 rounded-2xl max-w-[80%] text-xs font-semibold bg-primary text-white shadow-sm">
-                ${messageText}
-            </div>
-        </div>
-    `;
-    chatContainer.innerHTML += docMsgHtml;
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-
-    // Simulate client response
-    setTimeout(() => {
-        let replies = [
-            'Thank you doctor! I will adjust my snacks accordingly.',
-            'Got it, I just saw the updated goals in my client portal. Thanks!',
-            'Understood, I will log my water glasses now.',
-            'Perfect! See you at our next video consultation call.'
-        ];
-        const randomReply = replies[Math.floor(Math.random() * replies.length)];
+    const clientObj = state.clients.find(c => c.name === activeChatClient);
+    const progId = clientObj?.activeProgramId || 'prog-sarah';
+    const allProgramChats = JSON.parse(localStorage.getItem('nutriflow_program_chats')) || [];
+    const chatKey = `${progId}_${activeChatClient}`;
+    let chatEntry = allProgramChats.find(c => c.id === chatKey);
+    
+    if (chatEntry) {
+        const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        chatEntry.chatHistory.push({
+            sender: 'doctor',
+            senderName: localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan',
+            text: messageText,
+            time: timeNow
+        });
+        localStorage.setItem('nutriflow_program_chats', JSON.stringify(allProgramChats));
         
-        chatHistory.push({ sender: 'client', text: randomReply });
-        localStorage.setItem(`nutriflow_chat_${activeChatClient}`, JSON.stringify(chatHistory));
-
-        const clientMsgHtml = `
-            <div class="flex flex-col items-start w-full">
-                <div class="px-3.5 py-2.5 rounded-2xl max-w-[80%] text-xs font-semibold bg-surface-variant text-on-surface shadow-sm">
-                    ${randomReply}
-                </div>
-            </div>
-        `;
-        chatContainer.innerHTML += clientMsgHtml;
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-    }, 1500);
+        // Re-render
+        if (typeof openAdminChatModal === 'function') openAdminChatModal(activeChatClient);
+        if (typeof renderAdminProgramChat === 'function') renderAdminProgramChat();
+    }
 };
 
 window.showAddNewClientModal = function() {
@@ -2787,7 +2976,46 @@ window.renderAdminProgramChat = function() {
         const align = isDoc ? 'justify-end' : 'justify-start';
         
         let attachmentHtml = '';
-        if (msg.file) {
+        if (msg.type === 'ai_food_scan' && msg.scanData) {
+            const sd = msg.scanData;
+            attachmentHtml = `
+                <div class="mt-2 rounded-xl overflow-hidden border border-outline-variant/30 shadow-md bg-surface text-slate-800 w-[240px] max-w-full flex flex-col font-sans">
+                    <div class="relative h-32 bg-slate-100 flex items-center justify-center overflow-hidden">
+                        <img src="${sd.imageUrl}" class="w-full h-full object-cover">
+                        <div class="absolute top-2 right-2 bg-slate-900/80 backdrop-blur-sm text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider flex items-center gap-1 shadow-sm border border-white/10">
+                            <span class="material-symbols-outlined text-[12px] text-primary">auto_awesome</span> AI Verified
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h4 class="font-black text-sm text-on-surface truncate leading-tight">${sd.foodName}</h4>
+                        <div class="flex items-baseline gap-1 mt-0.5 mb-2">
+                            <span class="text-lg font-black text-primary leading-none">${sd.calories}</span>
+                            <span class="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">kcal</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-1.5 mb-3">
+                            <div class="bg-surface-container-low rounded-lg p-1.5 text-center border border-outline-variant/20">
+                                <div class="text-[9px] font-black text-slate-500 uppercase tracking-wide">Pro</div>
+                                <div class="text-[11px] font-bold text-slate-700">${sd.protein}g</div>
+                            </div>
+                            <div class="bg-surface-container-low rounded-lg p-1.5 text-center border border-outline-variant/20">
+                                <div class="text-[9px] font-black text-slate-500 uppercase tracking-wide">Carb</div>
+                                <div class="text-[11px] font-bold text-slate-700">${sd.carbs}g</div>
+                            </div>
+                            <div class="bg-surface-container-low rounded-lg p-1.5 text-center border border-outline-variant/20">
+                                <div class="text-[9px] font-black text-slate-500 uppercase tracking-wide">Fat</div>
+                                <div class="text-[11px] font-bold text-slate-700">${sd.fat}g</div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="approveAndAddToDiary('${sd.foodName}', ${sd.calories}, ${sd.protein}, ${sd.carbs}, ${sd.fat})" class="w-full bg-primary hover:bg-[#005321] text-white text-[11px] font-bold py-2 rounded-lg transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1.5">
+                            <span class="material-symbols-outlined text-[14px]">add_circle</span>
+                            Add to Meal Plan
+                        </button>
+                    </div>
+                </div>
+            `;
+        } else if (msg.file) {
             if (msg.file.type.startsWith('image/')) {
                 attachmentHtml = `
                     <div class="mt-2 rounded-lg overflow-hidden max-w-full border border-outline-variant/20 shadow-sm bg-white p-1">
@@ -2991,3 +3219,621 @@ window.toggleDiscussionFullView = function(fullViewActive) {
     }
 };
 
+
+// ==================== AI FOOD SCANNER LOGIC ====================
+window.handleFoodScannerUpload = function(e, senderRole) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (typeof showToast === 'function') showToast('AI is scanning your food... 🔍', 'info');
+    
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const dataUrl = event.target.result;
+        
+        // Simulate AI processing delay
+        setTimeout(() => {
+            const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+            const allProgramChats = JSON.parse(localStorage.getItem('nutriflow_program_chats')) || [];
+            
+            let progId = 'prog-sarah';
+            const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
+            const clientDetails = clientsList.find(c => c.name === activeClient);
+            if (clientDetails && clientDetails.activeProgramId) {
+                progId = clientDetails.activeProgramId;
+            }
+            
+            const chatKey = `${progId}_${activeClient}`;
+            let chatEntry = allProgramChats.find(c => c.id === chatKey);
+            if (!chatEntry) return;
+            
+            const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const senderName = senderRole === 'client' ? activeClient : (localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan');
+            
+            const aiResults = [
+                { name: "Avocado Toast with Egg", cal: 320, p: 14, c: 28, f: 18 },
+                { name: "Grilled Salmon Bowl", cal: 450, p: 35, c: 12, f: 28 },
+                { name: "Berry Protein Smoothie", cal: 280, p: 25, c: 35, f: 5 }
+            ];
+            const result = aiResults[Math.floor(Math.random() * aiResults.length)];
+            
+            const newMessage = {
+                sender: senderRole === 'client' ? 'client' : 'doctor',
+                senderName: senderName,
+                text: '',
+                time: timeNow,
+                type: 'ai_food_scan',
+                scanData: {
+                    imageUrl: dataUrl,
+                    foodName: result.name,
+                    calories: result.cal,
+                    protein: result.p,
+                    carbs: result.c,
+                    fat: result.f
+                }
+            };
+            
+            chatEntry.chatHistory.push(newMessage);
+            localStorage.setItem('nutriflow_program_chats', JSON.stringify(allProgramChats));
+            
+            if (typeof showToast === 'function') showToast('Scan complete!', 'success');
+            
+            // Re-render UI based on where we are
+            if (typeof renderProgramChat === 'function') renderProgramChat();
+            if (typeof renderAdminProgramChat === 'function') renderAdminProgramChat();
+            
+            // If admin modal chat is open, refresh it by finding the active client name in DOM
+            const modalLabel = document.getElementById('chat-client-name');
+            if (modalLabel && modalLabel.innerText && typeof openAdminChatModal === 'function') {
+                openAdminChatModal(modalLabel.innerText);
+            }
+            
+        }, 2000);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+};
+
+window.approveAndAddToDiary = function(foodName, calories, protein, carbs, fat) {
+    const today = 'Wed';
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    
+    // Add to Meal Plans
+    const storedPlans = JSON.parse(localStorage.getItem('nutriflow_client_meal_plans')) || {};
+    if (!storedPlans[activeClient]) storedPlans[activeClient] = {};
+    if (!storedPlans[activeClient][today]) storedPlans[activeClient][today] = [];
+
+    // Check if Snack already exists
+    const existingSnackIndex = storedPlans[activeClient][today].findIndex(m => m.type === 'Snack');
+    const newMeal = {
+        id: 'ai-scan-' + Date.now(),
+        type: 'Snack',
+        title: foodName,
+        calories: calories,
+        p: protein,
+        c: carbs,
+        f: fat,
+        image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80',
+        time: 'Now',
+        notes: 'Added via AI Scanner'
+    };
+    
+    if (existingSnackIndex > -1) {
+        // Replace or push to same array, actually meal plan is usually 1 per type in our UI, so let's replace Snack
+        storedPlans[activeClient][today][existingSnackIndex] = newMeal;
+    } else {
+        storedPlans[activeClient][today].push(newMeal);
+    }
+    
+    localStorage.setItem('nutriflow_client_meal_plans', JSON.stringify(storedPlans));
+    
+    // Auto-log it as consumed
+    const loggedStatus = JSON.parse(localStorage.getItem('nutriflow_client_logged_status') || '{}');
+    if (!loggedStatus[activeClient]) loggedStatus[activeClient] = {};
+    if (!loggedStatus[activeClient][today]) loggedStatus[activeClient][today] = {};
+    loggedStatus[activeClient][today]['Snack'] = true;
+    localStorage.setItem('nutriflow_client_logged_status', JSON.stringify(loggedStatus));
+    
+    if (typeof showToast === 'function') showToast(foodName + ' added to food diary!', 'success');
+    
+    // Trigger re-renders
+    if (typeof loadState === 'function') loadState();
+    if (typeof renderDashboardMeals === 'function') renderDashboardMeals();
+    if (typeof updateMacrosSummary === 'function') updateMacrosSummary();
+    if (typeof renderAdminMealBuilder === 'function') renderAdminMealBuilder();
+};
+
+window.openFoodScannerModal = function() {
+    const modal = document.getElementById('ai-food-scanner-modal');
+    if (!modal) { console.error('[NutriFlow] ai-food-scanner-modal not found!'); return; }
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    // Reset state
+    const uploadArea = document.getElementById('ai-scanner-upload-area');
+    const loading = document.getElementById('ai-scanner-loading');
+    const result = document.getElementById('ai-scanner-result');
+    if (uploadArea) { uploadArea.classList.remove('hidden'); uploadArea.classList.add('flex'); }
+    if (loading) { loading.classList.add('hidden'); loading.classList.remove('flex'); }
+    if (result) { result.classList.add('hidden'); result.classList.remove('flex'); }
+    
+    const fileInput = document.getElementById('ai-scanner-file-input');
+    if (fileInput) fileInput.value = '';
+};
+
+window.closeFoodScannerModal = function() {
+    const modal = document.getElementById('ai-food-scanner-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+let currentScanResult = null;
+
+window.processFoodScan = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Hide upload area, show loading
+    const uploadArea = document.getElementById('ai-scanner-upload-area');
+    const loadingEl = document.getElementById('ai-scanner-loading');
+    if (uploadArea) { uploadArea.classList.add('hidden'); uploadArea.classList.remove('flex'); }
+    if (loadingEl) { loadingEl.classList.remove('hidden'); loadingEl.classList.add('flex'); }
+    
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const dataUrl = event.target.result;
+        
+        setTimeout(() => {
+            // Hide loading, show result
+            if (loadingEl) { loadingEl.classList.add('hidden'); loadingEl.classList.remove('flex'); }
+            const resultEl = document.getElementById('ai-scanner-result');
+            if (resultEl) { resultEl.classList.remove('hidden'); resultEl.classList.add('flex'); }
+            
+            const aiResults = [
+                { name: "Avocado Toast with Egg", cal: 320, p: 14, c: 28, f: 18 },
+                { name: "Grilled Salmon Bowl", cal: 450, p: 35, c: 12, f: 28 },
+                { name: "Berry Protein Smoothie", cal: 280, p: 25, c: 35, f: 5 }
+            ];
+            const result = aiResults[Math.floor(Math.random() * aiResults.length)];
+            
+            currentScanResult = {
+                imageUrl: dataUrl,
+                foodName: result.name,
+                calories: result.cal,
+                protein: result.p,
+                carbs: result.c,
+                fat: result.f
+            };
+            
+            document.getElementById('ai-scanner-preview-img').src = dataUrl;
+            document.getElementById('ai-scanner-food-name').innerText = result.name;
+            document.getElementById('ai-scanner-calories').innerText = result.cal;
+            document.getElementById('ai-scanner-protein').innerText = result.p + 'g';
+            document.getElementById('ai-scanner-carbs').innerText = result.c + 'g';
+            document.getElementById('ai-scanner-fat').innerText = result.f + 'g';
+            
+            const btn = document.getElementById('ai-scanner-send-btn');
+            btn.onclick = function() {
+                specialistSendScanToClient();
+            };
+            
+        }, 1500);
+    };
+    reader.readAsDataURL(file);
+};
+
+window.sendScanToChat = function() {
+    if (!currentScanResult) return;
+    
+    const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    // Determine context (are we in admin or client?)
+    const isAdmin = window.location.pathname.includes('/admin/');
+    let senderRole = isAdmin ? 'doctor' : 'client';
+    let senderName = isAdmin ? (localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan') : (localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins');
+    
+    let activeClientName = isAdmin ? (window.activeChatClient || 'Sarah Jenkins') : (localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins');
+    
+    const allProgramChats = JSON.parse(localStorage.getItem('nutriflow_program_chats')) || [];
+    
+    let progId = 'prog-sarah';
+    const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
+    const clientDetails = clientsList.find(c => c.name === activeClientName);
+    if (clientDetails && clientDetails.activeProgramId) {
+        progId = clientDetails.activeProgramId;
+    }
+    
+    const chatKey = `${progId}_${activeClientName}`;
+    let chatEntry = allProgramChats.find(c => c.id === chatKey);
+    
+    if (chatEntry) {
+        chatEntry.chatHistory.push({
+            sender: senderRole,
+            senderName: senderName,
+            text: '',
+            time: timeNow,
+            type: 'ai_food_scan',
+            scanData: currentScanResult
+        });
+        localStorage.setItem('nutriflow_program_chats', JSON.stringify(allProgramChats));
+        
+        // Refresh UI
+        if (typeof renderProgramChat === 'function') renderProgramChat();
+        if (typeof renderAdminProgramChat === 'function') renderAdminProgramChat();
+        if (typeof openAdminChatModal === 'function' && isAdmin) openAdminChatModal(activeClientName);
+    }
+    
+    closeFoodScannerModal();
+};
+// ==========================================
+// FOOD SCANS HUB — Specialist Side
+// ==========================================
+
+let activeFoodChatClientId = null;
+
+window.updateScanBadge = function() {
+    const allMessages = JSON.parse(localStorage.getItem('nutriflow_food_chat_messages') || '[]');
+    const unread = allMessages.filter(m => m.sender === 'client' && !m.readBySpecialist).length;
+    const badge = document.getElementById('scan-badge');
+    if (badge) badge.style.display = unread > 0 ? 'block' : 'none';
+};
+
+window.migrateAdminScansToChatFallback = function() {
+    if (localStorage.getItem('nutriflow_food_chat_migrated')) return;
+    const allScans = JSON.parse(localStorage.getItem('nutriflow_food_scans') || '[]');
+    const chatMessages = JSON.parse(localStorage.getItem('nutriflow_food_chat_messages') || '[]');
+
+    if (chatMessages.length === 0 && allScans.length > 0) {
+        const sortedScans = [...allScans].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        sortedScans.forEach(scan => {
+            const scanMsgId = scan.id || 'msg_' + Date.now() + '_' + Math.random();
+            chatMessages.push({
+                id: scanMsgId,
+                clientId: scan.clientId || 'sarah_jenkins',
+                clientName: scan.clientName || 'Sarah Jenkins',
+                sender: scan.sender || 'client',
+                senderName: scan.senderName || (scan.sender === 'client' ? scan.clientName : 'Specialist'),
+                timestamp: scan.timestamp || new Date().toISOString(),
+                type: 'food_scan',
+                foodScan: {
+                    imageUrl: scan.imageUrl,
+                    foodName: scan.foodName,
+                    calories: scan.calories,
+                    protein: scan.protein,
+                    carbs: scan.carbs,
+                    fat: scan.fat,
+                    addedToMeal: scan.addedToMeal || false
+                }
+            });
+
+            if (scan.comments && scan.comments.length > 0) {
+                scan.comments.forEach(comment => {
+                    chatMessages.push({
+                        id: 'msg_' + Date.now() + '_' + Math.random(),
+                        clientId: scan.clientId || 'sarah_jenkins',
+                        clientName: scan.clientName || 'Sarah Jenkins',
+                        sender: comment.sender || 'specialist',
+                        senderName: comment.sender === 'client' ? (scan.clientName || 'Sarah Jenkins') : 'Specialist',
+                        timestamp: comment.timestamp || new Date().toISOString(),
+                        type: 'text',
+                        text: comment.text
+                    });
+                });
+            }
+        });
+        localStorage.setItem('nutriflow_food_chat_messages', JSON.stringify(chatMessages));
+    }
+    localStorage.setItem('nutriflow_food_chat_migrated', 'true');
+};
+
+window.renderAdminScanHub = function() {
+    migrateAdminScansToChatFallback();
+
+    const clientListEl = document.getElementById('admin-food-chat-client-list');
+    if (!clientListEl) return;
+
+    const allClients = JSON.parse(localStorage.getItem('nutriflow_clients') || '[]');
+    if (allClients.length === 0) {
+        clientListEl.innerHTML = `
+            <div class="text-center py-8 text-xs text-slate-400">
+                Belum ada client aktif.
+            </div>`;
+        return;
+    }
+
+    if (!activeFoodChatClientId) {
+        activeFoodChatClientId = allClients[0].name.toLowerCase().replace(/\s+/g, '_');
+    }
+
+    const allMessages = JSON.parse(localStorage.getItem('nutriflow_food_chat_messages') || '[]');
+
+    // Mark messages as read for active client
+    let changed = false;
+    allMessages.forEach(m => {
+        if (m.clientId === activeFoodChatClientId && m.sender === 'client' && !m.readBySpecialist) {
+            m.readBySpecialist = true;
+            changed = true;
+        }
+    });
+    if (changed) {
+        localStorage.setItem('nutriflow_food_chat_messages', JSON.stringify(allMessages));
+        updateScanBadge();
+    }
+
+    // Render client list on sidebar
+    clientListEl.innerHTML = allClients.map(c => {
+        const cId = c.name.toLowerCase().replace(/\s+/g, '_');
+        const isActive = cId === activeFoodChatClientId;
+        const myMessages = allMessages.filter(m => m.clientId === cId);
+        
+        let lastText = 'Start nutrition chat...';
+        if (myMessages.length > 0) {
+            const lastMsg = myMessages[myMessages.length - 1];
+            lastText = lastMsg.type === 'food_scan' ? `📸 Scan: ${lastMsg.foodScan.foodName}` : lastMsg.text;
+        }
+
+        const initials = c.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+        return `
+            <button onclick="setActiveFoodChatClient('${cId}')" class="w-full text-left p-3 rounded-2xl flex items-center gap-3 transition-all cursor-pointer ${isActive ? 'bg-primary/10 text-primary font-bold border border-primary/20' : 'hover:bg-slate-100/50 text-slate-600 border border-transparent'}">
+                <div class="w-9 h-9 rounded-full font-bold flex items-center justify-center text-xs shrink-0 ${isActive ? 'bg-primary text-white' : 'bg-slate-200 text-slate-500'}">
+                    ${initials}
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="text-xs font-bold truncate ${isActive ? 'text-primary' : 'text-slate-800'}">${c.name}</p>
+                    <p class="text-[10px] text-slate-400 truncate mt-0.5">${lastText}</p>
+                </div>
+            </button>`;
+    }).join('');
+
+    const activeClient = allClients.find(c => c.name.toLowerCase().replace(/\s+/g, '_') === activeFoodChatClientId) || allClients[0];
+    if (activeClient) {
+        const initials = activeClient.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        const headerAvatar = document.getElementById('admin-food-chat-header-avatar');
+        const headerName = document.getElementById('admin-food-chat-header-name');
+
+        if (headerAvatar) headerAvatar.innerText = initials;
+        if (headerName) headerName.innerText = activeClient.name;
+
+        renderAdminFoodChatMessages(activeClient);
+    }
+};
+
+window.setActiveFoodChatClient = function(clientId) {
+    activeFoodChatClientId = clientId;
+    renderAdminScanHub();
+};
+
+window.submitAdminFoodChatMessage = function() {
+    const input = document.getElementById('admin-food-chat-input');
+    if (!input || !input.value.trim() || !activeFoodChatClientId) return;
+
+    const allClients = JSON.parse(localStorage.getItem('nutriflow_clients') || '[]');
+    const client = allClients.find(c => c.name.toLowerCase().replace(/\s+/g, '_') === activeFoodChatClientId);
+    const clientName = client ? client.name : 'Sarah Jenkins';
+
+    const specialistName = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
+
+    const message = {
+        id: 'msg_' + Date.now(),
+        clientId: activeFoodChatClientId,
+        clientName: clientName,
+        sender: 'specialist',
+        senderName: specialistName,
+        timestamp: new Date().toISOString(),
+        type: 'text',
+        text: input.value.trim()
+    };
+
+    const allMessages = JSON.parse(localStorage.getItem('nutriflow_food_chat_messages') || '[]');
+    allMessages.push(message);
+    localStorage.setItem('nutriflow_food_chat_messages', JSON.stringify(allMessages));
+
+    input.value = '';
+    renderAdminScanHub();
+};
+
+window.addScanMessageToMealPlan = function(msgId) {
+    const allMessages = JSON.parse(localStorage.getItem('nutriflow_food_chat_messages') || '[]');
+    const msg = allMessages.find(m => m.id === msgId);
+    if (!msg || msg.type !== 'food_scan') return;
+
+    const allPrograms = JSON.parse(localStorage.getItem('nutriflow_meal_programs') || '[]');
+    const clientProgram = allPrograms.find(p => p.client === msg.clientName);
+    
+    if (!clientProgram) {
+        showToast(`Client ${msg.clientName} tidak memiliki program aktif. Buat program terlebih dahulu di tab Builder.`, 'error');
+        return;
+    }
+
+    const fs = msg.foodScan;
+    const foodItem = {
+        id: 'food_' + Date.now(),
+        title: fs.foodName,
+        calories: parseInt(fs.calories) || 300,
+        p: parseInt(fs.protein) || 15,
+        c: parseInt(fs.carbs) || 30,
+        f: parseInt(fs.fat) || 10,
+        recipeSteps: 'Add recommended meal plan steps.',
+        recipeIngredients: 'Recommended food item ingredients.',
+        image: fs.imageUrl || ''
+    };
+
+    if (!clientProgram.meals) clientProgram.meals = {};
+    if (!clientProgram.meals['Senin']) clientProgram.meals['Senin'] = {};
+    if (!clientProgram.meals['Senin']['Breakfast']) clientProgram.meals['Senin']['Breakfast'] = [];
+    
+    clientProgram.meals['Senin']['Breakfast'].push(foodItem);
+    localStorage.setItem('nutriflow_meal_programs', JSON.stringify(allPrograms));
+
+    msg.foodScan.addedToMeal = true;
+    localStorage.setItem('nutriflow_food_chat_messages', JSON.stringify(allMessages));
+
+    renderAdminScanHub();
+    showToast(`"${fs.foodName}" ditambahkan ke Program ${msg.clientName} (Senin Breakfast)!`);
+};
+
+function renderAdminFoodChatMessages(client) {
+    const container = document.getElementById('admin-food-chat-message-list');
+    if (!container) return;
+
+    const clientId = client.name.toLowerCase().replace(/\s+/g, '_');
+    const allMessages = JSON.parse(localStorage.getItem('nutriflow_food_chat_messages') || '[]');
+    const myMessages = allMessages.filter(m => m.clientId === clientId);
+
+    if (myMessages.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-16 text-xs text-slate-400 m-auto flex flex-col items-center gap-2">
+                <span class="material-symbols-outlined text-[32px] text-slate-300">chat_bubble_outline</span>
+                Belum ada diskusi gizi dengan ${client.name}.
+                <p class="text-[10px] text-slate-400">Kirim pesan pertama atau lakukan scan rekomendasi makanan untuk memulai.</p>
+            </div>`;
+        return;
+    }
+
+    container.innerHTML = myMessages.map(msg => {
+        const isSpecialist = msg.sender === 'specialist';
+        const date = new Date(msg.timestamp);
+        const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        let contentHtml = '';
+        if (msg.type === 'food_scan') {
+            const fs = msg.foodScan;
+            contentHtml = `
+                <div style="background:#fff;border:1px solid #e2e8f0;border-radius:0.75rem;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.05);margin-top:0.25rem;max-width:240px;">
+                    <div style="padding:0.75rem;text-align:left;">
+                        <h4 style="font-weight:800;font-size:0.75rem;color:#1e293b;margin:0 0 0.25rem;">${fs.foodName}</h4>
+                        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.375rem;">
+                            <span style="font-size:0.625rem;font-weight:800;color:#14833c;">${fs.calories} kcal</span>
+                            <span style="font-size:0.5625rem;color:#64748b;">P: ${fs.protein}g</span>
+                            <span style="font-size:0.5625rem;color:#64748b;">C: ${fs.carbs}g</span>
+                            <span style="font-size:0.5625rem;color:#64748b;">F: ${fs.fat}g</span>
+                        </div>
+                        ${fs.addedToMeal ? `
+                            <div style="font-size:0.5625rem;background:#f0fdf4;color:#15803d;font-weight:700;padding:0.125rem 0.375rem;border-radius:0.25rem;display:inline-flex;align-items:center;gap:0.125rem;">
+                                <span class="material-symbols-outlined" style="font-size:0.625rem;">check_circle</span>Added to Program
+                            </div>
+                        ` : `
+                            <button onclick="addScanMessageToMealPlan('${msg.id}')" style="width:100%;background:#14833c;color:#fff;font-size:0.625rem;font-weight:700;padding:0.375rem;border-radius:0.5rem;border:none;cursor:pointer;margin-top:0.25rem;transition:background 0.2s;" onmouseover="this.style.background='#005321'" onmouseout="this.style.background='#14833c'">
+                                Add to Program
+                            </button>
+                        `}
+                    </div>
+                </div>`;
+        } else {
+            contentHtml = `<div style="font-weight:500;">${msg.text}</div>`;
+        }
+
+        return `
+            <div style="display:flex;flex-direction:column;align-items:${isSpecialist ? 'flex-end' : 'flex-start'};width:100%;">
+                <div style="max-width:85%;padding:0.5rem 0.75rem;border-radius:0.875rem;font-size:0.75rem;line-height:1.4;
+                    background:${isSpecialist ? '#f1f5f9' : '#e0f2fe'};
+                    color:${isSpecialist ? '#334155' : '#0369a1'};
+                    border-bottom-right-radius:${isSpecialist ? '0.25rem' : '0.875rem'};
+                    border-bottom-left-radius:${isSpecialist ? '0.875rem' : '0.25rem'};">
+                    <span style="font-weight:800;font-size:0.625rem;display:block;margin-bottom:0.125rem;color:${isSpecialist ? '#475569' : '#0284c7'};">
+                        ${isSpecialist ? (msg.senderName || 'Kamu (Specialist)') : 'Client'}
+                    </span>
+                    ${contentHtml}
+                </div>
+                <span style="font-size:0.5625rem;color:#94a3b8;margin-top:0.125rem;padding:0 0.25rem;">${timeStr}</span>
+            </div>`;
+    }).join('');
+
+    container.scrollTop = container.scrollHeight;
+}
+
+window.openAdminScannerModal = function() {
+    const modal = document.getElementById('ai-food-scanner-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    const uploadArea = document.getElementById('ai-scanner-upload-area');
+    const loading = document.getElementById('ai-scanner-loading');
+    const result = document.getElementById('ai-scanner-result');
+    if (uploadArea) { uploadArea.classList.remove('hidden'); uploadArea.classList.add('flex'); }
+    if (loading) { loading.classList.add('hidden'); loading.classList.remove('flex'); }
+    if (result) { result.classList.add('hidden'); result.classList.remove('flex'); }
+    
+    const fileInput = document.getElementById('ai-scanner-file-input');
+    if (fileInput) fileInput.value = '';
+    
+    window._scannerMode = 'specialist';
+
+    // Populate Client Selector Dropdown & pre-select active client
+    const select = document.getElementById('scanner-client-select');
+    if (select) {
+        const allClients = JSON.parse(localStorage.getItem('nutriflow_clients') || '[]');
+        if (allClients.length === 0) {
+            select.innerHTML = `<option value="sarah_jenkins">Sarah Jenkins (Default)</option>`;
+        } else {
+            select.innerHTML = allClients.map(c => `<option value="${c.name.toLowerCase().replace(/\s+/g, '_')}">${c.name}</option>`).join('');
+        }
+        if (activeFoodChatClientId) {
+            select.value = activeFoodChatClientId;
+        }
+    }
+};
+
+window.specialistSendScanToClient = function() {
+    if (!currentScanResult) return;
+
+    const select = document.getElementById('scanner-client-select');
+    let clientId = 'sarah_jenkins';
+    let clientName = 'Sarah Jenkins';
+
+    if (select) {
+        const allClients = JSON.parse(localStorage.getItem('nutriflow_clients') || '[]');
+        const selectedId = select.value;
+        const matched = allClients.find(c => c.name.toLowerCase().replace(/\s+/g, '_') === selectedId);
+        if (matched) {
+            clientId = selectedId;
+            clientName = matched.name;
+        } else if (allClients.length > 0) {
+            clientId = allClients[0].name.toLowerCase().replace(/\s+/g, '_');
+            clientName = allClients[0].name;
+        }
+    }
+
+    const specialistName = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
+
+    const message = {
+        id: 'msg_' + Date.now(),
+        clientId: clientId,
+        clientName: clientName,
+        sender: 'specialist',
+        senderName: specialistName,
+        timestamp: new Date().toISOString(),
+        type: 'food_scan',
+        foodScan: {
+            imageUrl: currentScanResult.imageUrl,
+            foodName: currentScanResult.foodName,
+            calories: currentScanResult.calories,
+            protein: currentScanResult.protein,
+            carbs: currentScanResult.carbs,
+            fat: currentScanResult.fat,
+            addedToMeal: false
+        }
+    };
+
+    const allMessages = JSON.parse(localStorage.getItem('nutriflow_food_chat_messages') || '[]');
+    allMessages.push(message);
+    localStorage.setItem('nutriflow_food_chat_messages', JSON.stringify(allMessages));
+
+    closeFoodScannerModal();
+    window._scannerMode = null;
+    
+    // Set this client as active
+    activeFoodChatClientId = clientId;
+    renderAdminScanHub();
+
+    if (typeof showToast === 'function') showToast(`Scan "${message.foodScan.foodName}" dikirim ke ${clientName}!`);
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(updateScanBadge, 500);
+});

@@ -117,6 +117,10 @@
         <div class="hidden md:flex gap-md h-full items-center justify-center">
             <a onclick="navigateTo('admin-clients')" id="link-admin-clients" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Clients</a>
             <a onclick="navigateTo('admin-meal-builder')" id="link-admin-meal-builder" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Programs</a>
+            <a onclick="navigateTo('admin-food-scans')" id="link-admin-food-scans" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer relative">
+                Food Scans
+                <span id="scan-badge" style="display:none;position:absolute;top:1rem;right:0.5rem;width:0.5rem;height:0.5rem;background:#ef4444;border-radius:50%;"></span>
+            </a>
             <a onclick="navigateTo('admin-calendar')" id="link-admin-calendar" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Appointments</a>
             <a onclick="navigateTo('admin-services')" id="link-admin-services" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Services</a>
             <a onclick="navigateTo('admin-profile')" id="link-admin-profile" class="nav-link h-full flex items-center text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors px-3 cursor-pointer">Profile</a>
@@ -502,8 +506,6 @@
             </div>
         </section>
 
-
-
         <!-- ==================== VIEW 5: PRACTITIONER PROFILE ==================== -->
         <section id="view-admin-profile" class="view-section hidden flex flex-col gap-gutter">
             <div>
@@ -544,39 +546,113 @@
                             <!-- Populated dynamically via JS -->
                         </div>
                     </div>
-                </div>
+                </div>                <!-- Right: Profile Form + Platform Billing Card -->
+                <div class="lg:col-span-8 flex flex-col gap-gutter">
+                    <!-- Profile Form Card -->
+                    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
+                        <h3 class="text-lg font-bold text-on-background">Edit Professional Information</h3>
+                        <form onsubmit="handleSavePractitionerProfile(event)" class="space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Practitioner Name</label>
+                                    <input type="text" id="edit-practitioner-name" required class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-3 py-2 bg-surface">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Professional Specialty</label>
+                                    <input type="text" id="edit-practitioner-specialty" required class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-3 py-2 bg-surface">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Email Address</label>
+                                <input type="email" id="edit-practitioner-email" required class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-3 py-2 bg-surface">
+                            </div>
 
-                <!-- Right: Form card -->
-                <div class="lg:col-span-8 bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-4">
-                    <h3 class="text-lg font-bold text-on-background">Edit Professional Information</h3>
-                    <form onsubmit="handleSavePractitionerProfile(event)" class="space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Practitioner Name</label>
-                                <input type="text" id="edit-practitioner-name" required class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-3 py-2 bg-surface">
+                            <div class="flex justify-between items-center pt-4 border-t border-outline-variant/30 mt-6">
+                                <button type="button" onclick="handleAdminSignOut()" class="border border-[#ba1a1a]/30 hover:bg-red-50 text-[#ba1a1a] font-bold text-xs py-2.5 px-5 rounded-xl transition-all flex items-center gap-1 shadow-sm cursor-pointer">
+                                    <span class="material-symbols-outlined text-[16px]">logout</span> Sign Out
+                                </button>
+                                <button type="submit" class="bg-primary hover:bg-[#005321] text-white font-bold text-xs py-2.5 px-6 rounded-xl transition-all shadow-md cursor-pointer">Save Profile Changes</button>
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Professional Specialty</label>
-                                <input type="text" id="edit-practitioner-specialty" required class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-3 py-2 bg-surface">
-                            </div>
-                        </div>
+                        </form>
+                    </div>
+
+                    <!-- Platform Billing Card -->
+                    <div id="profile-billing-section" class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm flex flex-col gap-6 text-left">
                         <div>
-                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Email Address</label>
-                            <input type="email" id="edit-practitioner-email" required class="w-full rounded-lg border-outline-variant/40 focus:border-primary focus:ring-primary text-sm px-3 py-2 bg-surface">
+                            <h3 class="text-lg font-bold text-on-background">Platform Billing & SaaS Plan</h3>
+                            <p class="text-xs text-on-surface-variant mt-0.5">Manage your NutriFlow SaaS subscription and billing details.</p>
                         </div>
 
-                        <div class="flex justify-between items-center pt-4 border-t border-outline-variant/30 mt-6">
-                            <button type="button" onclick="handleAdminSignOut()" class="border border-[#ba1a1a]/30 hover:bg-red-50 text-[#ba1a1a] font-bold text-xs py-2.5 px-5 rounded-xl transition-all flex items-center gap-1 shadow-sm cursor-pointer">
-                                <span class="material-symbols-outlined text-[16px]">logout</span> Sign Out
-                            </button>
-                            <button type="submit" class="bg-primary hover:bg-[#005321] text-white font-bold text-xs py-2.5 px-6 rounded-xl transition-all shadow-md cursor-pointer">Save Profile Changes</button>
+                        <!-- Current Plan Card -->
+                        <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 border border-slate-700 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative overflow-hidden">
+                            <div class="absolute -top-16 -right-16 w-64 h-64 bg-primary/20 rounded-full blur-3xl pointer-events-none"></div>
+
+                            <div class="z-10 flex items-center gap-4">
+                                <div id="sp-plan-icon" class="w-12 h-12 rounded-xl bg-slate-700/50 flex items-center justify-center shrink-0 border border-slate-600">
+                                    <span class="material-symbols-outlined text-white text-2xl" style="font-variation-settings:'FILL' 1">badge</span>
+                                </div>
+                                <div>
+                                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">Current Plan</p>
+                                    <h3 id="sp-plan-name" class="text-white text-2xl font-black tracking-tight">Basic EHR</h3>
+                                    <p class="text-slate-400 text-xs mt-0.5 flex items-center gap-1.5">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Active — Billed monthly
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="z-10 flex flex-col sm:items-end gap-2 w-full sm:w-auto">
+                                <div id="sp-plan-price" class="text-white font-black text-3xl">S$0<span class="text-slate-400 text-xs font-normal">/mo</span></div>
+                                <button onclick="openSaaSUpgradeModal()" id="btn-upgrade-saas" class="w-full sm:w-auto bg-primary hover:bg-[#005321] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer border border-primary-container/30">
+                                    <span class="material-symbols-outlined text-[16px]">rocket_launch</span> Change SaaS Plan
+                                </button>
+                            </div>
                         </div>
-                    </form>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Why Upgrade / Features comparison -->
+                            <div class="bg-surface border border-outline-variant/30 rounded-xl p-5 shadow-sm">
+                                <h4 class="font-bold text-sm text-on-background mb-3">Why Upgrade to Pro?</h4>
+                                <ul class="space-y-3 text-left">
+                                    <li class="flex items-start gap-2.5">
+                                        <span class="material-symbols-outlined text-primary text-lg mt-0.5">auto_awesome</span>
+                                        <div>
+                                            <h5 class="font-bold text-xs text-on-surface">Unlimited AI ADIME Scribes</h5>
+                                            <p class="text-[10px] text-on-surface-variant mt-0.5">Save hours of charting. Let AI draft your notes instantly.</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start gap-2.5">
+                                        <span class="material-symbols-outlined text-emerald-600 text-lg mt-0.5">savings</span>
+                                        <div>
+                                            <h5 class="font-bold text-xs text-on-surface">0% Aggregator Commission</h5>
+                                            <p class="text-[10px] text-on-surface-variant mt-0.5">Keep 100% of your earnings. Direct-to-insurance billing included.</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start gap-2.5">
+                                        <span class="material-symbols-outlined text-blue-600 text-lg mt-0.5">group_add</span>
+                                        <div>
+                                            <h5 class="font-bold text-xs text-on-surface">Unlimited Clients</h5>
+                                            <p class="text-[10px] text-on-surface-variant mt-0.5">Scale your private practice without arbitrary limits.</p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Billing History -->
+                            <div class="bg-surface border border-outline-variant/30 rounded-xl p-5 shadow-sm flex flex-col">
+                                <h4 class="font-bold text-sm text-on-background mb-3">Billing History</h4>
+                                <div class="flex-grow flex items-center justify-center text-center p-4 border border-dashed border-outline-variant/30 rounded-lg bg-slate-50/50 min-h-[120px]">
+                                    <div>
+                                        <span class="material-symbols-outlined text-3xl text-outline-variant mb-1">receipt_long</span>
+                                        <p class="text-xs font-bold text-on-surface-variant">No invoices yet</p>
+                                        <p class="text-[10px] text-outline mt-0.5" id="billing-status-desc">You are currently on the Free plan.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
-
-
 
         <!-- ==================== VIEW 6: SERVICES MANAGEMENT ==================== -->
         <section id="view-admin-services" class="view-section hidden flex flex-col gap-gutter">
@@ -602,6 +678,66 @@
             </div>
         </section>
 
+
+
+        <!-- ==================== VIEW: FOOD SCANS HUB ==================== -->
+        <section id="view-admin-food-scans" class="view-section hidden flex flex-col gap-gutter" style="height: calc(100vh - 160px); min-height: 500px;">
+            <div class="flex justify-between items-center shrink-0">
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight text-on-surface">Food Scans & Nutrition Chat</h1>
+                    <p class="text-body-md text-on-surface-variant mt-1">Review client food photos and provide nutrition advice directly in the discussion thread.</p>
+                </div>
+            </div>
+
+            <!-- Workspace: Sidebar (Client List) + Chat Area -->
+            <div class="flex-grow flex bg-surface border border-outline-variant/30 rounded-3xl overflow-hidden shadow-sm min-h-0">
+                <!-- Sidebar (List of Clients) -->
+                <div class="w-80 border-r border-outline-variant/30 flex flex-col shrink-0 bg-slate-50/50">
+                    <div class="p-4 border-b border-outline-variant/20 shrink-0">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Client List</span>
+                    </div>
+                    <div id="admin-food-chat-client-list" class="flex-grow overflow-y-auto p-2 space-y-1">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Chat Pane -->
+                <div class="flex-1 flex flex-col min-w-0 bg-white">
+                    <!-- Chat Header -->
+                    <div class="px-6 py-4 border-b border-outline-variant/20 flex items-center justify-between shrink-0 bg-slate-50/30">
+                        <div class="flex items-center gap-3">
+                            <div id="admin-food-chat-header-avatar" class="w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center border border-primary/20">
+                                -
+                            </div>
+                            <div>
+                                <h3 id="admin-food-chat-header-name" class="font-bold text-sm text-slate-800">Select a Client</h3>
+                                <p class="text-[10px] text-slate-400 font-semibold">Discussion history & nutrition scans</p>
+                            </div>
+                        </div>
+                        <button onclick="openAdminScannerModal()" class="flex items-center gap-1.5 bg-primary hover:bg-[#005321] text-white font-bold text-xs px-4 py-2.5 rounded-full shadow-md transition-all active:scale-95 cursor-pointer">
+                            <span class="material-symbols-outlined text-[16px]">center_focus_strong</span>
+                            Scan Food Recommendation
+                        </button>
+                    </div>
+
+                    <!-- Chat Messages List -->
+                    <div id="admin-food-chat-message-list" class="flex-grow overflow-y-auto p-6 flex flex-col gap-4 bg-slate-50/20 scroll-smooth min-h-0">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Chat Footer Input -->
+                    <div class="p-4 border-t border-outline-variant/20 shrink-0 bg-white">
+                        <div class="flex gap-2 items-center">
+                            <input type="text" id="admin-food-chat-input" placeholder="Write nutrition feedback or a message to the client..." class="flex-1 bg-slate-50 border border-slate-200 text-xs px-4 py-3 rounded-xl focus:outline-none focus:border-primary text-slate-800 transition-all font-medium" onkeydown="if(event.key === 'Enter') submitAdminFoodChatMessage()">
+                            <button onclick="submitAdminFoodChatMessage()" class="bg-primary hover:bg-[#005321] text-white p-3 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center cursor-pointer">
+                                <span class="material-symbols-outlined text-base">send</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- Mobile Bottom Navigation (Only visible on mobile screens) -->
@@ -619,8 +755,8 @@
             <span class="text-[9px] font-bold mt-0.5">Appointments</span>
         </button>
         <button onclick="navigateTo('admin-services')" id="mobile-link-admin-services" class="mobile-nav-link flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
-            <span class="material-symbols-outlined text-[22px]">medical_services</span>
-            <span class="text-[9px] font-bold mt-0.5">Services</span>
+            <span class="material-symbols-outlined text-[20px] mb-1">room_service</span>
+            <span class="text-[10px] font-bold">Services</span>
         </button>
         <button onclick="navigateTo('admin-profile')" id="mobile-link-admin-profile" class="mobile-nav-link flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
             <span class="material-symbols-outlined text-[22px]">account_circle</span>
@@ -1021,7 +1157,148 @@
 
 
 
+    <!-- SaaS Upgrade Modal -->
+    <div id="saas-upgrade-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-surface max-w-4xl w-full rounded-3xl shadow-2xl border border-outline-variant/30 flex flex-col animate-fade-in overflow-hidden max-h-[90vh]">
+            <div class="px-8 pt-8 pb-6 border-b border-outline-variant/20 flex justify-between items-start shrink-0">
+                <div>
+                    <h2 class="text-2xl font-black text-on-surface tracking-tight">Upgrade Your SaaS Plan</h2>
+                    <p class="text-sm text-on-surface-variant mt-1">Select the best platform plan for your private practice.</p>
+                </div>
+                <button onclick="closeSaaSUpgradeModal()" class="text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer mt-1">
+                    <span class="material-symbols-outlined text-[22px]">close</span>
+                </button>
+            </div>
+            <div class="p-6 md:p-8 overflow-y-auto scrollbar-none">
+                <div id="saas-plans-grid" class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Admin dashboard logic -->
     <script type="module" src="./admin.js"></script>
+
+    <!-- AI Food Scanner Modal -->
+    <div id="ai-food-scanner-modal" class="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-surface-container-lowest max-w-sm w-full rounded-3xl p-6 border border-outline-variant/30 shadow-2xl flex flex-col gap-4 text-center relative overflow-hidden">
+            
+            <button onclick="closeFoodScannerModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors z-10 cursor-pointer">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            
+            <div class="space-y-1 z-10">
+                <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary mx-auto flex items-center justify-center shadow-sm border border-primary/20 mb-2">
+                    <span class="material-symbols-outlined text-2xl">center_focus_strong</span>
+                </div>
+                <h3 class="text-lg font-black text-on-background tracking-tight">AI Food Scanner</h3>
+                <p class="text-[10px] text-on-surface-variant font-medium px-4 leading-relaxed">Upload a photo of a meal and our AI will estimate its nutritional values instantly.</p>
+            </div>
+            
+            <div id="ai-scanner-upload-area" class="border-2 border-dashed border-primary/30 rounded-2xl p-6 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer group flex flex-col items-center justify-center gap-2 relative h-40">
+                <input type="file" id="ai-scanner-file-input" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" onchange="processFoodScan(event)">
+                <span class="material-symbols-outlined text-3xl text-primary/60 group-hover:scale-110 transition-transform">cloud_upload</span>
+                <span class="text-xs font-bold text-primary">Tap to upload photo</span>
+            </div>
+            
+            <!-- Loading State -->
+            <div id="ai-scanner-loading" class="hidden flex-col items-center justify-center gap-3 h-40">
+                <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                <p class="text-xs font-bold text-primary animate-pulse">Analyzing image...</p>
+            </div>
+            
+            <!-- Result State -->
+            <div id="ai-scanner-result" class="hidden flex-col text-left border border-outline-variant/30 rounded-xl overflow-hidden bg-white shadow-sm mt-2">
+                <div class="h-32 bg-slate-100 relative">
+                    <img id="ai-scanner-preview-img" src="" class="w-full h-full object-cover">
+                    <div class="absolute top-2 right-2 bg-slate-900/80 backdrop-blur-sm text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[12px] text-primary">auto_awesome</span> AI Verified
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h4 id="ai-scanner-food-name" class="font-black text-base text-on-surface mb-1">Avocado Toast</h4>
+                    <div class="flex items-baseline gap-1 mb-3">
+                        <span id="ai-scanner-calories" class="text-xl font-black text-primary leading-none">320</span>
+                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">kcal</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-2 mb-4">
+                        <div class="bg-slate-50 rounded-lg p-2 text-center border border-slate-100">
+                            <div class="text-[9px] font-black text-slate-400 uppercase tracking-wide">Pro</div>
+                            <div id="ai-scanner-protein" class="text-xs font-bold text-slate-700">14g</div>
+                        </div>
+                        <div class="bg-slate-50 rounded-lg p-2 text-center border border-slate-100">
+                            <div class="text-[9px] font-black text-slate-400 uppercase tracking-wide">Carb</div>
+                            <div id="ai-scanner-carbs" class="text-xs font-bold text-slate-700">28g</div>
+                        </div>
+                        <div class="bg-slate-50 rounded-lg p-2 text-center border border-slate-100">
+                            <div class="text-[9px] font-black text-slate-400 uppercase tracking-wide">Fat</div>
+                            <div id="ai-scanner-fat" class="text-xs font-bold text-slate-700">18g</div>
+                        </div>
+                    </div>
+                    <!-- Client Selector Dropdown for Specialist -->
+                    <div id="scanner-client-selector-container" class="mb-4 text-left">
+                        <label for="scanner-client-select" class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Pilih Client Tujuan</label>
+                        <select id="scanner-client-select" class="w-full bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold px-3 py-2 text-slate-700 focus:outline-none focus:border-primary">
+                        </select>
+                    </div>
+                    
+                    <button id="ai-scanner-send-btn" onclick="specialistSendScanToClient()" class="w-full bg-primary hover:bg-[#005321] text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer">
+                        <span class="material-symbols-outlined text-base">send</span>
+                        Kirim ke Client
+                    </button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- ==================== VIEW: FOOD SCANS HUB ==================== -->
+    <style>
+        .scan-hub-tab { padding: 0.5rem 1.25rem; font-size: 0.75rem; font-weight: 700; border-radius: 0.625rem; cursor: pointer; border: none; background: transparent; color: #64748b; transition: all 0.2s; }
+        .scan-hub-tab.active { background: #14833c; color: #fff; }
+        .scan-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 1rem; overflow: hidden; transition: box-shadow 0.2s; }
+        .scan-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+        #admin-scan-comment-modal { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 1rem; }
+        #admin-scan-comment-modal.open { display: flex !important; }
+    </style>
+
+
+    <!-- Admin Scan Comment Modal -->
+    <div id="admin-scan-comment-modal">
+        <div style="background:#fff;max-width:520px;width:100%;border-radius:1.5rem;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;position:relative;max-height:90vh;overflow-y:auto;">
+            <button onclick="closeAdminScanCommentModal()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;cursor:pointer;color:#94a3b8;font-size:1.5rem;">×</button>
+            <h3 style="font-size:1rem;font-weight:800;color:#1e293b;margin:0;">Food Scan Detail</h3>
+
+            <div id="scan-comment-food-info" style="display:flex;gap:0.75rem;padding:0.875rem;background:#f8fafc;border-radius:0.875rem;">
+                <!-- populated by JS -->
+            </div>
+
+            <!-- Comment Thread -->
+            <div id="scan-comment-thread" style="display:flex;flex-direction:column;gap:0.625rem;max-height:250px;overflow-y:auto;">
+                <!-- populated by JS -->
+            </div>
+
+            <!-- Reply box -->
+            <div style="display:flex;gap:0.5rem;border-top:1px solid #f1f5f9;padding-top:0.875rem;">
+                <textarea id="scan-comment-input" placeholder="Write a comment / feedback..." style="flex:1;border:1px solid #e2e8f0;border-radius:0.75rem;padding:0.625rem 0.875rem;font-size:0.75rem;resize:none;height:4.5rem;font-family:inherit;"></textarea>
+                <button onclick="submitScanComment()" style="background:#14833c;color:#fff;border:none;border-radius:0.75rem;padding:0 1rem;cursor:pointer;font-size:0.75rem;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.25rem;min-width:4rem;">
+                    <span class="material-symbols-outlined" style="font-size:1rem;">send</span>
+                    Send
+                </button>
+            </div>
+
+            <!-- Add to Meal Plan -->
+            <div style="border-top:1px solid #f1f5f9;padding-top:0.875rem;">
+                <button id="add-to-meal-btn" onclick="addScanToMealPlan()" style="width:100%;background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;border-radius:0.875rem;padding:0.625rem;font-size:0.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:background 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">
+                    <span class="material-symbols-outlined" style="font-size:1rem;">add_circle</span>
+                    Add to Meal Plan
+                </button>
+                <p style="font-size:0.5625rem;color:#94a3b8;text-align:center;margin:0.375rem 0 0;">This scan will be added to the client's active program</p>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

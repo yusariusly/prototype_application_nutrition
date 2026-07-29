@@ -1,4 +1,6 @@
 // NutriFlow Client Application Logic
+import html2pdf from 'html2pdf.js';
+
 
 // ==================== APP STATE ====================
 const state = {
@@ -998,6 +1000,8 @@ window.navigateTo = function(viewId) {
     if (viewId === 'dashboard') {
         renderDashboardMeals();
         updateKcalDisplay();
+        setTimeout(renderClientScanLog, 150);
+
     } else if (viewId === 'meal-plans') {
         loadState(); // load any updates from Admin builder
         renderMealPlans();
@@ -1073,17 +1077,33 @@ window.navigateTo = function(viewId) {
     }
 };
 
-// Client Notifications Dropdown
+// Client Notifications State
+let unreadNotificationsCount = 4;
 const clientNotificationsData = [
-    { type: 'confirmed', message: 'Appointment Confirmed: Dr. Hasan (Tomorrow, 10:00 AM)', time: '1 hour ago', icon: 'check_circle', bg: 'bg-[#e6f4ea]', text: 'text-[#1e8e3e]' },
-    { type: 'reminder', message: 'Don\'t forget to log your breakfast!', time: '2 hours ago', icon: 'restaurant', bg: 'bg-[#fff8e1]', text: 'text-[#d48806]' },
-    { type: 'message', message: 'New message from Dr. Hasan regarding your meal plan', time: 'Yesterday', icon: 'chat', bg: 'bg-[#e5f6fd]', text: 'text-[#0288d1]' },
-    { type: 'program', message: 'Your new 4-Week Weight Loss Program is ready!', time: '2 days ago', icon: 'assignment', bg: 'bg-[#f3e8fd]', text: 'text-[#8e24aa]' }
+    { type: 'reminder', message: '⏰ Upcoming Session (H-1): Your consultation with Dr. Hasan is scheduled for tomorrow at 10:00 AM.', time: 'Just now', icon: 'notifications_active', bg: 'bg-[#fff8e1]', text: 'text-[#d48806]' },
+    { type: 'reminder', message: '💧 Hydration Check: Don\'t forget to drink a glass of water and log your hourly intake!', time: '30 min ago', icon: 'water_drop', bg: 'bg-blue-50', text: 'text-blue-600' },
+    { type: 'reminder', message: '🥗 Dietary Log: Time to log your lunch to calculate today\'s macronutrient targets.', time: '2 hours ago', icon: 'restaurant', bg: 'bg-[#fff8e1]', text: 'text-[#d48806]' },
+    { type: 'message', message: '💬 New message from Dr. Hasan regarding your weight goal adjustments', time: 'Yesterday', icon: 'chat', bg: 'bg-[#e5f6fd]', text: 'text-[#0288d1]' }
 ];
 
+window.addDynamicNotification = function(type, message, icon, bg, text) {
+    clientNotificationsData.unshift({
+        type: type,
+        message: message,
+        time: 'Just now',
+        icon: icon,
+        bg: bg,
+        text: text
+    });
+    unreadNotificationsCount++;
+    renderClientNotifications();
+    showToast(message, 'info');
+};
+
 window.toggleClientNotifications = function(e) {
-    e.stopPropagation();
+    if (e) e.stopPropagation();
     const dropdown = document.getElementById('client-notifications-dropdown');
+    if (!dropdown) return;
     const isHidden = dropdown.classList.contains('hidden');
     
     if (isHidden) {
@@ -1096,6 +1116,18 @@ window.toggleClientNotifications = function(e) {
 
 window.renderClientNotifications = function() {
     const list = document.getElementById('client-notifications-list');
+    const badge = document.getElementById('client-notifications-badge');
+    
+    // Update badge visibility
+    if (badge) {
+        if (unreadNotificationsCount > 0) {
+            badge.classList.remove('hidden');
+            badge.innerText = unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount;
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
+    
     if (!list) return;
     
     if (clientNotificationsData.length === 0) {
@@ -1108,7 +1140,7 @@ window.renderClientNotifications = function() {
             <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${n.bg} ${n.text}">
                 <span class="material-symbols-outlined text-[20px]">${n.icon}</span>
             </div>
-            <div class="flex flex-col">
+            <div class="flex flex-col text-left">
                 <span class="text-[13px] font-medium text-on-background leading-snug">${n.message}</span>
                 <span class="text-[11px] text-on-surface-variant mt-1">${n.time}</span>
             </div>
@@ -1117,11 +1149,12 @@ window.renderClientNotifications = function() {
 };
 
 window.markClientNotificationsRead = function() {
-    clientNotificationsData.length = 0; // clear array
+    unreadNotificationsCount = 0;
     renderClientNotifications();
     showToast('All notifications marked as read', 'success');
     setTimeout(() => {
-        document.getElementById('client-notifications-dropdown').classList.add('hidden');
+        const dropdown = document.getElementById('client-notifications-dropdown');
+        if (dropdown) dropdown.classList.add('hidden');
     }, 1000);
 };
 
@@ -1618,7 +1651,46 @@ window.renderProgramChat = function() {
         const align = isDoc ? 'justify-start' : 'justify-end';
         
         let attachmentHtml = '';
-        if (msg.file) {
+        if (msg.type === 'ai_food_scan' && msg.scanData) {
+            const sd = msg.scanData;
+            attachmentHtml = `
+                <div class="mt-2 rounded-xl overflow-hidden border border-outline-variant/30 shadow-md bg-surface text-slate-800 w-[240px] max-w-full flex flex-col font-sans">
+                    <div class="relative h-32 bg-slate-100 flex items-center justify-center overflow-hidden">
+                        <img src="${sd.imageUrl}" class="w-full h-full object-cover">
+                        <div class="absolute top-2 right-2 bg-slate-900/80 backdrop-blur-sm text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider flex items-center gap-1 shadow-sm border border-white/10">
+                            <span class="material-symbols-outlined text-[12px] text-primary">auto_awesome</span> AI Verified
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h4 class="font-black text-sm text-on-surface truncate leading-tight">${sd.foodName}</h4>
+                        <div class="flex items-baseline gap-1 mt-0.5 mb-2">
+                            <span class="text-lg font-black text-primary leading-none">${sd.calories}</span>
+                            <span class="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">kcal</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-1.5 mb-3">
+                            <div class="bg-surface-container-low rounded-lg p-1.5 text-center border border-outline-variant/20">
+                                <div class="text-[9px] font-black text-slate-500 uppercase tracking-wide">Pro</div>
+                                <div class="text-[11px] font-bold text-slate-700">${sd.protein}g</div>
+                            </div>
+                            <div class="bg-surface-container-low rounded-lg p-1.5 text-center border border-outline-variant/20">
+                                <div class="text-[9px] font-black text-slate-500 uppercase tracking-wide">Carb</div>
+                                <div class="text-[11px] font-bold text-slate-700">${sd.carbs}g</div>
+                            </div>
+                            <div class="bg-surface-container-low rounded-lg p-1.5 text-center border border-outline-variant/20">
+                                <div class="text-[9px] font-black text-slate-500 uppercase tracking-wide">Fat</div>
+                                <div class="text-[11px] font-bold text-slate-700">${sd.fat}g</div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="approveAndAddToDiary('${sd.foodName}', ${sd.calories}, ${sd.protein}, ${sd.carbs}, ${sd.fat})" class="w-full bg-primary hover:bg-[#005321] text-white text-[11px] font-bold py-2 rounded-lg transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1.5">
+                            <span class="material-symbols-outlined text-[14px]">add_circle</span>
+                            Add to Meal Plan
+                        </button>
+                    </div>
+                </div>
+            `;
+        } else if (msg.file) {
             if (msg.file.type.startsWith('image/')) {
                 attachmentHtml = `
                     <div class="mt-2 rounded-lg overflow-hidden max-w-full border border-outline-variant/20 shadow-sm bg-white p-1">
@@ -2465,18 +2537,23 @@ window.renderConsultationHistory = function() {
     const assignedTherapist = clientDetails?.therapist || 'Dr. Hasan';
     
     const staticHistories = [
-        { title: 'Initial Consultation', date: 'Sep 15, 2023', doc: assignedTherapist },
-        { title: 'Check-in', date: 'Aug 02, 2023', doc: assignedTherapist },
-        { title: 'Body Composition Scan', date: 'Jul 10, 2023', doc: assignedTherapist },
-        { title: 'Bi-weekly Check-in', date: 'Jun 22, 2023', doc: assignedTherapist },
-        { title: 'Progress Assessment', date: 'Jun 05, 2023', doc: assignedTherapist },
-        { title: 'Dietary Plan Review', date: 'May 18, 2023', doc: assignedTherapist }
+        { id: 'apt-static-1', title: 'Initial Consultation', date: 'Sep 15, 2023', doc: assignedTherapist, price: 150, paymentMethod: 'PayNow SG', duration: '60 min', type: 'Online' },
+        { id: 'apt-static-2', title: 'Check-in', date: 'Aug 02, 2023', doc: assignedTherapist, price: 75, paymentMethod: 'GrabPay', duration: '30 min', type: 'Online' },
+        { id: 'apt-static-3', title: 'Body Composition Scan', date: 'Jul 10, 2023', doc: assignedTherapist, price: 120, paymentMethod: 'Visa / Mastercard', duration: '45 min', type: 'In-Person' },
+        { id: 'apt-static-4', title: 'Bi-weekly Check-in', date: 'Jun 22, 2023', doc: assignedTherapist, price: 75, paymentMethod: 'PayNow SG', duration: '30 min', type: 'Online' },
+        { id: 'apt-static-5', title: 'Progress Assessment', date: 'Jun 05, 2023', doc: assignedTherapist, price: 150, paymentMethod: 'DBS FAST Transfer', duration: '60 min', type: 'Online' },
+        { id: 'apt-static-6', title: 'Dietary Plan Review', date: 'May 18, 2023', doc: assignedTherapist, price: 150, paymentMethod: 'PayNow SG', duration: '60 min', type: 'Online' }
     ];
     
     const completedApts = state.appointments.filter(a => a.status === 'completed' && a.clientName === activeClient).map(a => ({
+        id: a.id,
         title: a.serviceTitle,
         date: new Date(a.date).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
-        doc: assignedTherapist
+        doc: assignedTherapist,
+        price: a.price || 150,
+        paymentMethod: a.paymentMethod || 'PayNow SG',
+        duration: a.duration || '60 min',
+        type: a.type || 'Online'
     }));
     
     const allHistory = [...completedApts, ...staticHistories];
@@ -2539,11 +2616,14 @@ window.renderConsultationHistory = function() {
                             ${detail.prescription.map(p => `<li>${p}</li>`).join('')}
                         </ul>
                     </div>
-
-                    <!-- Rate Consultation Button -->
-                    <div class="flex justify-end pt-2 border-t border-slate-100">
+ 
+                    <!-- Action Buttons -->
+                    <div class="flex justify-between items-center pt-2 border-t border-slate-100 gap-3">
+                        <button onclick="event.stopPropagation(); downloadInvoicePDF('${h.id}', '${h.title}', '${h.date}', '${h.doc}', ${h.price}, '${h.paymentMethod}', '${h.duration}', '${h.type}')" class="bg-white border border-outline-variant/30 hover:bg-slate-50 text-slate-800 font-bold text-xs px-3.5 py-1.5 rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-1 active:scale-95">
+                            <span class="material-symbols-outlined text-[15px]">download</span> Download Invoice
+                        </button>
                         <button onclick="event.stopPropagation(); openLeaveReviewModal('${h.doc}')" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-3.5 py-1.5 rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-1 active:scale-95">
-                            <span class="material-symbols-outlined text-[15px]">star</span> Rate & Review Specialist
+                            <span class="material-symbols-outlined text-[15px]">star</span> Rate & Review
                         </button>
                     </div>
                 </div>
@@ -3126,6 +3206,15 @@ window.processSimulatedPayment = function() {
 
         advanceBookingStep(5);
         showToast(`Payment Successful! Receipt #${currentPendingAptForPayment.id.toUpperCase()} confirmed via ${methodNames[methodKey]}.`, 'success');
+        if (window.addDynamicNotification) {
+            window.addDynamicNotification(
+                'reminder',
+                `⏰ Upcoming Session (H-1): Your consultation "${srvTitle}" with ${state.bookingFlow.selectedSpecialist} is scheduled for tomorrow at ${state.bookingFlow.selectedSlot}.`,
+                'notifications_active',
+                'bg-[#fff8e1]',
+                'text-[#d48806]'
+            );
+        }
     }, 800);
 };
 
@@ -3744,8 +3833,9 @@ window.handleRegistrationSubmit = function(e) {
     const rightCont = document.getElementById('nav-right-container');
     if (rightCont) {
         rightCont.innerHTML = `
-            <button onclick="showClientNotifications()" class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-full transition-colors active:scale-95">
+            <button onclick="toggleClientNotifications(event)" id="client-notifications-btn" class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-full transition-colors active:scale-95 relative">
                 <span class="material-symbols-outlined">notifications</span>
+                <span id="client-notifications-badge" class="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white rounded-full border border-surface flex items-center justify-center text-[9px] font-bold ${unreadNotificationsCount > 0 ? '' : 'hidden'}">${unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}</span>
             </button>
             <div class="w-9 h-9 rounded-full overflow-hidden border border-outline-variant/30 shrink-0">
                 <img class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" alt="Profile">
@@ -3825,11 +3915,11 @@ window.filterHelpFAQ = function() {
 window.initDefaultSpecialistReviews = function() {
     if (!localStorage.getItem('nutriflow_specialist_reviews')) {
         const defaultReviews = [
-            { id: 'rev-1', specialist: 'Dr. Hasan', clientName: 'Sarah Jenkins', rating: 5, date: '3 days ago', comment: 'Dr. Hasan sangat membantu membuat rencana diet yang lezat dan realistis. Berat badan saya turun 4kg dalam sebulan!' },
-            { id: 'rev-2', specialist: 'Dr. Hasan', clientName: 'Budi Santoso', rating: 5, date: '1 week ago', comment: 'Penjelasan nutrisinya sangat ilmiah dan mudah diikuti. Sesi telehealth lancar sekali.' },
-            { id: 'rev-3', specialist: 'Dr. Hasan', clientName: 'Rina Wijaya', rating: 4, date: '2 weeks ago', comment: 'Sangat responsif di chat program. Menu gizi yang disusun fleksibel dengan makanan lokal.' },
-            { id: 'rev-4', specialist: 'Dr. Amanda', clientName: 'Marcus Reid', rating: 5, date: '5 days ago', comment: 'Dr. Amanda mengerti betul target nutrisi untuk olahraga berat. Massa otot saya meningkat pesat!' },
-            { id: 'rev-5', specialist: 'Dr. Amanda', clientName: 'Elena Lopez', rating: 5, date: '2 weeks ago', comment: 'Konsultasi yang sangat membuka wawasan tentang gizi seimbang.' }
+            { id: 'rev-1', specialist: 'Dr. Hasan', clientName: 'Sarah Jenkins', rating: 5, date: '3 days ago', comment: 'Dr. Hasan was incredibly helpful in creating a delicious and realistic diet plan. I lost 4kg in just one month!' },
+            { id: 'rev-2', specialist: 'Dr. Hasan', clientName: 'Budi Santoso', rating: 5, date: '1 week ago', comment: 'The nutrition explanations were very scientific yet easy to follow. The telehealth session was smooth.' },
+            { id: 'rev-3', specialist: 'Dr. Hasan', clientName: 'Rina Wijaya', rating: 4, date: '2 weeks ago', comment: 'Very responsive in the program chat. The nutrition menu is flexible with local foods.' },
+            { id: 'rev-4', specialist: 'Dr. Amanda', clientName: 'Marcus Reid', rating: 5, date: '5 days ago', comment: 'Dr. Amanda truly understands nutrition targets for intense training. My muscle mass has grown significantly!' },
+            { id: 'rev-5', specialist: 'Dr. Amanda', clientName: 'Elena Lopez', rating: 5, date: '2 weeks ago', comment: 'A truly eye-opening consultation on balanced nutrition.' }
         ];
         localStorage.setItem('nutriflow_specialist_reviews', JSON.stringify(defaultReviews));
     }
@@ -3962,3 +4052,1076 @@ window.closeSpecialistReviewsModal = function() {
         modal.classList.remove('flex');
     }
 };
+
+// ==================== PDF EXPORT & INVOICE GENERATION LOGIC ====================
+
+window.downloadInvoicePDF = function(id, title, date, doc, price, paymentMethod, duration, type) {
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
+    const clientDetails = clientsList.find(c => c.name === activeClient) || {};
+    const clientEmail = clientDetails.email || `${activeClient.toLowerCase().replace(/\s+/g, '')}@email.com`;
+    const clientPhone = clientDetails.phone || '+65 8123 4567';
+
+    const txRef = `TRX-${id.toUpperCase()}`;
+    const invoiceNo = `INV-${id.toUpperCase().replace('APT-', '')}`;
+
+    const tempInvoiceHtml = `
+        <div style="font-family: 'Inter', sans-serif; padding: 30px; color: #1e293b; max-width: 800px; margin: 0 auto; background-color: #ffffff; text-align: left;">
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 20px;">
+                <div style="text-align: left;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <span style="font-size: 24px; font-weight: 800; color: #006e2f; letter-spacing: -0.5px;">NutriFlow</span>
+                    </div>
+                    <p style="font-size: 10px; color: #64748b; margin: 0; line-height: 1.4;">
+                        NutriFlow Health Systems Pte. Ltd.<br>
+                        10 Anson Road, #10-11 International Plaza<br>
+                        Singapore 079903<br>
+                        billing@nutriflow.sg
+                    </p>
+                </div>
+                <div style="text-align: right;">
+                    <h2 style="font-size: 18px; font-weight: 900; color: #0f172a; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px;">Official Invoice</h2>
+                    <div style="display: inline-block; background-color: #dcfce7; color: #15803d; font-size: 9px; font-weight: 800; padding: 4px 10px; border: 1px solid #bbf7d0; border-radius: 9999px; margin-bottom: 8px; text-transform: uppercase;">Paid</div>
+                    <p style="font-size: 10px; color: #64748b; margin: 0; line-height: 1.4;">
+                        <strong>Invoice No:</strong> ${invoiceNo}<br>
+                        <strong>Date:</strong> ${date}<br>
+                        <strong>Payment Ref:</strong> ${txRef}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Client & Specialist Details -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px;">
+                <div style="text-align: left;">
+                    <h4 style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; margin: 0 0 8px 0; tracking: 0.5px;">Billed To</h4>
+                    <p style="font-size: 12px; font-weight: 700; color: #0f172a; margin: 0 0 4px 0;">${activeClient}</p>
+                    <p style="font-size: 11px; color: #475569; margin: 0 0 2px 0;">${clientEmail}</p>
+                    <p style="font-size: 11px; color: #475569; margin: 0;">${clientPhone}</p>
+                </div>
+                <div style="text-align: left;">
+                    <h4 style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; margin: 0 0 8px 0; tracking: 0.5px;">Service Practitioner</h4>
+                    <p style="font-size: 12px; font-weight: 700; color: #0f172a; margin: 0 0 4px 0;">${doc}</p>
+                    <p style="font-size: 11px; color: #475569; margin: 0 0 2px 0;">Clinical Nutrition Specialist</p>
+                    <p style="font-size: 11px; color: #475569; margin: 0;">NutriFlow Practitioner Guild</p>
+                </div>
+            </div>
+
+            <!-- Itemized List Table -->
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #cbd5e1; background-color: #f8fafc;">
+                        <th style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #475569; text-align: left; padding: 10px 12px;">Description of Service</th>
+                        <th style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #475569; text-align: center; padding: 10px 12px; width: 80px;">Qty</th>
+                        <th style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #475569; text-align: right; padding: 10px 12px; width: 100px;">Price (SGD)</th>
+                        <th style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #475569; text-align: right; padding: 10px 12px; width: 120px;">Total (SGD)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 12px; font-size: 12px; text-align: left;">
+                            <div style="font-weight: 700; color: #0f172a; margin-bottom: 4px;">${title}</div>
+                            <div style="font-size: 10px; color: #64748b;">Clinical Nutrition Consultation • Mode: ${type} • Duration: ${duration}</div>
+                        </td>
+                        <td style="padding: 12px; font-size: 12px; text-align: center; color: #334155;">1</td>
+                        <td style="padding: 12px; font-size: 12px; text-align: right; color: #334155;">S$${price}.00</td>
+                        <td style="padding: 12px; font-size: 12px; text-align: right; font-weight: 700; color: #0f172a;">S$${price}.00</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Total Calculations -->
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 40px;">
+                <div style="width: 250px; text-align: right;">
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px; color: #475569;">
+                        <span>Subtotal:</span>
+                        <span>S$${price}.00</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px; color: #475569;">
+                        <span>GST/VAT (0%):</span>
+                        <span>S$0.00</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 10px; color: #475569; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">
+                        <span>Processing Fee:</span>
+                        <span style="color: #15803d; font-weight: 700;">FREE (Promo)</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: 800; color: #0f172a;">
+                        <span>Total Paid:</span>
+                        <span style="color: #006e2f;">S$${price}.00 SGD</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment info & footer disclaimer -->
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; text-align: left; margin-bottom: 30px;">
+                <h5 style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #475569; margin: 0 0 6px 0; tracking: 0.5px;">Transaction Settlement Info</h5>
+                <p style="font-size: 10px; color: #64748b; margin: 0; line-height: 1.5;">
+                    This invoice constitutes an official payment receipt. The transaction of <strong>S$${price}.00 SGD</strong> was processed securely and settled in full via <strong>${paymentMethod}</strong> on ${date}. Thank you for choosing NutriFlow Health Systems.
+                </p>
+            </div>
+
+            <!-- Official Footer stamp -->
+            <div style="text-align: center; border-top: 1px solid #e2e8f0; padding-top: 15px; font-size: 9px; color: #94a3b8; font-weight: 500;">
+                NutriFlow Systems • Secure Digital Receipt • Issued Automatically
+            </div>
+        </div>
+    `;
+
+    const element = document.createElement('div');
+    element.innerHTML = tempInvoiceHtml;
+    element.style.position = 'fixed';
+    element.style.top = '-9999px';
+    element.style.left = '-9999px';
+    element.style.zIndex = '-1';
+    element.style.pointerEvents = 'none';
+    document.body.appendChild(element);
+
+    const opt = {
+        margin: [15, 15, 15, 15],
+        filename: `Invoice_${invoiceNo}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().from(element).set(opt).save()
+        .then(() => {
+            if (document.body.contains(element)) document.body.removeChild(element);
+            showToast(`Invoice ${invoiceNo} berhasil diunduh!`, 'success');
+        })
+        .catch((err) => {
+            if (document.body.contains(element)) document.body.removeChild(element);
+            console.error('PDF generation error:', err);
+            showToast('Gagal generate PDF. Silakan coba lagi.', 'error');
+        });
+};
+
+window.downloadLatestInvoicePDF = function() {
+    if (currentPendingAptForPayment) {
+        window.downloadInvoicePDF(
+            currentPendingAptForPayment.id,
+            currentPendingAptForPayment.serviceTitle,
+            new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+            currentPendingAptForPayment.therapist,
+            currentPendingAptForPayment.price,
+            currentPendingAptForPayment.paymentMethod || 'PayNow SG',
+            currentPendingAptForPayment.duration,
+            currentPendingAptForPayment.type
+        );
+    } else {
+        const txs = JSON.parse(localStorage.getItem('nutriflow_payment_transactions') || '[]');
+        if (txs.length > 0) {
+            const lastTx = txs[0];
+            window.downloadInvoicePDF(
+                lastTx.appointmentId || lastTx.id,
+                lastTx.serviceTitle,
+                lastTx.date,
+                lastTx.specialist,
+                lastTx.amount,
+                lastTx.paymentMethod,
+                '60 min',
+                'Online'
+            );
+        } else {
+            showToast('No recent transaction invoice found.', 'error');
+        }
+    }
+};
+
+window.downloadProgressReportPDF = function() {
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const rawData = localStorage.getItem(`nutriflow_client_health_profile_${activeClient}`);
+    const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
+    const clientDetails = clientsList.find(c => c.name === activeClient) || {};
+    
+    const getSeedProfile = (client) => {
+        if (client === 'Sarah Jenkins') {
+            return {
+                name: 'Sarah Jenkins',
+                dob: '1995-04-12',
+                sex: 'Female',
+                height: 168,
+                weight: 72.5,
+                targetWeight: 65.0,
+                goal: 'Weight Loss & Fat Reduction',
+                allergies: ['Peanuts', 'Seafood/Shellfish'],
+                conditions: ['GERD/Maag'],
+                dietPref: 'Balanced / No Restriction',
+                notes: 'Diagnosed with mild GERD. Focus on high-protein, calorie-restricted meal plan with minimal triggers.'
+            };
+        }
+        return {
+            name: client,
+            dob: '—',
+            sex: 'Female',
+            height: '—',
+            weight: '—',
+            targetWeight: '—',
+            goal: 'Weight Loss & Fat Reduction',
+            allergies: [],
+            conditions: [],
+            dietPref: 'None',
+            notes: 'No clinical notes recorded yet.'
+        };
+    };
+
+    const isSeedClient = ['Sarah Jenkins', 'Marcus Reid', 'Elena Lopez'].includes(activeClient);
+    const profile = rawData ? JSON.parse(rawData) : getSeedProfile(activeClient);
+
+    const clientEmail = clientDetails.email || `${activeClient.toLowerCase().replace(/\s+/g, '')}@email.com`;
+    const clientPhone = clientDetails.phone || '+65 8123 4567';
+    const therapistName = clientDetails.therapist || 'Dr. Hasan';
+
+    const weightHistory = JSON.parse(localStorage.getItem(`nutriflow_weight_history_${activeClient}`)) || [
+        { month: 'Jun', weight: 75.0 },
+        { month: 'Jul', weight: 73.8 },
+        { month: 'Aug', weight: 72.5 }
+    ];
+
+    let weightHistoryRows = '';
+    if (weightHistory.length === 0) {
+        weightHistoryRows = `
+            <tr>
+                <td colspan="3" style="padding: 10px; text-align: center; color: #94a3b8;">No weight entries recorded yet.</td>
+            </tr>
+        `;
+    } else {
+        weightHistoryRows = weightHistory.map(h => {
+            const weightVal = parseFloat(h.weight) || 0;
+            const targetVal = parseFloat(profile.targetWeight) || 0;
+            const variance = targetVal > 0 ? (weightVal - targetVal).toFixed(1) : '—';
+            const varianceText = targetVal > 0 
+                ? (variance > 0 ? `+${variance} kg above target` : `${variance} kg reached target`) 
+                : '—';
+            const varianceColor = variance > 0 ? '#b45309' : '#15803d';
+
+            return `
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 10px 12px; color: #334155;">${h.month} Logged Entry</td>
+                    <td style="padding: 10px 12px; text-align: center; font-weight: 700; color: #0f172a;">${weightVal} kg</td>
+                    <td style="padding: 10px 12px; text-align: right; font-weight: 600; color: ${varianceColor};">${varianceText}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    const reportDate = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
+    const allergiesStr = (profile.allergies && profile.allergies.length > 0) ? profile.allergies.join(', ') : 'None Reported';
+    const conditionsStr = (profile.conditions && profile.conditions.length > 0) ? profile.conditions.join(', ') : 'None Reported';
+
+    const tempReportHtml = `
+        <div style="font-family: 'Inter', sans-serif; padding: 30px; color: #1e293b; max-width: 800px; margin: 0 auto; background-color: #ffffff; text-align: left;">
+            <!-- Logo & Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 25px;">
+                <div style="text-align: left;">
+                    <span style="font-size: 24px; font-weight: 800; color: #006e2f; letter-spacing: -0.5px;">NutriFlow</span>
+                    <p style="font-size: 10px; color: #64748b; margin: 2px 0 0 0;">Clinical Progress Report</p>
+                </div>
+                <div style="text-align: right;">
+                    <p style="font-size: 11px; font-weight: 700; color: #0f172a; margin: 0;">Report Generated On</p>
+                    <p style="font-size: 10px; color: #64748b; margin: 2px 0 0 0;">${reportDate}</p>
+                </div>
+            </div>
+
+            <!-- Patient Metadata Card -->
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 18px; border-radius: 16px; margin-bottom: 25px;">
+                <h3 style="font-size: 12px; font-weight: 800; text-transform: uppercase; color: #006e2f; margin: 0 0 12px 0; letter-spacing: 0.5px; text-align: left;">Client Information Profile</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px 30px; font-size: 11px; color: #475569;">
+                    <div style="text-align: left;">
+                        <strong>Full Name:</strong> <span style="color: #0f172a; font-weight: 700; margin-left: 4px;">${profile.name || activeClient}</span>
+                    </div>
+                    <div style="text-align: left;">
+                        <strong>Primary Practitioner:</strong> <span style="color: #0f172a; font-weight: 700; margin-left: 4px;">${therapistName}</span>
+                    </div>
+                    <div style="text-align: left;">
+                        <strong>Birth Date / Sex:</strong> <span style="color: #0f172a; font-weight: 700; margin-left: 4px;">${profile.dob || '—'} (${profile.sex})</span>
+                    </div>
+                    <div style="text-align: left;">
+                        <strong>Primary Health Focus:</strong> <span style="color: #0f172a; font-weight: 700; margin-left: 4px;">${profile.goal}</span>
+                    </div>
+                    <div style="text-align: left;">
+                        <strong>Dietary Preference:</strong> <span style="color: #0f172a; font-weight: 700; margin-left: 4px;">${profile.dietPref === 'None' ? 'Balanced / No Restriction' : profile.dietPref}</span>
+                    </div>
+                    <div style="text-align: left;">
+                        <strong>Medical Conditions:</strong> <span style="color: #ba1a1a; font-weight: 700; margin-left: 4px;">${conditionsStr}</span>
+                    </div>
+                    <div style="text-align: left; grid-column: span 2;">
+                        <strong>Food Allergies:</strong> <span style="color: #b45309; font-weight: 700; margin-left: 4px;">${allergiesStr}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Health Metrics Progress Summary -->
+            <div style="margin-bottom: 25px;">
+                <h3 style="font-size: 12px; font-weight: 800; text-transform: uppercase; color: #006e2f; margin: 0 0 12px 0; letter-spacing: 0.5px; text-align: left;">Physical Metrics Assessment</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
+                    <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px; border-radius: 12px;">
+                        <span style="font-size: 9px; font-weight: 800; text-transform: uppercase; color: #166534; display: block;">Height</span>
+                        <span style="font-size: 16px; font-weight: 800; color: #14532d; display: block; margin-top: 4px;">${profile.height ? `${profile.height} cm` : '—'}</span>
+                    </div>
+                    <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px; border-radius: 12px;">
+                        <span style="font-size: 9px; font-weight: 800; text-transform: uppercase; color: #166534; display: block;">Latest Weight</span>
+                        <span style="font-size: 16px; font-weight: 800; color: #14532d; display: block; margin-top: 4px;">${profile.weight ? `${profile.weight} kg` : '—'}</span>
+                    </div>
+                    <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px; border-radius: 12px;">
+                        <span style="font-size: 9px; font-weight: 800; text-transform: uppercase; color: #166534; display: block;">Target Weight</span>
+                        <span style="font-size: 16px; font-weight: 800; color: #006e2f; display: block; margin-top: 4px;">${profile.targetWeight ? `${profile.targetWeight} kg` : '—'}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress History Logs Table -->
+            <div style="margin-bottom: 30px;">
+                <h3 style="font-size: 12px; font-weight: 800; text-transform: uppercase; color: #006e2f; margin: 0 0 12px 0; letter-spacing: 0.5px; text-align: left;">Weight Tracking History</h3>
+                <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #cbd5e1; background-color: #f8fafc;">
+                            <th style="font-weight: 800; color: #475569; text-align: left; padding: 8px 12px;">Date/Month Logged</th>
+                            <th style="font-weight: 800; color: #475569; text-align: center; padding: 8px 12px;">Recorded Weight</th>
+                            <th style="font-weight: 800; color: #475569; text-align: right; padding: 8px 12px;">Variance to Target</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${weightHistoryRows}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Specialist Clinical Notes -->
+            <div style="margin-bottom: 30px; text-align: left;">
+                <h3 style="font-size: 12px; font-weight: 800; text-transform: uppercase; color: #006e2f; margin: 0 0 8px 0; letter-spacing: 0.5px;">Registered Intake Clinical Notes</h3>
+                <p style="font-size: 11px; color: #334155; line-height: 1.6; background-color: #fafafa; border: 1px dashed #e2e8f0; padding: 12px; border-radius: 8px; white-space: pre-line;">
+                    ${profile.notes || 'No active clinical notes registered.'}
+                </p>
+            </div>
+
+            <!-- Official Footer stamp -->
+            <div style="text-align: center; border-top: 1px solid #e2e8f0; padding-top: 15px; font-size: 9px; color: #94a3b8; font-weight: 500;">
+                NutriFlow Systems • Official Medical Intake Summary • Verified Client Record
+            </div>
+        </div>
+    `;
+
+    const element = document.createElement('div');
+    element.innerHTML = tempReportHtml;
+    element.style.position = 'fixed';
+    element.style.top = '-9999px';
+    element.style.left = '-9999px';
+    element.style.zIndex = '-1';
+    element.style.pointerEvents = 'none';
+    document.body.appendChild(element);
+
+    const opt = {
+        margin: [15, 15, 15, 15],
+        filename: `Health_Progress_Report_${activeClient.replace(/\s+/g, '_')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().from(element).set(opt).save()
+        .then(() => {
+            if (document.body.contains(element)) document.body.removeChild(element);
+            showToast('Laporan progres berhasil diunduh!', 'success');
+        })
+        .catch((err) => {
+            if (document.body.contains(element)) document.body.removeChild(element);
+            console.error('PDF generation error:', err);
+            showToast('Gagal generate PDF. Silakan coba lagi.', 'error');
+        });
+};
+
+
+// ==================== PROMO CODE ====================
+let appliedPromoDiscount = 0;
+
+window.applyPromoCode = function() {
+    const input = document.getElementById('promo-code-input');
+    const code = input ? input.value.trim().toUpperCase() : '';
+    if (!code) { showToast('Please enter a promo code.', 'error'); return; }
+
+    const promos = JSON.parse(localStorage.getItem('nutriflow_global_promos') || '[]');
+    const match = promos.find(p => p.code === code);
+
+    if (!match) {
+        showToast('Promo code is invalid or expired.', 'error');
+        return;
+    }
+
+    appliedPromoDiscount = match.value;
+
+    const discountLine = document.getElementById('promo-discount-line');
+    const discountLabel = document.getElementById('applied-promo-code-label');
+    const discountAmount = document.getElementById('promo-discount-amount');
+    const removeBtn = document.getElementById('remove-promo-btn');
+    const totalEl = document.getElementById('checkout-total-price');
+
+    if (discountLine) { discountLine.classList.remove('hidden'); discountLine.classList.add('flex'); }
+    if (discountLabel) discountLabel.innerText = code;
+    if (discountAmount) discountAmount.innerText = '-S$' + match.value + '.00';
+    if (removeBtn) removeBtn.classList.remove('hidden');
+
+    const priceText = document.getElementById('checkout-service-price')?.innerText || '';
+    const basePrice = parseFloat(priceText.replace(/[^0-9.]/g, '')) || 0;
+    const newTotal = Math.max(0, basePrice - match.value);
+    if (totalEl) totalEl.innerText = 'S$' + newTotal + '.00 SGD';
+    if (input) input.disabled = true;
+
+    showToast('Promo applied! You save S$' + match.value + '.', 'success');
+};
+
+window.removePromoCode = function() {
+    appliedPromoDiscount = 0;
+    const input = document.getElementById('promo-code-input');
+    const discountLine = document.getElementById('promo-discount-line');
+    const removeBtn = document.getElementById('remove-promo-btn');
+    const totalEl = document.getElementById('checkout-total-price');
+
+    if (input) { input.value = ''; input.disabled = false; }
+    if (discountLine) { discountLine.classList.add('hidden'); discountLine.classList.remove('flex'); }
+    if (removeBtn) removeBtn.classList.add('hidden');
+
+    const priceText = document.getElementById('checkout-service-price')?.innerText || '';
+    const basePrice = parseFloat(priceText.replace(/[^0-9.]/g, '')) || 0;
+    if (totalEl) totalEl.innerText = 'S$' + basePrice + '.00 SGD';
+
+    showToast('Promo code removed.', 'info');
+};
+
+
+// ==================== SUBSCRIPTION / MEMBERSHIP SYSTEM ====================
+
+const DEFAULT_SUBSCRIPTION_PLANS = [
+    {
+        id: 'plan-free',
+        name: 'Pay-Per-Session',
+        price: 0,
+        color: 'slate',
+        icon: 'person',
+        description: 'Standard hourly billing without continuity.',
+        features: ['Book single sessions', 'Basic food tracker', 'Progress dashboard']
+    },
+    {
+        id: 'plan-basic',
+        name: 'Anti-Diet Coaching',
+        price: 129,
+        color: 'blue',
+        icon: 'favorite',
+        description: 'Focus on intuitive eating and food freedom.',
+        features: ['2 Consultations/month', 'Unlimited Chat', 'Behavioral Habit Tracking', 'Priority Booking']
+    },
+    {
+        id: 'plan-pro',
+        name: 'Metabolic Continuity',
+        price: 199,
+        color: 'primary',
+        icon: 'monitor_heart',
+        description: 'Precision tracking for GLP-1 users.',
+        features: ['4 Consultations/month', 'Macronutrient Targets', 'Muscle Mass Preservation Protocol', 'Direct access to Specialist'],
+        recommended: true
+    },
+    {
+        id: 'plan-premium',
+        name: 'Data-Driven Biohacker',
+        price: 299,
+        color: 'amber',
+        icon: 'diamond',
+        description: 'Intense macro tracking & CGM data analysis.',
+        features: ['Unlimited Consultations', 'CGM Data Review', 'Advanced Blood Panel Analysis', 'Custom DNA Meal Plans']
+    }
+];
+
+function getSubscriptionPlans() {
+    const stored = localStorage.getItem('nutriflow_care_packages');
+    if (stored) return JSON.parse(stored);
+    localStorage.setItem('nutriflow_care_packages', JSON.stringify(DEFAULT_SUBSCRIPTION_PLANS));
+    return DEFAULT_SUBSCRIPTION_PLANS;
+}
+
+function getClientSubscription() {
+    const stored = localStorage.getItem('nutriflow_client_care_sub');
+    if (stored) return JSON.parse(stored);
+    const def = { planId: 'plan-free', status: 'active', since: new Date().toISOString().split('T')[0] };
+    localStorage.setItem('nutriflow_client_care_sub', JSON.stringify(def));
+    return def;
+}
+
+function saveClientSubscription(sub) {
+    localStorage.setItem('nutriflow_client_care_sub', JSON.stringify(sub));
+}
+
+const PLAN_STYLES = {
+    'slate':   { badge: 'bg-slate-100 text-slate-600',    card: 'border-slate-200',           btn: 'bg-slate-800 hover:bg-slate-700 text-white',  icon: 'text-slate-500',   iconBg: 'bg-slate-500/20' },
+    'blue':    { badge: 'bg-blue-100 text-blue-700',      card: 'border-blue-200',             btn: 'bg-blue-600 hover:bg-blue-500 text-white',    icon: 'text-blue-500',    iconBg: 'bg-blue-500/20' },
+    'primary': { badge: 'bg-primary/10 text-primary',     card: 'border-primary ring-2 ring-primary/30', btn: 'bg-primary hover:bg-[#005321] text-white', icon: 'text-primary', iconBg: 'bg-primary/20' },
+    'amber':   { badge: 'bg-amber-100 text-amber-700',    card: 'border-amber-300',            btn: 'bg-amber-500 hover:bg-amber-400 text-white',  icon: 'text-amber-500',   iconBg: 'bg-amber-400/20' }
+};
+
+function renderMembershipSection() {
+    const plans = getSubscriptionPlans();
+    const sub = getClientSubscription();
+    const activePlan = plans.find(p => p.id === sub.planId) || plans[0];
+    const style = PLAN_STYLES[activePlan.color] || PLAN_STYLES['slate'];
+
+    const badgeEl = document.getElementById('membership-badge');
+    const badgeLabelEl = document.getElementById('membership-badge-label');
+    if (badgeEl && badgeLabelEl) {
+        badgeEl.className = 'text-[10px] sm:text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 ' + style.badge;
+        badgeLabelEl.innerText = activePlan.name + ' Member';
+    }
+
+    const nameEl = document.getElementById('membership-plan-name');
+    const descEl = document.getElementById('membership-plan-desc');
+    const priceEl = document.getElementById('membership-plan-price');
+    const iconEl  = document.getElementById('membership-plan-icon');
+
+    if (nameEl) nameEl.innerText = activePlan.name + ' Plan';
+    if (descEl) descEl.innerText = activePlan.description;
+    if (priceEl) priceEl.innerHTML = activePlan.price === 0
+        ? 'Free<span class="text-slate-400 text-xs font-normal"> forever</span>'
+        : 'S$' + activePlan.price + '<span class="text-slate-400 text-xs font-normal">/month</span>';
+    if (iconEl) {
+        iconEl.className = 'w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ' + style.iconBg;
+        const iconSpan = iconEl.querySelector('span');
+        if (iconSpan) iconSpan.className = 'material-symbols-outlined text-3xl ' + style.icon;
+    }
+}
+
+window.openMembershipModal = function() {
+    const modal = document.getElementById('membership-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    renderMembershipPlansGrid();
+};
+
+window.closeMembershipModal = function() {
+    const modal = document.getElementById('membership-modal');
+    if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+};
+
+function renderMembershipPlansGrid() {
+    const grid = document.getElementById('membership-plans-grid');
+    if (!grid) return;
+    const plans = getSubscriptionPlans();
+    const sub = getClientSubscription();
+
+    grid.innerHTML = plans.map(plan => {
+        const style = PLAN_STYLES[plan.color] || PLAN_STYLES['slate'];
+        const isActive = plan.id === sub.planId;
+        const isRec = plan.recommended;
+        const featList = plan.features.map(f =>
+            `<li class="flex items-start gap-1.5 text-[11px] text-on-surface-variant"><span class="material-symbols-outlined text-emerald-500 text-[14px] mt-px" style="font-variation-settings:'FILL' 1">check_circle</span>${f}</li>`
+        ).join('');
+        const btnLabel = isActive ? '&#10003; Current Plan' : (plan.price === 0 ? 'Switch to Free' : `Subscribe &mdash; S$${plan.price}/mo`);
+        const btnClass = isActive
+            ? 'w-full font-bold text-xs py-2.5 rounded-xl bg-emerald-500 text-white cursor-default'
+            : `w-full font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer active:scale-95 ${style.btn}`;
+
+        return `<div class="relative flex flex-col rounded-2xl border-2 p-5 gap-4 ${style.card}${isActive ? ' shadow-lg' : ''}">
+            ${isRec ? '<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-black px-3 py-0.5 rounded-full uppercase tracking-wider shadow">Most Popular</div>' : ''}
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-2xl ${style.icon}" style="font-variation-settings:'FILL' 1">${plan.icon}</span>
+                <div>
+                    <h4 class="font-black text-on-surface text-base">${plan.name}</h4>
+                    <p class="text-[11px] text-on-surface-variant">${plan.price === 0 ? 'Free forever' : 'S$' + plan.price + '/month'}</p>
+                </div>
+            </div>
+            <ul class="flex flex-col gap-1.5 flex-grow">${featList}</ul>
+            <button onclick="selectMembershipPlan('${plan.id}')" class="${btnClass}">${btnLabel}</button>
+        </div>`;
+    }).join('');
+}
+
+window.selectMembershipPlan = function(planId) {
+    const plans = getSubscriptionPlans();
+    const plan = plans.find(p => p.id === planId);
+    if (!plan) return;
+    const sub = getClientSubscription();
+    if (sub.planId === planId) {
+        showToast('You are already on the ' + plan.name + ' plan.', 'info');
+        return;
+    }
+    saveClientSubscription({ planId, status: 'active', since: new Date().toISOString().split('T')[0] });
+    closeMembershipModal();
+    renderMembershipSection();
+    const msg = plan.price === 0
+        ? 'Switched to Free plan.'
+        : `Successfully subscribed to ${plan.name} Plan (S$${plan.price}/mo)! \uD83C\uDF89`;
+    showToast(msg, 'success');
+};
+
+// Hook into navigateTo to re-render membership section when profile is opened
+const _origNavigateToMembership = window.navigateTo;
+window.navigateTo = function(view) {
+    if (_origNavigateToMembership) _origNavigateToMembership(view);
+    if (view === 'profile') setTimeout(renderMembershipSection, 80);
+};
+
+// Init on load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', renderMembershipSection);
+} else {
+    renderMembershipSection();
+}
+
+// ==================== AI FOOD SCANNER LOGIC ====================
+window.handleFoodScannerUpload = function(e, senderRole) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (typeof showToast === 'function') showToast('AI is scanning your food... 🔍', 'info');
+    
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const dataUrl = event.target.result;
+        
+        // Simulate AI processing delay
+        setTimeout(() => {
+            const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+            const allProgramChats = JSON.parse(localStorage.getItem('nutriflow_program_chats')) || [];
+            
+            let progId = 'prog-sarah';
+            const clientsList = JSON.parse(localStorage.getItem('nutriflow_clients')) || [];
+            const clientDetails = clientsList.find(c => c.name === activeClient);
+            if (clientDetails && clientDetails.activeProgramId) {
+                progId = clientDetails.activeProgramId;
+            }
+            
+            const chatKey = `${progId}_${activeClient}`;
+            let chatEntry = allProgramChats.find(c => c.id === chatKey);
+            if (!chatEntry) return;
+            
+            const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const senderName = senderRole === 'client' ? activeClient : (localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan');
+            
+            const aiResults = [
+                { name: "Avocado Toast with Egg", cal: 320, p: 14, c: 28, f: 18 },
+                { name: "Grilled Salmon Bowl", cal: 450, p: 35, c: 12, f: 28 },
+                { name: "Berry Protein Smoothie", cal: 280, p: 25, c: 35, f: 5 }
+            ];
+            const result = aiResults[Math.floor(Math.random() * aiResults.length)];
+            
+            const newMessage = {
+                sender: senderRole === 'client' ? 'client' : 'doctor',
+                senderName: senderName,
+                text: '',
+                time: timeNow,
+                type: 'ai_food_scan',
+                scanData: {
+                    imageUrl: dataUrl,
+                    foodName: result.name,
+                    calories: result.cal,
+                    protein: result.p,
+                    carbs: result.c,
+                    fat: result.f
+                }
+            };
+            
+            chatEntry.chatHistory.push(newMessage);
+            localStorage.setItem('nutriflow_program_chats', JSON.stringify(allProgramChats));
+            
+            if (typeof showToast === 'function') showToast('Scan complete!', 'success');
+            
+            // Re-render UI based on where we are
+            if (typeof renderProgramChat === 'function') renderProgramChat();
+            if (typeof renderAdminProgramChat === 'function') renderAdminProgramChat();
+            
+            // If admin modal chat is open, refresh it by finding the active client name in DOM
+            const modalLabel = document.getElementById('chat-client-name');
+            if (modalLabel && modalLabel.innerText && typeof openAdminChatModal === 'function') {
+                openAdminChatModal(modalLabel.innerText);
+            }
+            
+        }, 2000);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+};
+
+window.approveAndAddToDiary = function(foodName, calories, protein, carbs, fat) {
+    const today = 'Wed';
+    const activeClient = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    
+    // Add to Meal Plans
+    const storedPlans = JSON.parse(localStorage.getItem('nutriflow_client_meal_plans')) || {};
+    if (!storedPlans[activeClient]) storedPlans[activeClient] = {};
+    if (!storedPlans[activeClient][today]) storedPlans[activeClient][today] = [];
+
+    // Check if Snack already exists
+    const existingSnackIndex = storedPlans[activeClient][today].findIndex(m => m.type === 'Snack');
+    const newMeal = {
+        id: 'ai-scan-' + Date.now(),
+        type: 'Snack',
+        title: foodName,
+        calories: calories,
+        p: protein,
+        c: carbs,
+        f: fat,
+        image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80',
+        time: 'Now',
+        notes: 'Added via AI Scanner'
+    };
+    
+    if (existingSnackIndex > -1) {
+        // Replace or push to same array, actually meal plan is usually 1 per type in our UI, so let's replace Snack
+        storedPlans[activeClient][today][existingSnackIndex] = newMeal;
+    } else {
+        storedPlans[activeClient][today].push(newMeal);
+    }
+    
+    localStorage.setItem('nutriflow_client_meal_plans', JSON.stringify(storedPlans));
+    
+    // Auto-log it as consumed
+    const loggedStatus = JSON.parse(localStorage.getItem('nutriflow_client_logged_status') || '{}');
+    if (!loggedStatus[activeClient]) loggedStatus[activeClient] = {};
+    if (!loggedStatus[activeClient][today]) loggedStatus[activeClient][today] = {};
+    loggedStatus[activeClient][today]['Snack'] = true;
+    localStorage.setItem('nutriflow_client_logged_status', JSON.stringify(loggedStatus));
+    
+    if (typeof showToast === 'function') showToast(foodName + ' added to food diary!', 'success');
+    
+    // Trigger re-renders
+    if (typeof loadState === 'function') loadState();
+    if (typeof renderDashboardMeals === 'function') renderDashboardMeals();
+    if (typeof updateMacrosSummary === 'function') updateMacrosSummary();
+    if (typeof renderAdminMealBuilder === 'function') renderAdminMealBuilder();
+};
+
+window.openFoodScannerModal = function() {
+    const modal = document.getElementById('ai-food-scanner-modal');
+    if (!modal) { console.error('[NutriFlow] ai-food-scanner-modal not found!'); return; }
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    // Reset state
+    const uploadArea = document.getElementById('ai-scanner-upload-area');
+    const loading = document.getElementById('ai-scanner-loading');
+    const result = document.getElementById('ai-scanner-result');
+    if (uploadArea) { uploadArea.classList.remove('hidden'); uploadArea.classList.add('flex'); }
+    if (loading) { loading.classList.add('hidden'); loading.classList.remove('flex'); }
+    if (result) { result.classList.add('hidden'); result.classList.remove('flex'); }
+    
+    const fileInput = document.getElementById('ai-scanner-file-input');
+    if (fileInput) fileInput.value = '';
+};
+
+window.closeFoodScannerModal = function() {
+    const modal = document.getElementById('ai-food-scanner-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+let currentScanResult = null;
+
+window.processFoodScan = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Hide upload area, show loading
+    const uploadArea = document.getElementById('ai-scanner-upload-area');
+    const loadingEl = document.getElementById('ai-scanner-loading');
+    if (uploadArea) { uploadArea.classList.add('hidden'); uploadArea.classList.remove('flex'); }
+    if (loadingEl) { loadingEl.classList.remove('hidden'); loadingEl.classList.add('flex'); }
+    
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const dataUrl = event.target.result;
+        
+        setTimeout(() => {
+            // Hide loading, show result
+            if (loadingEl) { loadingEl.classList.add('hidden'); loadingEl.classList.remove('flex'); }
+            const resultEl = document.getElementById('ai-scanner-result');
+            if (resultEl) { resultEl.classList.remove('hidden'); resultEl.classList.add('flex'); }
+            
+            const aiResults = [
+                { name: "Avocado Toast with Egg", cal: 320, p: 14, c: 28, f: 18 },
+                { name: "Grilled Salmon Bowl", cal: 450, p: 35, c: 12, f: 28 },
+                { name: "Berry Protein Smoothie", cal: 280, p: 25, c: 35, f: 5 }
+            ];
+            const result = aiResults[Math.floor(Math.random() * aiResults.length)];
+            
+            currentScanResult = {
+                imageUrl: dataUrl,
+                foodName: result.name,
+                calories: result.cal,
+                protein: result.p,
+                carbs: result.c,
+                fat: result.f
+            };
+            
+            document.getElementById('ai-scanner-preview-img').src = dataUrl;
+            document.getElementById('ai-scanner-food-name').innerText = result.name;
+            document.getElementById('ai-scanner-calories').innerText = result.cal;
+            document.getElementById('ai-scanner-protein').innerText = result.p + 'g';
+            document.getElementById('ai-scanner-carbs').innerText = result.c + 'g';
+            document.getElementById('ai-scanner-fat').innerText = result.f + 'g';
+            
+            const btn = document.getElementById('ai-scanner-send-btn');
+            btn.onclick = function() {
+                sendScanToSpecialist();
+            };
+            
+        }, 1500);
+    };
+    reader.readAsDataURL(file);
+};
+
+window.migrateScansToChat = function() {
+    if (localStorage.getItem('nutriflow_food_chat_migrated')) return;
+
+    const allScans = JSON.parse(localStorage.getItem('nutriflow_food_scans') || '[]');
+    const chatMessages = JSON.parse(localStorage.getItem('nutriflow_food_chat_messages') || '[]');
+
+    if (chatMessages.length === 0 && allScans.length > 0) {
+        // Sort scans chronologically (oldest first)
+        const sortedScans = [...allScans].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        
+        sortedScans.forEach(scan => {
+            // Add the food scan card as a chat message
+            const scanMsgId = scan.id || 'msg_' + Date.now() + '_' + Math.random();
+            chatMessages.push({
+                id: scanMsgId,
+                clientId: scan.clientId || 'sarah_jenkins',
+                clientName: scan.clientName || 'Sarah Jenkins',
+                sender: scan.sender || 'client',
+                senderName: scan.senderName || (scan.sender === 'client' ? scan.clientName : 'Specialist'),
+                timestamp: scan.timestamp || new Date().toISOString(),
+                type: 'food_scan',
+                foodScan: {
+                    imageUrl: scan.imageUrl,
+                    foodName: scan.foodName,
+                    calories: scan.calories,
+                    protein: scan.protein,
+                    carbs: scan.carbs,
+                    fat: scan.fat,
+                    addedToMeal: scan.addedToMeal || false
+                }
+            });
+
+            // Add each comment as a separate text message
+            if (scan.comments && scan.comments.length > 0) {
+                scan.comments.forEach(comment => {
+                    chatMessages.push({
+                        id: 'msg_' + Date.now() + '_' + Math.random(),
+                        clientId: scan.clientId || 'sarah_jenkins',
+                        clientName: scan.clientName || 'Sarah Jenkins',
+                        sender: comment.sender || 'specialist',
+                        senderName: comment.sender === 'client' ? (scan.clientName || 'Sarah Jenkins') : 'Specialist',
+                        timestamp: comment.timestamp || new Date().toISOString(),
+                        type: 'text',
+                        text: comment.text
+                    });
+                });
+            }
+        });
+        
+        localStorage.setItem('nutriflow_food_chat_messages', JSON.stringify(chatMessages));
+    }
+    localStorage.setItem('nutriflow_food_chat_migrated', 'true');
+};
+
+window.sendScanToSpecialist = function() {
+    if (!currentScanResult) return;
+    
+    migrateScansToChat();
+    const clientName = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const clientId = clientName.toLowerCase().replace(/\s+/g, '_');
+    
+    const message = {
+        id: 'msg_' + Date.now(),
+        clientId: clientId,
+        clientName: clientName,
+        sender: 'client',
+        senderName: clientName,
+        timestamp: new Date().toISOString(),
+        type: 'food_scan',
+        foodScan: {
+            imageUrl: currentScanResult.imageUrl,
+            foodName: currentScanResult.foodName,
+            calories: currentScanResult.calories,
+            protein: currentScanResult.protein,
+            carbs: currentScanResult.carbs,
+            fat: currentScanResult.fat,
+            addedToMeal: false
+        }
+    };
+    
+    const allMessages = JSON.parse(localStorage.getItem('nutriflow_food_chat_messages') || '[]');
+    allMessages.push(message);
+    localStorage.setItem('nutriflow_food_chat_messages', JSON.stringify(allMessages));
+    
+    closeFoodScannerModal();
+    renderClientScanLog();
+    
+    if (window._scannerMode === 'client_chat') {
+        renderClientFoodChatMessages();
+    }
+    window._scannerMode = null;
+    
+    if (typeof showToastNotification === 'function') {
+        showToastNotification(`📸 "${message.foodScan.foodName}" dikirim ke specialist!`);
+    }
+};
+
+window.renderClientScanLog = function() {
+    migrateScansToChat();
+    const clientName = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const clientId = clientName.toLowerCase().replace(/\s+/g, '_');
+
+    const allMessages = JSON.parse(localStorage.getItem('nutriflow_food_chat_messages') || '[]');
+    const myMessages = allMessages.filter(m => m.clientId === clientId);
+
+    const senderEl = document.getElementById('client-food-chat-preview-sender');
+    const textEl = document.getElementById('client-food-chat-preview-text');
+
+    if (!senderEl || !textEl) return;
+
+    if (myMessages.length === 0) {
+        senderEl.innerText = "Nutrition Specialist";
+        textEl.innerText = "No recent food scans. Click to start a discussion.";
+        return;
+    }
+
+    const lastMsg = myMessages[myMessages.length - 1];
+    senderEl.innerText = lastMsg.sender === 'client' ? 'You (Client)' : (lastMsg.senderName || 'Specialist');
+    
+    if (lastMsg.type === 'food_scan') {
+        textEl.innerHTML = `📸 Food scan sent: <strong>${lastMsg.foodScan.foodName}</strong>`;
+    } else {
+        textEl.innerText = lastMsg.text;
+    }
+};
+
+window.openClientFoodChatModal = function() {
+    migrateScansToChat();
+    const modal = document.getElementById('client-food-chat-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+    renderClientFoodChatMessages();
+};
+
+window.closeClientFoodChatModal = function() {
+    const modal = document.getElementById('client-food-chat-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+    const input = document.getElementById('client-food-chat-input');
+    if (input) input.value = '';
+};
+
+window.triggerClientChatScanner = function() {
+    window._scannerMode = 'client_chat';
+    openFoodScannerModal();
+};
+
+window.submitClientFoodChatMessage = function() {
+    const input = document.getElementById('client-food-chat-input');
+    if (!input || !input.value.trim()) return;
+
+    const clientName = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const clientId = clientName.toLowerCase().replace(/\s+/g, '_');
+
+    const message = {
+        id: 'msg_' + Date.now(),
+        clientId: clientId,
+        clientName: clientName,
+        sender: 'client',
+        senderName: clientName,
+        timestamp: new Date().toISOString(),
+        type: 'text',
+        text: input.value.trim()
+    };
+
+    const allMessages = JSON.parse(localStorage.getItem('nutriflow_food_chat_messages') || '[]');
+    allMessages.push(message);
+    localStorage.setItem('nutriflow_food_chat_messages', JSON.stringify(allMessages));
+
+    input.value = '';
+    renderClientFoodChatMessages();
+    renderClientScanLog();
+};
+
+window.renderClientFoodChatMessages = function() {
+    const container = document.getElementById('client-food-chat-messages-container');
+    if (!container) return;
+
+    const clientName = localStorage.getItem('nutriflow_client_logged_name') || 'Sarah Jenkins';
+    const clientId = clientName.toLowerCase().replace(/\s+/g, '_');
+
+    const allMessages = JSON.parse(localStorage.getItem('nutriflow_food_chat_messages') || '[]');
+    const myMessages = allMessages.filter(m => m.clientId === clientId);
+
+    if (myMessages.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center;padding:3rem 1rem;color:#94a3b8;font-size:0.75rem;margin:auto;">
+                <span class="material-symbols-outlined" style="font-size:2rem;display:block;margin-bottom:0.5rem;color:#cbd5e1;">chat_bubble_outline</span>
+                No nutrition discussions yet. Type a message or tap the scan button below to get started!
+            </div>`;
+        return;
+    }
+
+    container.innerHTML = myMessages.map(msg => {
+        const isClient = msg.sender === 'client';
+        const date = new Date(msg.timestamp);
+        const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        let contentHtml = '';
+        if (msg.type === 'food_scan') {
+            const fs = msg.foodScan;
+            contentHtml = `
+                <div style="background:#fff;border:1px solid #e2e8f0;border-radius:0.75rem;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.05);margin-top:0.25rem;max-width:240px;">
+                    <div style="padding:0.75rem;text-align:left;">
+                        <h4 style="font-weight:800;font-size:0.75rem;color:#1e293b;margin:0 0 0.25rem;">${fs.foodName}</h4>
+                        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.375rem;">
+                            <span style="font-size:0.625rem;font-weight:800;color:#14833c;">${fs.calories} kcal</span>
+                            <span style="font-size:0.5625rem;color:#64748b;">P: ${fs.protein}g</span>
+                            <span style="font-size:0.5625rem;color:#64748b;">C: ${fs.carbs}g</span>
+                            <span style="font-size:0.5625rem;color:#64748b;">F: ${fs.fat}g</span>
+                        </div>
+                        ${fs.addedToMeal ? `
+                            <div style="font-size:0.5625rem;background:#f0fdf4;color:#15803d;font-weight:700;padding:0.125rem 0.375rem;border-radius:0.25rem;display:inline-flex;align-items:center;gap:0.125rem;">
+                                <span class="material-symbols-outlined" style="font-size:0.625rem;">check_circle</span>Added
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>`;
+        } else {
+            contentHtml = `<div style="font-weight:500;">${msg.text}</div>`;
+        }
+
+        return `
+            <div style="display:flex;flex-direction:column;align-items:${isClient ? 'flex-end' : 'flex-start'};width:100%;">
+                <div style="max-width:85%;padding:0.5rem 0.75rem;border-radius:0.875rem;font-size:0.75rem;line-height:1.4;
+                    background:${isClient ? '#f1f5f9' : '#e0f2fe'};
+                    color:${isClient ? '#334155' : '#0369a1'};
+                    border-bottom-right-radius:${isClient ? '0.25rem' : '0.875rem'};
+                    border-bottom-left-radius:${isClient ? '0.875rem' : '0.25rem'};">
+                    <span style="font-weight:800;font-size:0.625rem;display:block;margin-bottom:0.125rem;color:${isClient ? '#475569' : '#0284c7'};">
+                        ${isClient ? 'Kamu (Client)' : (msg.senderName || 'Specialist')}
+                    </span>
+                    ${contentHtml}
+                </div>
+                <span style="font-size:0.5625rem;color:#94a3b8;margin-top:0.125rem;padding:0 0.25rem;">${timeStr}</span>
+            </div>`;
+    }).join('');
+    
+    container.scrollTop = container.scrollHeight;
+};
+
+// Override renderDashboard to call renderClientScanLog
+const _origRenderDashboard = window.renderDashboard;
+if (typeof window.renderDashboard === 'function') {
+    window.renderDashboard = function() {
+        if (_origRenderDashboard) _origRenderDashboard.apply(this, arguments);
+        setTimeout(renderClientScanLog, 100);
+    };
+}
+
