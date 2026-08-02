@@ -92,7 +92,7 @@ function setupPwaExperience() {
   let deferredInstallPrompt = null;
   const region = document.createElement('div');
   region.id = 'pwa-experience-region';
-  region.className = 'fixed left-1/2 -translate-x-1/2 bottom-4 z-[60] w-[min(92vw,460px)] flex flex-col gap-2';
+  region.className = 'fixed left-1/2 -translate-x-1/2 top-4 z-[60] w-[min(92vw,460px)] flex flex-col gap-2';
   region.setAttribute('aria-live', 'polite');
   document.body.appendChild(region);
 

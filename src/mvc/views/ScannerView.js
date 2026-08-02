@@ -96,6 +96,22 @@ export class ScannerView {
     this._triggerAnimation(dummyMeal);
   }
 
+  handleBarcodeScan() {
+    const dummyMeal = {
+      title: "Oatmeal Package (Scanned)",
+      type: this.activeScanSlot || 'Snack',
+      calories: 150 + Math.floor(Math.random() * 50),
+      p: 5 + Math.floor(Math.random() * 5),
+      c: 27 + Math.floor(Math.random() * 10),
+      f: 3 + Math.floor(Math.random() * 2),
+      image: "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&q=80&w=400",
+      advice: `Barcode scanned successfully! Retrieved nutritional info from product database.`,
+      confidence: 100,
+    };
+    this.activeScannedMeal = dummyMeal;
+    this._triggerAnimation(dummyMeal);
+  }
+
   _triggerAnimation(mealData) {
     const promptEl = document.getElementById('scanner-select-prompt');
     const foodImg = document.getElementById('scanner-food-image');

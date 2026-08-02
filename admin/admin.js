@@ -39,7 +39,7 @@ function checkAdminSession() {
 }
 
 // ==================== STATE SYNC ====================
-function loadAdminState() {
+window.loadAdminState = function loadAdminState() {
     // Clear old mismatched cached states (e.g. Smoothie Bowl using Avocado Toast image or old googleusercontent links)
     const storedPlans = localStorage.getItem('nutriflow_client_meal_plans');
     const storedLib = localStorage.getItem('nutriflow_food_library');
@@ -323,9 +323,9 @@ function saveAdminState() {
 }
 
 // ==================== INITIALIZATION ====================
-document.addEventListener('DOMContentLoaded', () => {
-    initAdminApp();
-});
+// document.addEventListener('DOMContentLoaded', () => {
+//     initAdminApp();
+// });
 
 // ==================== SAAS BILLING / SUBSCRIPTION ====================
 window.openSaaSUpgradeModal = function() {
@@ -446,7 +446,7 @@ window.renderBillingTab = function() {
     }
 }
 function initAdminApp() {
-    loadAdminState();
+    // loadAdminState(); // Disabled for MVC
     
     // Set subtitle welcome message with specialist name
     const activeSpecialist = localStorage.getItem('nutriflow_specialist_name') || 'Dr. Hasan';
@@ -462,7 +462,7 @@ function initAdminApp() {
         avatarLabel.innerText = initials;
     }
     
-    navigateTo('admin-clients');
+    // navigateTo('admin-clients'); // Disabled for MVC
 }
 
 // ==================== TOASTS ====================

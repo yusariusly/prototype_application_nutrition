@@ -250,10 +250,18 @@ export class ClientController {
     window.openFoodScannerModal = () => scannerView.open();
     window.closeFoodScannerModal = () => scannerView.close();
     window.selectScanSample = (sampleId) => scannerView.selectSample(sampleId);
-    window.handleCustomImageUpload = (e) => {
-      const file = e.target.files?.[0];
-      if (file) scannerView.handleImageUpload(file);
+    window.handleImageUpload = (event) => {
+      const input = event.target;
+      if (!input) return;
+      if (input.files && input.files[0]) {
+        scannerView.handleImageUpload(input.files[0]);
+      }
     };
+
+    window.triggerBarcodeScan = () => {
+      scannerView.handleBarcodeScan();
+    };
+
     window.applyScanEdits = () => {
       if (scannerView.applyEdits()) toast.show('Scan result updated. You can now log this meal.', 'success');
     };
