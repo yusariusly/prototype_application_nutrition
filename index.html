@@ -4,6 +4,10 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>NutriFlow - Client Health Sanctuary</title>
+    <meta name="theme-color" content="#006e2f">
+    <meta name="description" content="NutriFlow membantu Anda mencatat makanan, mengikuti program nutrisi, dan mengatur konsultasi.">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" href="/icons/nutriflow-icon.svg" type="image/svg+xml">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1758,7 +1762,10 @@
                             <h4 class="text-sm font-bold text-on-background" id="res-food-title">Avocado Egg Toast</h4>
                             <p class="text-[10px] text-on-surface-variant mt-0.5" id="res-food-type">Vegetarian Breakfast</p>
                         </div>
-                        <span class="bg-primary/10 text-primary px-2.5 py-1 rounded-full text-[10px] font-bold" id="res-food-calories">320 kcal</span>
+                        <div class="flex flex-col items-end gap-1">
+                            <span class="bg-primary/10 text-primary px-2.5 py-1 rounded-full text-[10px] font-bold" id="res-food-calories">320 kcal</span>
+                            <span class="text-[9px] text-on-surface-variant font-semibold" id="res-food-confidence">88% confidence</span>
+                        </div>
                     </div>
                     <div class="p-5 space-y-4">
                         <!-- Macros Grid -->
@@ -1784,6 +1791,18 @@
                                 <p id="res-food-advice">Excellent choice! Rich in healthy unsaturated monounsaturated fats from avocado and clean protein from the egg.</p>
                             </div>
                         </div>
+                        <div id="res-food-allergen-warning" role="alert" class="hidden bg-amber-50 border border-amber-300 text-amber-900 rounded-xl p-3 text-xs font-semibold"></div>
+                        <details class="rounded-xl border border-outline-variant/30 bg-surface-container-low/50 p-3">
+                            <summary class="cursor-pointer text-xs font-bold text-on-surface">Edit estimation before logging</summary>
+                            <div class="grid grid-cols-2 gap-2 mt-3">
+                                <label class="col-span-2 text-[10px] font-bold text-on-surface-variant">Food name<input id="edit-scan-name" class="mt-1 w-full rounded-lg border-outline-variant/40 text-xs px-2.5 py-2" aria-label="Food name"></label>
+                                <label class="text-[10px] font-bold text-on-surface-variant">Calories<input id="edit-scan-calories" type="number" min="0" class="mt-1 w-full rounded-lg border-outline-variant/40 text-xs px-2.5 py-2" aria-label="Calories"></label>
+                                <label class="text-[10px] font-bold text-on-surface-variant">Protein (g)<input id="edit-scan-protein" type="number" min="0" class="mt-1 w-full rounded-lg border-outline-variant/40 text-xs px-2.5 py-2" aria-label="Protein grams"></label>
+                                <label class="text-[10px] font-bold text-on-surface-variant">Carbs (g)<input id="edit-scan-carbs" type="number" min="0" class="mt-1 w-full rounded-lg border-outline-variant/40 text-xs px-2.5 py-2" aria-label="Carbohydrate grams"></label>
+                                <label class="text-[10px] font-bold text-on-surface-variant">Fat (g)<input id="edit-scan-fat" type="number" min="0" class="mt-1 w-full rounded-lg border-outline-variant/40 text-xs px-2.5 py-2" aria-label="Fat grams"></label>
+                            </div>
+                            <button type="button" onclick="applyScanEdits()" class="mt-3 text-xs font-bold text-primary hover:underline">Apply edits</button>
+                        </details>
                     </div>
                 </div>
             </div>
@@ -2081,7 +2100,9 @@
     </div>
     <!-- Removed onboarding modal and replaced with a dedicated page view -->
 
-    <!-- Core App logic -->
+<!-- Core App logic (MVC Architecture) -->
+    <script type="module" src="/src/mvc/App.js"></script>
+    <!-- Legacy compatibility layer (akan dihapus bertahap) -->
     <script type="module" src="/src/main.js"></script>
 
     <!-- AI Food Scanner Modal — plain CSS, no Tailwind for visibility -->
