@@ -1,6 +1,6 @@
 /* NutriFlow app shell cache. User, health, and API data are never cached. */
 const CACHE_NAME = 'nutriflow-shell-v1';
-const APP_SHELL = ['/', '/index.html', '/login.html', '/manifest.webmanifest', '/icons/nutriflow-icon.svg'];
+const APP_SHELL = ['/', '/index.html', '/dashboard.html', '/login.html', '/manifest.webmanifest', '/icons/nutriflow-icon.svg'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
@@ -27,6 +27,6 @@ self.addEventListener('fetch', (event) => {
         caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
       }
       return response;
-    }).catch(() => caches.match(request).then((cached) => cached || caches.match('/index.html')))
+    }).catch(() => caches.match(request).then((cached) => cached || caches.match('/dashboard.html')))
   );
 });

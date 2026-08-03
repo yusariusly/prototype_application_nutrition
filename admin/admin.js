@@ -2104,7 +2104,7 @@ window.previewWeeklyPlan = function() {
     if (clientUrl.endsWith('/admin') || clientUrl.endsWith('/admin/')) {
         clientUrl = clientUrl.replace(/\/admin\/?$/, '');
     }
-    const previewUrl = `${clientUrl}/index.html?client=${encodeURIComponent(client)}&preview=true`;
+    const previewUrl = `${clientUrl}/dashboard.html?client=${encodeURIComponent(client)}&preview=true`;
     
     saveAdminState();
     window.open(previewUrl, '_blank');
@@ -2395,7 +2395,7 @@ function shareProgramLinkLogic(programId) {
     if (clientUrl.endsWith('/admin') || clientUrl.endsWith('/admin/')) {
         clientUrl = clientUrl.replace(/\/admin\/?$/, '');
     }
-    const previewUrl = `${clientUrl}/index.html?programId=${programId}&preview=true`;
+    const previewUrl = `${clientUrl}/dashboard.html?programId=${programId}&preview=true`;
     
     const urlInput = document.getElementById('share-preview-url-input');
     if (urlInput) urlInput.value = previewUrl;
@@ -2619,7 +2619,7 @@ window.previewWeeklyPlan = function() {
     if (clientUrl.endsWith('/admin') || clientUrl.endsWith('/admin/')) {
         clientUrl = clientUrl.replace(/\/admin\/?$/, '');
     }
-    const previewUrl = `${clientUrl}/index.html?programId=${progId}&preview=true`;
+    const previewUrl = `${clientUrl}/dashboard.html?programId=${progId}&preview=true`;
     
     saveAdminState();
     window.open(previewUrl, '_blank');

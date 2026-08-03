@@ -191,7 +191,8 @@
                 if (name) {
                     localStorage.setItem('nutriflow_client_logged', 'true');
                     localStorage.setItem('nutriflow_client_logged_name', name);
-                    window.location.href = './index.html';
+                    // Redirect to client dashboard
+                    window.location.href = './dashboard.html';
                     return;
                 }
             }
@@ -229,8 +230,8 @@
             // Flag that this user needs onboarding intake form
             localStorage.setItem('nutriflow_trigger_onboarding', 'true');
 
-            // Redirect to index.html to launch onboarding
-            window.location.href = './index.html';
+            // Redirect to dashboard.html to launch onboarding
+            window.location.href = './dashboard.html';
         }
     </script>
 </body>
