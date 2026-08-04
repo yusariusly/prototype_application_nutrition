@@ -11,6 +11,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     
+    <!-- i18n -->
+    <script type="module" src="/src/i18n.js"></script>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script id="tailwind-config">
@@ -88,15 +91,21 @@
             </a>
             
             <div class="hidden md:flex items-center gap-8 font-medium text-sm text-slate-600">
-                <a href="#features" class="hover:text-primary transition-colors">Features</a>
-                <a href="#how-it-works" class="hover:text-primary transition-colors">How it Works</a>
-                <a href="#testimonials" class="hover:text-primary transition-colors">Success Stories</a>
+                <a href="#features" data-i18n="nav.features" class="hover:text-primary transition-colors">Features</a>
+                <a href="#specialists" data-i18n="nav.specialists" class="hover:text-primary transition-colors">Specialists</a>
+                <a href="#testimonials" data-i18n="nav.success_stories" class="hover:text-primary transition-colors">Success Stories</a>
+                <a href="/article.html" data-i18n="nav.articles" class="hover:text-primary transition-colors">Articles</a>
             </div>
             
             <div class="flex items-center gap-4">
-                <a href="/login.html" class="text-sm font-semibold text-primary hover:text-[#005321] transition-colors hidden sm:block">Sign In</a>
+                <select id="lang-selector" class="text-xs font-bold text-primary bg-transparent border-none cursor-pointer focus:ring-0 appearance-none pr-1">
+                    <option value="en">EN</option>
+                    <option value="id">ID</option>
+                </select>
+                <div class="w-[1px] h-4 bg-slate-300"></div>
+                <a href="/login.html" data-i18n="nav.sign_in" class="text-sm font-semibold text-primary hover:text-[#005321] transition-colors hidden sm:block">Sign In</a>
                 <a href="/login.html" class="bg-primary hover:bg-[#005321] text-white text-sm font-bold py-2.5 px-5 rounded-xl transition-all shadow-lg hover:shadow-primary/30 flex items-center gap-2">
-                    Get Started
+                    <span data-i18n="nav.get_started">Get Started</span>
                     <span class="material-symbols-outlined text-sm">arrow_forward</span>
                 </a>
             </div>
@@ -120,24 +129,24 @@
                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                           <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                         </span>
-                        New: Smart Meal Planning AI
+                        <span data-i18n="hero.badge">New: Smart Meal Planning AI</span>
                     </div>
                     
                     <h1 class="text-5xl lg:text-7xl font-extrabold tracking-tight text-slate-900 leading-[1.1] mb-6 opacity-0 animate-fade-in-up delay-100">
-                        Nourish Your Body.<br>
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Empower Your Life.</span>
+                        <span data-i18n="hero.title1">Nourish Your Body.</span><br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary" data-i18n="hero.title2">Empower Your Life.</span>
                     </h1>
                     
-                    <p class="text-lg text-slate-600 mb-8 max-w-lg leading-relaxed opacity-0 animate-fade-in-up delay-200">
+                    <p class="text-lg text-slate-600 mb-8 max-w-lg leading-relaxed opacity-0 animate-fade-in-up delay-200" data-i18n="hero.desc">
                         NutriFlow is your all-in-one health sanctuary. Track your nutrition, consult with top-tier dietitians via telehealth, and achieve your wellness goals with personalized insights.
                     </p>
                     
                     <div class="flex flex-col sm:flex-row gap-4 opacity-0 animate-fade-in-up delay-300">
                         <a href="/login.html" class="bg-primary hover:bg-[#005321] text-white text-base font-bold py-4 px-8 rounded-xl transition-all shadow-xl hover:shadow-primary/40 flex items-center justify-center gap-2 group">
-                            Start Your Journey
+                            <span data-i18n="hero.start">Start Your Journey</span>
                             <span class="material-symbols-outlined text-lg transition-transform group-hover:translate-x-1">arrow_right_alt</span>
                         </a>
-                        <a href="#features" class="bg-white hover:bg-slate-50 text-slate-700 text-base font-semibold py-4 px-8 rounded-xl border border-slate-200 transition-all shadow-sm flex items-center justify-center">
+                        <a href="#features" data-i18n="hero.explore" class="bg-white hover:bg-slate-50 text-slate-700 text-base font-semibold py-4 px-8 rounded-xl border border-slate-200 transition-all shadow-sm flex items-center justify-center">
                             Explore Features
                         </a>
                     </div>
@@ -149,7 +158,7 @@
                             <div class="w-10 h-10 rounded-full bg-amber-100 border-2 border-white flex items-center justify-center text-xs font-bold text-amber-700">MR</div>
                             <div class="w-10 h-10 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center text-xs font-bold text-slate-700">+2k</div>
                         </div>
-                        <div class="text-sm text-slate-600 font-medium">
+                        <div class="text-sm text-slate-600 font-medium" data-i18n="hero.joined">
                             Joined by over <span class="text-primary font-bold">2,000+</span> healthy users
                         </div>
                     </div>
@@ -162,8 +171,8 @@
                         <!-- Mockup App Header -->
                         <div class="flex items-center justify-between mb-6">
                             <div>
-                                <h3 class="font-bold text-lg text-slate-800">Daily Summary</h3>
-                                <p class="text-xs text-slate-500">Today's Nutrition Progress</p>
+                                <h3 class="font-bold text-lg text-slate-800" data-i18n="mockup.title">Daily Summary</h3>
+                                <p class="text-xs text-slate-500" data-i18n="mockup.subtitle">Today's Nutrition Progress</p>
                             </div>
                             <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                                 <span class="material-symbols-outlined text-primary">pie_chart</span>
@@ -177,7 +186,7 @@
                                 <div class="flex justify-between items-end mb-2">
                                     <div class="flex items-center gap-2">
                                         <span class="material-symbols-outlined text-tertiary-container text-sm">local_fire_department</span>
-                                        <span class="text-xs font-bold text-slate-600 uppercase">Calories</span>
+                                        <span class="text-xs font-bold text-slate-600 uppercase" data-i18n="mockup.cal">Calories</span>
                                     </div>
                                     <span class="text-xs font-bold text-slate-800">1,450 / 2,000 kcal</span>
                                 </div>
@@ -189,15 +198,15 @@
                             <!-- Macros Grid -->
                             <div class="grid grid-cols-3 gap-3">
                                 <div class="bg-emerald-50 rounded-2xl p-3 text-center">
-                                    <div class="text-[10px] font-bold text-emerald-800 uppercase mb-1">Protein</div>
+                                    <div class="text-[10px] font-bold text-emerald-800 uppercase mb-1" data-i18n="mockup.pro">Protein</div>
                                     <div class="text-lg font-extrabold text-emerald-600">85g</div>
                                 </div>
                                 <div class="bg-blue-50 rounded-2xl p-3 text-center">
-                                    <div class="text-[10px] font-bold text-blue-800 uppercase mb-1">Carbs</div>
+                                    <div class="text-[10px] font-bold text-blue-800 uppercase mb-1" data-i18n="mockup.carb">Carbs</div>
                                     <div class="text-lg font-extrabold text-blue-600">120g</div>
                                 </div>
                                 <div class="bg-amber-50 rounded-2xl p-3 text-center">
-                                    <div class="text-[10px] font-bold text-amber-800 uppercase mb-1">Fats</div>
+                                    <div class="text-[10px] font-bold text-amber-800 uppercase mb-1" data-i18n="mockup.fat">Fats</div>
                                     <div class="text-lg font-extrabold text-amber-600">45g</div>
                                 </div>
                             </div>
@@ -209,11 +218,11 @@
                                         <span class="material-symbols-outlined text-sm">videocam</span>
                                     </div>
                                     <div>
-                                        <div class="text-[10px] font-bold text-white/80 uppercase">Upcoming Consult</div>
+                                        <div class="text-[10px] font-bold text-white/80 uppercase" data-i18n="mockup.consult">Upcoming Consult</div>
                                         <div class="text-sm font-bold">Dr. Sarah Jenkins</div>
                                     </div>
                                 </div>
-                                <div class="text-xs font-medium text-white/90">Today, 2:00 PM via Telehealth</div>
+                                <div class="text-xs font-medium text-white/90" data-i18n="mockup.consult_time">Today, 2:00 PM via Telehealth</div>
                             </div>
                         </div>
                     </div>
@@ -226,37 +235,165 @@
     <section id="features" class="py-24 bg-white relative">
         <div class="max-w-7xl mx-auto px-6">
             <div class="text-center max-w-2xl mx-auto mb-16">
-                <h2 class="text-primary font-bold text-sm tracking-wider uppercase mb-2">Everything You Need</h2>
-                <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">A complete ecosystem for your health goals.</h3>
-                <p class="text-slate-600">Stop juggling multiple apps. NutriFlow brings your diet tracking, specialist consultations, and progress analytics into one beautiful platform.</p>
+                <h2 class="text-primary font-bold text-sm tracking-wider uppercase mb-2" data-i18n="feat.badge">Everything You Need</h2>
+                <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4" data-i18n="feat.title">A complete ecosystem for your health goals.</h3>
+                <p class="text-slate-600" data-i18n="feat.desc">Stop juggling multiple apps. NutriFlow brings your diet tracking, specialist consultations, and progress analytics into one beautiful platform.</p>
             </div>
             
-            <div class="grid md:grid-cols-3 gap-8">
+            <div class="grid md:grid-cols-2 gap-8">
                 <!-- Feature 1 -->
                 <div class="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 hover:shadow-xl hover:border-primary/20 transition-all group">
                     <div class="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <span class="material-symbols-outlined text-2xl text-primary">restaurant_menu</span>
+                        <span class="material-symbols-outlined text-2xl text-primary">smartphone</span>
                     </div>
-                    <h4 class="text-xl font-bold text-slate-900 mb-3">Smart Meal Tracking</h4>
-                    <p class="text-slate-600 text-sm leading-relaxed">Easily log your meals with our extensive database. Get instant insights into your macronutrient and micronutrient intake.</p>
+                    <h4 class="text-xl font-bold text-slate-900 mb-3" data-i18n="feat.1.title">Client Nutrition App</h4>
+                    <p class="text-slate-600 text-sm leading-relaxed" data-i18n="feat.1.desc">Track your daily meals, access personalized programs, and book consultations easily.</p>
                 </div>
                 
                 <!-- Feature 2 -->
                 <div class="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 hover:shadow-xl hover:border-secondary/20 transition-all group">
                     <div class="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <span class="material-symbols-outlined text-2xl text-secondary">monitor_heart</span>
+                        <span class="material-symbols-outlined text-2xl text-secondary">admin_panel_settings</span>
                     </div>
-                    <h4 class="text-xl font-bold text-slate-900 mb-3">Telehealth Consults</h4>
-                    <p class="text-slate-600 text-sm leading-relaxed">Connect directly with certified dietitians and nutritionists via secure video calls. Get professional advice without leaving home.</p>
+                    <h4 class="text-xl font-bold text-slate-900 mb-3" data-i18n="feat.2.title">Specialist Portal</h4>
+                    <p class="text-slate-600 text-sm leading-relaxed" data-i18n="feat.2.desc">Manage clients, create structured programs, review medical intakes, and handle appointments.</p>
                 </div>
                 
                 <!-- Feature 3 -->
                 <div class="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 hover:shadow-xl hover:border-tertiary-container/30 transition-all group">
                     <div class="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <span class="material-symbols-outlined text-2xl text-tertiary-container">monitoring</span>
+                        <span class="material-symbols-outlined text-2xl text-tertiary-container">auto_awesome</span>
                     </div>
-                    <h4 class="text-xl font-bold text-slate-900 mb-3">Advanced Analytics</h4>
-                    <p class="text-slate-600 text-sm leading-relaxed">Visualize your progress with interactive charts. Track weight, body measurements, and dietary adherence over time.</p>
+                    <h4 class="text-xl font-bold text-slate-900 mb-3" data-i18n="feat.3.title">AI Food Intelligence</h4>
+                    <p class="text-slate-600 text-sm leading-relaxed" data-i18n="feat.3.desc">Snap a photo of your food and let our AI estimate calories and macros instantly.</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 hover:shadow-xl hover:border-blue-500/30 transition-all group">
+                    <div class="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-2xl text-blue-500">payments</span>
+                    </div>
+                    <h4 class="text-xl font-bold text-slate-900 mb-3" data-i18n="feat.4.title">Commerce & Engagement</h4>
+                    <p class="text-slate-600 text-sm leading-relaxed" data-i18n="feat.4.desc">Integrated secure payments, 1-on-1 messaging, telehealth, and specialist reviews.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Specialists Section -->
+    <section id="specialists" class="py-24 bg-slate-50 relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <h2 class="text-secondary font-bold text-sm tracking-wider uppercase mb-2" data-i18n="spec.badge">Top Specialists</h2>
+                <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4" data-i18n="spec.title">Meet our certified nutritionists.</h3>
+                <p class="text-slate-600" data-i18n="spec.desc">Work with world-class experts who understand your unique dietary needs.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Specialist 1 -->
+                <div class="bg-white rounded-[2rem] p-8 border border-slate-100 hover:shadow-xl transition-all text-center group">
+                    <div class="w-24 h-24 rounded-full bg-slate-200 mx-auto mb-4 overflow-hidden border-4 border-white shadow-md">
+                        <img src="https://i.pravatar.cc/150?img=47" alt="Dr. Sarah Jenkins" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                    </div>
+                    <h4 class="text-xl font-bold text-slate-900" data-i18n="spec.1.name">Dr. Sarah Jenkins</h4>
+                    <p class="text-primary font-medium text-sm mb-3" data-i18n="spec.1.role">Clinical Nutritionist</p>
+                    <p class="text-slate-600 text-sm" data-i18n="spec.1.desc">Specializes in medical conditions and gut health.</p>
+                </div>
+                
+                <!-- Specialist 2 -->
+                <div class="bg-white rounded-[2rem] p-8 border border-slate-100 hover:shadow-xl transition-all text-center group">
+                    <div class="w-24 h-24 rounded-full bg-slate-200 mx-auto mb-4 overflow-hidden border-4 border-white shadow-md">
+                        <img src="https://i.pravatar.cc/150?img=11" alt="Michael Roberts" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                    </div>
+                    <h4 class="text-xl font-bold text-slate-900" data-i18n="spec.2.name">Michael Roberts</h4>
+                    <p class="text-primary font-medium text-sm mb-3" data-i18n="spec.2.role">Sports Dietitian</p>
+                    <p class="text-slate-600 text-sm" data-i18n="spec.2.desc">Focuses on athletic performance and muscle gain.</p>
+                </div>
+                
+                <!-- Specialist 3 -->
+                <div class="bg-white rounded-[2rem] p-8 border border-slate-100 hover:shadow-xl transition-all text-center group">
+                    <div class="w-24 h-24 rounded-full bg-slate-200 mx-auto mb-4 overflow-hidden border-4 border-white shadow-md">
+                        <img src="https://i.pravatar.cc/150?img=5" alt="Amanda Lee" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                    </div>
+                    <h4 class="text-xl font-bold text-slate-900" data-i18n="spec.3.name">Amanda Lee</h4>
+                    <p class="text-primary font-medium text-sm mb-3" data-i18n="spec.3.role">Weight Management Expert</p>
+                    <p class="text-slate-600 text-sm" data-i18n="spec.3.desc">Helps clients achieve sustainable weight loss goals.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-24 bg-white relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <h2 class="text-tertiary-container font-bold text-sm tracking-wider uppercase mb-2" data-i18n="testi.badge">Success Stories</h2>
+                <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4" data-i18n="testi.title">Loved by thousands.</h3>
+                <p class="text-slate-600" data-i18n="testi.desc">See how NutriFlow has changed the lives of our clients.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 relative">
+                    <span class="material-symbols-outlined absolute top-6 right-6 text-4xl text-slate-200" style="font-variation-settings: 'FILL' 1;">format_quote</span>
+                    <p class="text-slate-700 italic mb-6 relative z-10" data-i18n="testi.1.text">"NutriFlow completely changed how I look at food. Dr. Sarah helped me manage my diabetes effortlessly."</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-slate-300 overflow-hidden">
+                            <img src="https://i.pravatar.cc/150?img=12" alt="John Doe" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <div class="font-bold text-slate-900 text-sm" data-i18n="testi.1.author">John Doe</div>
+                            <div class="flex text-amber-400 text-sm">
+                                <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 2 -->
+                <div class="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 relative">
+                    <span class="material-symbols-outlined absolute top-6 right-6 text-4xl text-slate-200" style="font-variation-settings: 'FILL' 1;">format_quote</span>
+                    <p class="text-slate-700 italic mb-6 relative z-10" data-i18n="testi.2.text">"The AI scanner is magic, and Michael's custom sports program helped me prep for my first marathon!"</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-slate-300 overflow-hidden">
+                            <img src="https://i.pravatar.cc/150?img=44" alt="Jane Smith" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <div class="font-bold text-slate-900 text-sm" data-i18n="testi.2.author">Jane Smith</div>
+                            <div class="flex text-amber-400 text-sm">
+                                <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 3 -->
+                <div class="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 relative">
+                    <span class="material-symbols-outlined absolute top-6 right-6 text-4xl text-slate-200" style="font-variation-settings: 'FILL' 1;">format_quote</span>
+                    <p class="text-slate-700 italic mb-6 relative z-10" data-i18n="testi.3.text">"I've tried many apps, but having direct access to a real dietitian makes all the difference."</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-slate-300 overflow-hidden">
+                            <img src="https://i.pravatar.cc/150?img=33" alt="Robert Chen" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <div class="font-bold text-slate-900 text-sm" data-i18n="testi.3.author">Robert Chen</div>
+                            <div class="flex text-amber-400 text-sm">
+                                <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -269,11 +406,11 @@
         
         <div class="max-w-7xl mx-auto px-6 relative z-10 flex flex-col items-center text-center">
             <span class="material-symbols-outlined text-white/50 text-5xl mb-4" style="font-variation-settings: 'FILL' 1;">spa</span>
-            <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-6">Ready to transform your lifestyle?</h2>
-            <p class="text-slate-300 max-w-xl mx-auto mb-10 text-lg">Join thousands of users who have successfully reached their health goals with NutriFlow's guidance.</p>
+            <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-6" data-i18n="cta.title">Ready to transform your lifestyle?</h2>
+            <p class="text-slate-300 max-w-xl mx-auto mb-10 text-lg" data-i18n="cta.desc">Join thousands of users who have successfully reached their health goals with NutriFlow's guidance.</p>
             
             <a href="/login.html" class="bg-primary hover:bg-primary-container text-white hover:text-on-primary-container text-lg font-bold py-4 px-10 rounded-2xl transition-all shadow-2xl shadow-primary/30 flex items-center gap-2">
-                Create Free Account
+                <span data-i18n="cta.btn">Create Free Account</span>
                 <span class="material-symbols-outlined">arrow_forward</span>
             </a>
         </div>
@@ -288,12 +425,12 @@
             </div>
             
             <div class="flex gap-6 text-sm text-slate-500">
-                <a href="#" class="hover:text-primary transition-colors">Privacy Policy</a>
-                <a href="#" class="hover:text-primary transition-colors">Terms of Service</a>
-                <a href="#" class="hover:text-primary transition-colors">Contact Support</a>
+                <a href="#" class="hover:text-primary transition-colors" data-i18n="footer.privacy">Privacy Policy</a>
+                <a href="#" class="hover:text-primary transition-colors" data-i18n="footer.terms">Terms of Service</a>
+                <a href="#" class="hover:text-primary transition-colors" data-i18n="footer.support">Contact Support</a>
             </div>
             
-            <div class="text-sm text-slate-400">
+            <div class="text-sm text-slate-400" data-i18n="footer.copy">
                 &copy; 2026 NutriFlow Inc. All rights reserved.
             </div>
         </div>
