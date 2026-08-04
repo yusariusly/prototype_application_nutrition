@@ -1,6 +1,35 @@
 // NutriFlow Client Application Logic
 import html2pdf from 'html2pdf.js';
 
+// ==================== MVC Bootstrap ====================
+// Import and initialize the MVC system for structured state management,
+// separated concerns, and improved maintainability.
+//
+// The MVC architecture provides:
+// - Models: Data layer with localStorage persistence (single source of truth)
+// - Views: UI rendering logic for each section
+// - Controller: Orchestrates all interactions via EventBus
+// - Core: Store, Router, EventBus, Toast utilities
+//
+// Legacy code below remains for backward compatibility.
+// New features should use the MVC pattern.
+
+import { clientController } from './mvc/controllers/ClientController.js';
+import { router } from './mvc/core/Router.js';
+import { bus as eventBus } from './mvc/core/EventBus.js';
+import { store } from './mvc/core/Store.js';
+import { toast } from './mvc/core/Toast.js';
+import { clientModel } from './mvc/models/ClientModel.js';
+import { diaryModel } from './mvc/models/DiaryModel.js';
+
+// Override global navigateTo with the MVC Router
+window.defaultNavigate = window.defaultNavigate || function(viewId) {
+    // Placeholder — legacy function kept for compatibility
+};
+
+// Bootstrap MVC dilakukan oleh src/mvc/App.js. File ini hanya menjadi
+// compatibility layer untuk handler UI legacy agar controller tidak diinisialisasi dua kali.
+
 
 // ==================== APP STATE ====================
 const state = {
