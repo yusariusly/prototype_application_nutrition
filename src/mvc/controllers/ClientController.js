@@ -262,6 +262,10 @@ export class ClientController {
       scannerView.handleBarcodeScan();
     };
 
+    window.cancelBarcodeScan = () => {
+      scannerView.cancelBarcodeScan();
+    };
+
     window.applyScanEdits = () => {
       if (scannerView.applyEdits()) toast.show('Scan result updated. You can now log this meal.', 'success');
     };

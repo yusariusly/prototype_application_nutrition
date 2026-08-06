@@ -5,11 +5,13 @@
  */
 import { scanModel } from '../models/ScanModel.js';
 import { clientModel } from '../models/ClientModel.js';
+import { Html5Qrcode } from 'html5-qrcode';
 
 export class ScannerView {
   constructor() {
     this.activeScannedMeal = null;
     this.activeScanSlot = null;
+    this.html5QrCode = null;
   }
 
   open(slotName) {
@@ -52,6 +54,7 @@ export class ScannerView {
       modal.classList.add('hidden');
       modal.classList.remove('flex');
     }
+    this.stopBarcodeScan();
   }
 
   _renderSamples() {
@@ -77,6 +80,11 @@ export class ScannerView {
   }
 
   handleImageUpload(file) {
+    const setLog = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+    setLog('log-step-1', `<span class="material-symbols-outlined text-[14px]">checklist</span> Identifying ingredients...`);
+    setLog('log-step-2', `<span class="material-symbols-outlined text-[14px]">scale</span> Estimating food volume & weight...`);
+    setLog('log-step-3', `<span class="material-symbols-outlined text-[14px]">bar_chart_4_bars</span> Extracting calorie & macro values...`);
+
     const imageUrl = URL.createObjectURL(file);
     let foodName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
     foodName = foodName.replace(/[-_]/g, ' ').split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
@@ -96,20 +104,92 @@ export class ScannerView {
     this._triggerAnimation(dummyMeal);
   }
 
-  handleBarcodeScan() {
-    const dummyMeal = {
-      title: "Oatmeal Package (Scanned)",
-      type: this.activeScanSlot || 'Snack',
-      calories: 150 + Math.floor(Math.random() * 50),
-      p: 5 + Math.floor(Math.random() * 5),
-      c: 27 + Math.floor(Math.random() * 10),
-      f: 3 + Math.floor(Math.random() * 2),
-      image: "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&q=80&w=400",
-      advice: `Barcode scanned successfully! Retrieved nutritional info from product database.`,
-      confidence: 100,
-    };
-    this.activeScannedMeal = dummyMeal;
-    this._triggerAnimation(dummyMeal);
+  async handleBarcodeScan() {
+    this.open();
+    const container = document.getElementById('barcode-scanner-container');
+    const promptEl = document.getElementById('scanner-select-prompt');
+    
+    if (container) container.classList.remove('hidden');
+    if (promptEl) promptEl.classList.add('hidden');
+
+    if (!this.html5QrCode) {
+      this.html5QrCode = new Html5Qrcode("qr-reader");
+    }
+
+    try {
+      await this.html5QrCode.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 }
+        },
+        async (decodedText, decodedResult) => {
+          // Success callback
+          await this.stopBarcodeScan();
+          this.processBarcodeData(decodedText);
+        },
+        (errorMessage) => {
+          // parse error, ignore silently
+        }
+      );
+    } catch (err) {
+      console.error("Error starting barcode scanner", err);
+      alert("Could not start camera. Please check permissions.");
+      this.cancelBarcodeScan();
+    }
+  }
+
+  async stopBarcodeScan() {
+    if (this.html5QrCode && this.html5QrCode.isScanning) {
+      try {
+        await this.html5QrCode.stop();
+      } catch (err) {
+        console.error("Failed to stop scanner", err);
+      }
+    }
+    const container = document.getElementById('barcode-scanner-container');
+    if (container) container.classList.add('hidden');
+  }
+
+  async cancelBarcodeScan() {
+    await this.stopBarcodeScan();
+    const promptEl = document.getElementById('scanner-select-prompt');
+    if (promptEl) promptEl.classList.remove('hidden');
+  }
+
+  async processBarcodeData(barcode) {
+    try {
+      const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+      const data = await response.json();
+      
+      if (data.status === 1 && data.product) {
+        const p = data.product;
+        const nut = p.nutriments || {};
+        
+        const meal = {
+          title: p.product_name || `Scanned Product (${barcode})`,
+          type: this.activeScanSlot || 'Snack',
+          calories: Math.round(nut['energy-kcal_100g'] || nut['energy-kcal'] || 0),
+          p: Math.round(nut.proteins_100g || nut.proteins || 0),
+          c: Math.round(nut.carbohydrates_100g || nut.carbohydrates || 0),
+          f: Math.round(nut.fat_100g || nut.fat || 0),
+          image: p.image_url || "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&q=80&w=400",
+          advice: `Barcode scanned successfully! Retrieved from OpenFoodFacts (per 100g).`,
+          confidence: 100,
+        };
+        this.activeScannedMeal = meal;
+        this._triggerAnimation(meal);
+      } else {
+        alert("Product not found in OpenFoodFacts database.");
+        const promptEl = document.getElementById('scanner-select-prompt');
+        if (promptEl) promptEl.classList.remove('hidden');
+      }
+    } catch (err) {
+      console.error("Error fetching product data", err);
+      alert("Failed to fetch product data. Check connection.");
+      const promptEl = document.getElementById('scanner-select-prompt');
+      if (promptEl) promptEl.classList.remove('hidden');
+    }
   }
 
   _triggerAnimation(mealData) {
