@@ -685,7 +685,7 @@ window.loadSpecialistServicesForOwner = function() {
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${srv.type === 'Online' ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'}">${srv.type}</span>
             </td>
             <td class="px-6 py-4 text-on-surface-variant">${srv.duration}</td>
-            <td class="px-6 py-4 text-right font-bold text-primary">S$${srv.price}</td>
+            <td class="px-6 py-4 text-right font-bold text-primary">RM${srv.price}</td>
             <td class="px-6 py-4 text-right">
                 <div class="flex items-center justify-end gap-2">
                     <button onclick="openEditServiceModal('${selectedName}', '${srv.id}')" class="text-xs font-semibold text-primary hover:text-[#005321] flex items-center gap-1 cursor-pointer transition-colors">
@@ -715,7 +715,7 @@ function renderPromosTable() {
             <td class="px-6 py-4">
                 <span class="font-mono font-bold text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded-lg border border-amber-200">${p.code}</span>
             </td>
-            <td class="px-6 py-4 font-bold text-primary">-S$${p.value}</td>
+            <td class="px-6 py-4 font-bold text-primary">-RM${p.value}</td>
             <td class="px-6 py-4 text-right">
                 <div class="flex items-center justify-end gap-2">
                     <button onclick="openEditPromoModal('${p.id}')" class="text-xs font-semibold text-primary hover:text-[#005321] flex items-center gap-1 cursor-pointer transition-colors">
@@ -905,7 +905,7 @@ function renderSubscriptionsView() {
     const statPlans = document.getElementById('sub-stat-plans');
 
     if (statTotal) statTotal.innerText = totalSubs;
-    if (statMrr)   statMrr.innerText   = 'S$' + mrr;
+    if (statMrr)   statMrr.innerText   = 'RM' + mrr;
     if (statPop)   statPop.innerText   = mostPop ? mostPop.name : '—';
     if (statPlans) statPlans.innerText  = plans.length;
 
@@ -926,7 +926,7 @@ function renderSubscriptionsView() {
                     ${plan.recommended ? '<span class="text-[9px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Popular</span>' : ''}
                 </div>
             </td>
-            <td class="px-6 py-4 font-bold text-primary">${plan.price === 0 ? 'Free' : 'S$' + plan.price + '/mo'}</td>
+            <td class="px-6 py-4 font-bold text-primary">${plan.price === 0 ? 'Free' : 'RM' + plan.price + '/mo'}</td>
             <td class="px-6 py-4 text-on-surface-variant max-w-xs truncate">${topFeatures}</td>
             <td class="px-6 py-4 text-center">
                 <span class="font-bold text-on-background">${subs}</span>

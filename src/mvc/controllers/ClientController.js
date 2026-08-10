@@ -482,13 +482,13 @@ export class ClientController {
       const target = document.getElementById(`gateway-view-${method}`);
       if (target) { target.classList.remove('hidden'); target.classList.add('flex'); }
       const total = document.getElementById('gateway-total-amount');
-      if (total) total.innerText = `S$${apt.price}.00 SGD`;
+      if (total) total.innerText = `RM${apt.price}.00 MYR`;
       const modal = document.getElementById('payment-gateway-modal');
       if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
       const btn = document.getElementById('gateway-submit-btn');
       if (btn) {
         btn.disabled = false;
-        btn.innerHTML = `<span class="material-symbols-outlined text-[18px]">verified</span> Complete Payment (S$${apt.price}.00)`;
+        btn.innerHTML = `<span class="material-symbols-outlined text-[18px]">verified</span> Complete Payment (RM${apt.price}.00)`;
       }
     };
 
@@ -605,7 +605,7 @@ export class ClientController {
     document.getElementById('success-time').innerText = apt.time;
     document.getElementById('success-practitioner').innerText = apt.therapist;
     document.getElementById('success-method').innerText = `${apt.type} Session`;
-    document.getElementById('success-price').innerText = `S$${apt.price}.00 SGD (PAID via ${methodNames[method]})`;
+    document.getElementById('success-price').innerText = `RM${apt.price}.00 MYR (PAID via ${methodNames[method]})`;
 
     bookingView.advanceStep(5);
     toast.show(`Payment successful! Confirmed via ${methodNames[method]}.`, 'success');

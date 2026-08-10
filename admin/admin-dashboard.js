@@ -10,7 +10,7 @@ function renderBillingTab() {
 
     if (sub.planId === 'plan-pro') {
         if (nameEl) nameEl.innerText = 'Pro SaaS';
-        if (priceEl) priceEl.innerHTML = 'S$49<span class="text-slate-400 text-sm font-normal">/mo</span>';
+        if (priceEl) priceEl.innerHTML = 'RM49<span class="text-slate-400 text-sm font-normal">/mo</span>';
         if (btn) {
             btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">check_circle</span> Active Pro Member';
             btn.className = 'w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-sm px-6 py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 border border-emerald-400/30';
@@ -83,7 +83,7 @@ function renderSaaSPlansGrid() {
             `<li class="flex items-start gap-1.5 text-[11px] text-on-surface-variant"><span class="material-symbols-outlined text-emerald-500 text-[14px] mt-px" style="font-variation-settings:'FILL' 1">check_circle</span>${f}</li>`
         ).join('');
 
-        const btnLabel = isActive ? '✓ Current SaaS Plan' : (plan.price === 0 ? 'Switch to Free' : `Upgrade to ${plan.name} — S$${plan.price}/mo`);
+        const btnLabel = isActive ? '✓ Current SaaS Plan' : (plan.price === 0 ? 'Switch to Free' : `Upgrade to ${plan.name} — RM${plan.price}/mo`);
         const btnClass = isActive 
             ? 'w-full font-bold text-xs py-2.5 rounded-xl bg-emerald-500 text-white cursor-default' 
             : `w-full font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer active:scale-95 ${style.btn}`;
@@ -96,7 +96,7 @@ function renderSaaSPlansGrid() {
                 </div>
                 <div>
                     <h4 class="font-black text-on-surface text-base">${plan.name}</h4>
-                    <p class="text-[11px] text-on-surface-variant">${plan.price === 0 ? 'Free forever' : 'S$' + plan.price + '/mo'}</p>
+                    <p class="text-[11px] text-on-surface-variant">${plan.price === 0 ? 'Free forever' : 'RM' + plan.price + '/mo'}</p>
                 </div>
             </div>
             <p class="text-xs text-on-surface-variant">${plan.description}</p>
@@ -138,7 +138,7 @@ function renderBillingTab() {
     const desc = document.getElementById('billing-status-desc');
 
     if (nameEl) nameEl.innerText = activePlan.name;
-    if (priceEl) priceEl.innerHTML = `S$${activePlan.price}<span class="text-slate-400 text-sm font-normal">/mo</span>`;
+    if (priceEl) priceEl.innerHTML = `RM${activePlan.price}<span class="text-slate-400 text-sm font-normal">/mo</span>`;
     if (desc) desc.innerText = `You are currently on the ${activePlan.name} plan. Next billing cycle: 1st of next month.`;
 
     if (btn) {
@@ -193,7 +193,7 @@ window.renderSaaSPlansGrid = function() {
             `<li class="flex items-start gap-1.5 text-[11px] text-on-surface-variant"><span class="material-symbols-outlined text-emerald-500 text-[14px] mt-px" style="font-variation-settings:'FILL' 1">check_circle</span>${f}</li>`
         ).join('');
 
-        const btnLabel = isActive ? '✓ Current SaaS Plan' : (plan.price === 0 ? 'Switch to Free' : `Upgrade to ${plan.name} — S$${plan.price}/mo`);
+        const btnLabel = isActive ? '✓ Current SaaS Plan' : (plan.price === 0 ? 'Switch to Free' : `Upgrade to ${plan.name} — RM${plan.price}/mo`);
         const btnClass = isActive 
             ? 'w-full font-bold text-xs py-2.5 rounded-xl bg-emerald-500 text-white cursor-default' 
             : `w-full font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer active:scale-95 ${style.btn}`;
@@ -206,7 +206,7 @@ window.renderSaaSPlansGrid = function() {
                 </div>
                 <div>
                     <h4 class="font-black text-on-surface text-base">${plan.name}</h4>
-                    <p class="text-[11px] text-on-surface-variant">${plan.price === 0 ? 'Free forever' : 'S$' + plan.price + '/mo'}</p>
+                    <p class="text-[11px] text-on-surface-variant">${plan.price === 0 ? 'Free forever' : 'RM' + plan.price + '/mo'}</p>
                 </div>
             </div>
             <p class="text-xs text-on-surface-variant">${plan.description}</p>

@@ -3148,7 +3148,7 @@ window.openPaymentGatewayModal = function(apt) {
     const methodKey = document.getElementById('selected-checkout-pay-method')?.value || 'qr';
 
     const amountEl = document.getElementById('gateway-total-amount');
-    if (amountEl) amountEl.innerText = `S$${apt.price}.00 SGD`;
+    if (amountEl) amountEl.innerText = `RM${apt.price}.00 MYR`;
 
     // Hide all gateway views
     ['qr', 'ewallet', 'fpx', 'card'].forEach(k => {
@@ -3171,9 +3171,9 @@ window.openPaymentGatewayModal = function(apt) {
         submitBtn.disabled = false;
         const btnTexts = {
             qr: '<span class="material-symbols-outlined text-[18px]">verified</span> I Have Paid via PayNow',
-            ewallet: '<span class="material-symbols-outlined text-[18px]">phone_iphone</span> Authorize Payment (S$' + apt.price + '.00)',
+            ewallet: '<span class="material-symbols-outlined text-[18px]">phone_iphone</span> Authorize Payment (RM' + apt.price + '.00)',
             fpx: '<span class="material-symbols-outlined text-[18px]">account_balance</span> I Have Completed FAST Transfer',
-            card: `<span class="material-symbols-outlined text-[18px]">lock</span> Pay S$${apt.price}.00 SGD`
+            card: `<span class="material-symbols-outlined text-[18px]">lock</span> Pay RM${apt.price}.00 MYR`
         };
         submitBtn.innerHTML = btnTexts[methodKey] || btnTexts.qr;
     }
@@ -3244,7 +3244,7 @@ window.processSimulatedPayment = function() {
         document.getElementById('success-time').innerText = state.bookingFlow.selectedSlot;
         document.getElementById('success-practitioner').innerText = state.bookingFlow.selectedSpecialist;
         document.getElementById('success-method').innerText = `${state.bookingFlow.selectedMethod} Session`;
-        document.getElementById('success-price').innerText = `S$${price}.00 SGD (PAID via ${methodNames[methodKey]})`;
+        document.getElementById('success-price').innerText = `RM${price}.00 MYR (PAID via ${methodNames[methodKey]})`;
 
         advanceBookingStep(5);
         showToast(`Payment Successful! Receipt #${currentPendingAptForPayment.id.toUpperCase()} confirmed via ${methodNames[methodKey]}.`, 'success');
@@ -4155,8 +4155,8 @@ window.downloadInvoicePDF = function(id, title, date, doc, price, paymentMethod,
                     <tr style="border-bottom: 2px solid #cbd5e1; background-color: #f8fafc;">
                         <th style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #475569; text-align: left; padding: 10px 12px;">Description of Service</th>
                         <th style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #475569; text-align: center; padding: 10px 12px; width: 80px;">Qty</th>
-                        <th style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #475569; text-align: right; padding: 10px 12px; width: 100px;">Price (SGD)</th>
-                        <th style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #475569; text-align: right; padding: 10px 12px; width: 120px;">Total (SGD)</th>
+                        <th style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #475569; text-align: right; padding: 10px 12px; width: 100px;">Price (MYR)</th>
+                        <th style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #475569; text-align: right; padding: 10px 12px; width: 120px;">Total (MYR)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -4166,8 +4166,8 @@ window.downloadInvoicePDF = function(id, title, date, doc, price, paymentMethod,
                             <div style="font-size: 10px; color: #64748b;">Clinical Nutrition Consultation • Mode: ${type} • Duration: ${duration}</div>
                         </td>
                         <td style="padding: 12px; font-size: 12px; text-align: center; color: #334155;">1</td>
-                        <td style="padding: 12px; font-size: 12px; text-align: right; color: #334155;">S$${price}.00</td>
-                        <td style="padding: 12px; font-size: 12px; text-align: right; font-weight: 700; color: #0f172a;">S$${price}.00</td>
+                        <td style="padding: 12px; font-size: 12px; text-align: right; color: #334155;">RM${price}.00</td>
+                        <td style="padding: 12px; font-size: 12px; text-align: right; font-weight: 700; color: #0f172a;">RM${price}.00</td>
                     </tr>
                 </tbody>
             </table>
@@ -4177,11 +4177,11 @@ window.downloadInvoicePDF = function(id, title, date, doc, price, paymentMethod,
                 <div style="width: 250px; text-align: right;">
                     <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px; color: #475569;">
                         <span>Subtotal:</span>
-                        <span>S$${price}.00</span>
+                        <span>RM${price}.00</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px; color: #475569;">
                         <span>GST/VAT (0%):</span>
-                        <span>S$0.00</span>
+                        <span>RM0.00</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 10px; color: #475569; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">
                         <span>Processing Fee:</span>
@@ -4189,7 +4189,7 @@ window.downloadInvoicePDF = function(id, title, date, doc, price, paymentMethod,
                     </div>
                     <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: 800; color: #0f172a;">
                         <span>Total Paid:</span>
-                        <span style="color: #006e2f;">S$${price}.00 SGD</span>
+                        <span style="color: #006e2f;">RM${price}.00 MYR</span>
                     </div>
                 </div>
             </div>
@@ -4198,7 +4198,7 @@ window.downloadInvoicePDF = function(id, title, date, doc, price, paymentMethod,
             <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; text-align: left; margin-bottom: 30px;">
                 <h5 style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #475569; margin: 0 0 6px 0; tracking: 0.5px;">Transaction Settlement Info</h5>
                 <p style="font-size: 10px; color: #64748b; margin: 0; line-height: 1.5;">
-                    This invoice constitutes an official payment receipt. The transaction of <strong>S$${price}.00 SGD</strong> was processed securely and settled in full via <strong>${paymentMethod}</strong> on ${date}. Thank you for choosing NutriFlow Health Systems.
+                    This invoice constitutes an official payment receipt. The transaction of <strong>RM${price}.00 MYR</strong> was processed securely and settled in full via <strong>${paymentMethod}</strong> on ${date}. Thank you for choosing NutriFlow Health Systems.
                 </p>
             </div>
 
@@ -4501,16 +4501,16 @@ window.applyPromoCode = function() {
 
     if (discountLine) { discountLine.classList.remove('hidden'); discountLine.classList.add('flex'); }
     if (discountLabel) discountLabel.innerText = code;
-    if (discountAmount) discountAmount.innerText = '-S$' + match.value + '.00';
+    if (discountAmount) discountAmount.innerText = '-RM' + match.value + '.00';
     if (removeBtn) removeBtn.classList.remove('hidden');
 
     const priceText = document.getElementById('checkout-service-price')?.innerText || '';
     const basePrice = parseFloat(priceText.replace(/[^0-9.]/g, '')) || 0;
     const newTotal = Math.max(0, basePrice - match.value);
-    if (totalEl) totalEl.innerText = 'S$' + newTotal + '.00 SGD';
+    if (totalEl) totalEl.innerText = 'RM' + newTotal + '.00 MYR';
     if (input) input.disabled = true;
 
-    showToast('Promo applied! You save S$' + match.value + '.', 'success');
+    showToast('Promo applied! You save RM' + match.value + '.', 'success');
 };
 
 window.removePromoCode = function() {
@@ -4526,7 +4526,7 @@ window.removePromoCode = function() {
 
     const priceText = document.getElementById('checkout-service-price')?.innerText || '';
     const basePrice = parseFloat(priceText.replace(/[^0-9.]/g, '')) || 0;
-    if (totalEl) totalEl.innerText = 'S$' + basePrice + '.00 SGD';
+    if (totalEl) totalEl.innerText = 'RM' + basePrice + '.00 MYR';
 
     showToast('Promo code removed.', 'info');
 };
@@ -4622,7 +4622,7 @@ function renderMembershipSection() {
     if (descEl) descEl.innerText = activePlan.description;
     if (priceEl) priceEl.innerHTML = activePlan.price === 0
         ? 'Free<span class="text-slate-400 text-xs font-normal"> forever</span>'
-        : 'S$' + activePlan.price + '<span class="text-slate-400 text-xs font-normal">/month</span>';
+        : 'RM' + activePlan.price + '<span class="text-slate-400 text-xs font-normal">/month</span>';
     if (iconEl) {
         iconEl.className = 'w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ' + style.iconBg;
         const iconSpan = iconEl.querySelector('span');
@@ -4656,7 +4656,7 @@ function renderMembershipPlansGrid() {
         const featList = plan.features.map(f =>
             `<li class="flex items-start gap-1.5 text-[11px] text-on-surface-variant"><span class="material-symbols-outlined text-emerald-500 text-[14px] mt-px" style="font-variation-settings:'FILL' 1">check_circle</span>${f}</li>`
         ).join('');
-        const btnLabel = isActive ? '&#10003; Current Plan' : (plan.price === 0 ? 'Switch to Free' : `Subscribe &mdash; S$${plan.price}/mo`);
+        const btnLabel = isActive ? '&#10003; Current Plan' : (plan.price === 0 ? 'Switch to Free' : `Subscribe &mdash; RM${plan.price}/mo`);
         const btnClass = isActive
             ? 'w-full font-bold text-xs py-2.5 rounded-xl bg-emerald-500 text-white cursor-default'
             : `w-full font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer active:scale-95 ${style.btn}`;
@@ -4667,7 +4667,7 @@ function renderMembershipPlansGrid() {
                 <span class="material-symbols-outlined text-2xl ${style.icon}" style="font-variation-settings:'FILL' 1">${plan.icon}</span>
                 <div>
                     <h4 class="font-black text-on-surface text-base">${plan.name}</h4>
-                    <p class="text-[11px] text-on-surface-variant">${plan.price === 0 ? 'Free forever' : 'S$' + plan.price + '/month'}</p>
+                    <p class="text-[11px] text-on-surface-variant">${plan.price === 0 ? 'Free forever' : 'RM' + plan.price + '/month'}</p>
                 </div>
             </div>
             <ul class="flex flex-col gap-1.5 flex-grow">${featList}</ul>
@@ -4690,7 +4690,7 @@ window.selectMembershipPlan = function(planId) {
     renderMembershipSection();
     const msg = plan.price === 0
         ? 'Switched to Free plan.'
-        : `Successfully subscribed to ${plan.name} Plan (S$${plan.price}/mo)! \uD83C\uDF89`;
+        : `Successfully subscribed to ${plan.name} Plan (RM${plan.price}/mo)! \uD83C\uDF89`;
     showToast(msg, 'success');
 };
 
