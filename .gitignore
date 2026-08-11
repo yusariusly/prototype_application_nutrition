@@ -3,7 +3,6 @@ dist
 .DS_Store
 .env
 .gemini
-Documentation/
 
 # Created by https://www.toptal.com/developers/gitignore/api/windows,visualstudiocode,webstorm,joe
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,visualstudiocode,webstorm,joe
@@ -23,7 +22,6 @@ DEADJOE
 !.vscode/*.code-snippets
 
 ### Documentation ###
-Documentation/
 .tmp_audit.ps1
 .tmp_audit2.ps1
 .tmp_audit3.ps1
